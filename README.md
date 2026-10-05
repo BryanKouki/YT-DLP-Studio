@@ -67,6 +67,20 @@ python src/selfcheck.py
 
 This runs offline tests for the converter command builder, the playlist cover template and the playlist availability parser.
 
+### Tauri + TypeScript version (experimental)
+
+The `tauri/` folder holds a full port of the app: same tabs and features, UI in plain HTML/CSS/TypeScript, and a small Rust shell. It builds to a **single 4 MB `.exe`** that uses the WebView2 runtime already present on Windows 10/11, and keeps yt-dlp, FFmpeg and settings in a `data/` folder next to it.
+
+Building needs [Node.js](https://nodejs.org/) 20+, [Rust](https://rustup.rs/) and the Visual Studio C++ Build Tools. Running the `.exe` needs none of them.
+
+```bash
+cd tauri
+npm install
+npm start        # run from source
+npm run check    # offline self-check
+npm run dist     # build release\YT-DLP Studio.exe
+```
+
 ## Default folders
 
 | Type  | Location                         |

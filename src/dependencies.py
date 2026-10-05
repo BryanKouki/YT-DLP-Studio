@@ -196,11 +196,11 @@ class DependencyManager:
         self._report("ytdlp", "checking")
         has_ytdlp = False if force_reinstall else check_ytdlp()
         if not has_ytdlp:
-            self._report("ytdlp", "downloading", size="~15MB")
+            self._report("ytdlp", "downloading", size="15MB")
 
             def prog(done, total):
                 pct = int(done * 100 / total) if total else None
-                self._report("ytdlp", "downloading", size="~15MB", pct=pct)
+                self._report("ytdlp", "downloading", size="15MB", pct=pct)
 
             ok = install_ytdlp(prog)
             self._report("ytdlp", "ok" if ok else "error")
@@ -210,11 +210,11 @@ class DependencyManager:
         self._report("ffmpeg", "checking")
         has_ffmpeg = False if force_reinstall else check_ffmpeg()
         if not has_ffmpeg:
-            self._report("ffmpeg", "downloading", size="~80MB")
+            self._report("ffmpeg", "downloading", size="80MB")
 
             def prog2(done, total):
                 pct = int(done * 100 / total) if total else None
-                self._report("ffmpeg", "downloading", size="~80MB", pct=pct)
+                self._report("ffmpeg", "downloading", size="80MB", pct=pct)
 
             ok = install_ffmpeg(prog2)
             self._report("ffmpeg", "ok" if ok else "error")
@@ -222,11 +222,11 @@ class DependencyManager:
             self._report("ffmpeg", "ok")
 
     def update_ytdlp(self):
-        self._report("ytdlp", "downloading", size="~15MB")
+        self._report("ytdlp", "downloading", size="15MB")
 
         def prog(done, total):
             pct = int(done * 100 / total) if total else None
-            self._report("ytdlp", "downloading", size="~15MB", pct=pct)
+            self._report("ytdlp", "downloading", size="15MB", pct=pct)
 
         ok = update_ytdlp(prog)
         self._report("ytdlp", "ok" if ok else "error")

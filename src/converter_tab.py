@@ -48,7 +48,7 @@ def build_ffmpeg_cmd(src, fmt, quality, res, target_bytes=0, duration=0.0):
     """Monta o comando ffmpeg. quality: 0=Alta, 1=Média, 2=Baixa. Com target_bytes
     (compressor), a qualidade é ignorada e o bitrate sai do tamanho alvo / duração.
     Retorna (cmd, arquivo_saida); ValueError se o alvo não for possível."""
-    # ponytail: 1 passagem com teto de bitrate; tamanho fica perto do alvo (±~5%), 2-pass se precisar exato
+    # 1 passagem com teto de bitrate; tamanho fica perto do alvo (±~5%), 2-pass se precisar exato
     kbps = target_bytes * 8 / duration / 1000 * 0.97 if target_bytes else 0  # 3% de folga p/ contêiner
     if fmt in AUDIO:
         ext, codec, rates = AUDIO[fmt]

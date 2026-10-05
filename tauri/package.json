@@ -1,0 +1,17 @@
+{
+  "name": "yt-dlp-studio",
+  "version": "1.0.0",
+  "description": "Desktop GUI for yt-dlp and FFmpeg (Tauri + TypeScript)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc && node ui/js/selfcheck.js",
+    "start": "tauri dev",
+    "dist": "set \"RUSTFLAGS=--remap-path-prefix=%USERPROFILE%=~\"&& tauri build --no-bundle &&(if not exist release mkdir release) && copy /y \"src-tauri\\target\\release\\YT-DLP Studio.exe\" release\\"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.1",
+    "typescript": "^7.0.2"
+  }
+}

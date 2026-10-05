@@ -26,7 +26,9 @@ def run():
     # 1. playlist + "Guardar thumbnail" -> nomeia a capa da playlist
     job = downloader.Job(id="1", mode="audio", url="u", options={
         "folder": "/tmp/pl", "save_thumbnail": True, "_is_playlist": True})
-    assert any(c.startswith("pl_thumbnail:") for c in downloader.build_command(job, "%(title)s.%(ext)s"))
+    cmd = downloader.build_command(job, "%(title)s.%(ext)s")
+    assert any(c.startswith("pl_thumbnail:") for c in cmd)
+    assert "--progress" in cmd  # sem isso o --print esconde as linhas de porcentagem
 
     # 2. verificação: acha a faixa com erro e as vizinhas
     flat = "a1\tFaixa 1\nb2\tFaixa 2\nc3\tFaixa 3\n"

@@ -1,0 +1,178 @@
+/* Paleta única do app: preto, branco e vermelho #FF0000. Todas as cores saem daqui. */
+:root {
+  --red: #FF0000;
+  --red-hover: #CC0000;
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --err: #ef4444;
+  --off: #9ca3af;
+
+  --bg: #1a1a1a;
+  --bar: #262626;
+  --panel: #242424;
+  --field: #333333;
+  --btn: #3a3a3a;
+  --btn-hover: #484848;
+  --border: #4d4d4d;
+  --text: #e6e6e6;
+  --muted: #a6a6a6;
+  --cancel-hover: #3a1414;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #ebebeb;
+  --bar: #e0e0e0;
+  --panel: #f2f2f2;
+  --field: #ffffff;
+  --btn: #dbdbdb;
+  --btn-hover: #c8c8c8;
+  --border: #b3b3b3;
+  --text: #1a1a1a;
+  --muted: #595959;
+  --cancel-hover: #ffe0e0;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+}
+:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+
+/* ---- barra superior ---- */
+header { display: flex; align-items: center; padding: 8px 12px; background: var(--bar); }
+nav { display: flex; gap: 2px; padding: 3px; background: var(--btn); border-radius: 8px; }
+nav button { background: none; padding: 4px 14px; font-weight: 600; }
+nav button.on, nav button.on:hover { background: var(--red); color: #fff; }
+.tools { display: flex; gap: 6px; margin-left: auto; }
+.tools button { width: 34px; height: 28px; padding: 0; font-size: 14px; font-weight: 700; }
+
+main { flex: 1; min-height: 0; }
+.tab { display: none; flex-direction: column; gap: 10px; height: 100%; padding: 16px; overflow: auto; }
+.tab.on { display: flex; }
+
+/* ---- controles ---- */
+button, input, select, textarea { font: inherit; color: inherit; }
+button {
+  background: var(--btn);
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+button:hover { background: var(--btn-hover); }
+button.primary { background: var(--red); color: #fff; font-weight: 600; }
+button.primary:hover { background: var(--red-hover); }
+button.cancel { background: transparent; border: 2px solid var(--red); color: var(--red); padding: 4px 10px; }
+button.cancel:hover { background: var(--cancel-hover); }
+button.link { background: none; padding: 0; color: var(--red); font-size: 12px; text-decoration: underline; }
+button.big { height: 42px; font-size: 15px; font-weight: 700; flex: none; }
+button.big.grow { flex: 1; }
+
+input:not([type]), select, textarea {
+  min-width: 0;
+  padding: 6px 8px;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--red); }
+textarea.links { flex: none; height: 64px; resize: none; white-space: pre; }
+.time { width: 100px; text-align: center; }
+
+.row { display: flex; align-items: center; gap: 8px; }
+.wrap { flex-wrap: wrap; }
+.grow { flex: 1; min-width: 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.field { display: flex; flex-direction: column; gap: 3px; }
+.chk { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.chk.end { align-self: end; padding-bottom: 8px; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.folder { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+progress { flex: none; display: block; width: 100%; height: 10px; border: 0; appearance: none; }
+progress::-webkit-progress-bar { background: var(--btn); }
+progress::-webkit-progress-value { background: var(--red); }
+
+/* ---- recorte de trecho: dois <input type=range> sobrepostos ---- */
+.range { position: relative; height: 28px; }
+.range::before, .fill { content: ""; position: absolute; top: 12px; height: 4px; border-radius: 2px; }
+.range::before { left: 0; right: 0; background: var(--btn); }
+.fill { left: var(--from, 0%); right: calc(100% - var(--to, 100%)); background: var(--red); }
+.range input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: none;
+  appearance: none;
+  pointer-events: none; /* só as bolinhas recebem o mouse */
+}
+.range input::-webkit-slider-runnable-track { height: 4px; background: none; }
+.range input::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--red);
+  appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* ---- fila e log ---- */
+.panel { padding: 8px 10px; background: var(--panel); border-radius: 8px; }
+.list { flex: 1; min-height: 90px; display: flex; flex-direction: column; gap: 6px; overflow: auto; }
+.list .empty { margin: auto; }
+.job { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: var(--field); border-radius: 8px; }
+.job .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.job progress { height: 8px; }
+.job:not([data-status="downloading"]) .cancel { display: none; }
+.job[data-status="done"] progress::-webkit-progress-value { background: var(--ok); }
+.job[data-status="error"] progress::-webkit-progress-value { background: var(--err); }
+.dot { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; background: var(--off); }
+.dot[data-state="ok"] { background: var(--ok); }
+.dot[data-state="checking"], .dot[data-state="downloading"] { background: var(--warn); }
+.dot[data-state="error"] { background: var(--err); }
+#q-log {
+  flex: 1;
+  min-height: 90px;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: 11px/1.45 Consolas, monospace;
+  user-select: text;
+}
+.err { color: var(--err); }
+
+/* ---- janelas (Configurações, Ajuda, mensagens) ---- */
+dialog {
+  width: 560px;
+  max-width: 92vw;
+  max-height: 88vh;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+#dlg-msg { width: 360px; text-align: center; }
+.dlg-body { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 4px; overflow: auto; outline: none; }
+#set-form { display: flex; flex-direction: column; gap: 8px; }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; }
+h2 { margin: 0; font-size: 18px; }
+h3 { margin: 12px 0 0; font-size: 15px; }
+#help-body p { margin: 2px 0 0; color: var(--muted); user-select: text; }
