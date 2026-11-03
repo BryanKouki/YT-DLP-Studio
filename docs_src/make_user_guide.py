@@ -211,8 +211,7 @@ story.append(body(
     "Numa playlist, <b>Guardar thumbnail</b> guarda só a capa da playlist "
     "(playlistcover.jpg). Para ter também um .jpg ao lado de cada faixa, marque "
     "<b>Guardar capa de cada música</b>: quadrado em música e no tamanho original "
-    "em vídeo. Em Configurações → Arquivos extras, <b>Criar arquivo de playlist "
-    "(.m3u8)</b> salva na pasta um arquivo com as faixas na ordem da playlist, que "
+    "em vídeo. <b>Criar playlist (.m3u8)</b>, ao lado, salva na pasta um arquivo com as faixas na ordem da playlist, que "
     "abre em qualquer player; as substitutas entram no lugar certo."
 ))
 story.append(h3("Cookies contra o bloqueio \"não é um robô\" (versão .exe Tauri)"))
@@ -392,9 +391,10 @@ story.append(bullets([
     "<b>Salvar arquivo de descrição / de informações (.info.json)</b> — gera "
     "arquivos de texto extras com a descrição e os metadados completos do vídeo.",
 ]))
-story.append(h3("Salvar capa do álbum/playlist na pasta"))
+story.append(h3("Salvar capa do álbum/playlist na pasta (versão Python)"))
 story.append(body(
-    "Ligada por padrão. Ao terminar de baixar uma playlist inteira (que já "
+    "Na versão .exe Tauri, essa opção foi unida a <b>Guardar thumbnail</b>, na tela "
+    "principal. Na versão Python ela fica ligada por padrão. Ao terminar de baixar uma playlist inteira (que já "
     "ganhou sua própria subpasta, como explicado na seção 4), o programa "
     "escolhe a melhor capa encontrada e salva uma cópia como "
     "<b>playlistcover.jpg</b> dentro dessa subpasta — assim fica claro, só de "

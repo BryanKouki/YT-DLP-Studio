@@ -84,7 +84,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "sub_langs": "Idiomas da legenda",
     "sub_format": "Formato de legenda",
     "save_folder_cover": "Salvar capa do álbum/playlist na pasta (cover.jpg)",
-    "save_playlist_file": "Criar arquivo de playlist (.m3u8) na pasta da playlist",
+    "save_playlist_file": "Criar playlist (.m3u8)",
     "best_any": "Melhor (qualquer)",
     "force_mp4": "Forçar MP4",
     "force_mkv": "Forçar MKV",
@@ -256,7 +256,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "sub_langs": "Subtitle languages",
     "sub_format": "Subtitle format",
     "save_folder_cover": "Save album/playlist cover in folder (cover.jpg)",
-    "save_playlist_file": "Create a playlist file (.m3u8) in the playlist folder",
+    "save_playlist_file": "Create playlist (.m3u8)",
     "best_any": "Best (any)",
     "force_mp4": "Force MP4",
     "force_mkv": "Force MKV",
@@ -381,8 +381,8 @@ export const HELP: Record<string, [string, string][]> = {
       "Salva a capa como um arquivo .jpg separado, ao lado do arquivo baixado. Em música, a capa (salva em disco e/ou incorporada ao arquivo) sempre sai recortada 1:1 (quadrada, padrão de capa de álbum) — automaticamente, sem precisar ligar nada em Configurações; em vídeo, sai no tamanho/proporção normal da thumbnail original, sem recorte."
     ],
     [
-      "Playlists e capa da playlist (Configurações → Arquivos extras)",
-      "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente uma subpasta com o nome da playlist e salva a melhor capa encontrada como 'playlistcover.jpg' dentro dela (opção 'Salvar capa do álbum/playlist na pasta', ligada por padrão)."
+      "Playlists e capa da playlist",
+      "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente uma subpasta com o nome da playlist. Com 'Guardar thumbnail' marcado, a capa da playlist é salva como 'playlistcover.jpg' dentro dela. (Na versão Python, a capa fica na opção 'Salvar capa do álbum/playlist na pasta', em Configurações → Arquivos extras.)"
     ],
     [
       "Playlist: capa e verificação",
@@ -394,7 +394,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Guardar capa de cada música (versão .exe Tauri)",
-      "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada faixa, quadrado em música e no tamanho original em vídeo. Em Configurações → Arquivos extras, 'Criar arquivo de playlist (.m3u8)' salva na pasta um arquivo com as faixas na ordem da playlist, que abre em qualquer player (as substitutas entram no lugar certo)."
+      "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada faixa, quadrado em música e no tamanho original em vídeo. 'Criar playlist (.m3u8)', ao lado, salva na pasta um arquivo com as faixas na ordem da playlist, que abre em qualquer player (as substitutas entram no lugar certo)."
     ],
     [
       "Playlist: faixas com erro e substitutas (versão .exe Tauri)",
@@ -451,8 +451,8 @@ export const HELP: Record<string, [string, string][]> = {
       "Saves the cover as a separate .jpg file, next to the downloaded file. For music, the cover (saved to disk and/or embedded in the file) always comes out cropped 1:1 (square, the standard album-cover shape) — automatically, nothing to turn on in Settings; for video, it comes out at the thumbnail's normal size/proportions, uncropped."
     ],
     [
-      "Playlists and playlist cover (Settings → Extra files)",
-      "When downloading a whole playlist/album, the app automatically creates a subfolder named after the playlist and saves the best cover it found as 'playlistcover.jpg' inside it ('Save album/playlist cover in folder' option, on by default)."
+      "Playlists and playlist cover",
+      "When downloading a whole playlist/album, the app automatically creates a subfolder named after the playlist. With 'Save thumbnail' checked, the playlist cover is saved as 'playlistcover.jpg' inside it. (In the Python version, the cover is the 'Save album/playlist cover in folder' option, in Settings → Extra files.)"
     ],
     [
       "Playlist: cover and check",
@@ -464,7 +464,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Save each track's cover (Tauri .exe version)",
-      "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist cover), 'Save each track's cover' leaves a .jpg next to every track, square for music and at the original size for video. In Settings → Extra files, 'Create a playlist file (.m3u8)' saves a file in the folder with the tracks in playlist order, which opens in any player (replacements go in the right place)."
+      "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist cover), 'Save each track's cover' leaves a .jpg next to every track, square for music and at the original size for video. 'Create playlist (.m3u8)', next to it, saves a file in the folder with the tracks in playlist order, which opens in any player (replacements go in the right place)."
     ],
     [
       "Playlist: failed tracks and replacements (Tauri .exe version)",

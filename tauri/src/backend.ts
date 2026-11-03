@@ -59,11 +59,9 @@ const settings: Record<string, any> = {
   split_chapters: false,
   write_description: false,
   write_info_json: false,
-  embed_audio_tags: true,
   keep_video: false,
   sub_langs: 'en.*',
   sub_format: '',
-  save_folder_cover: true,
   pause_failed: 'each', // faixas de playlist falharam: 'each' pausa depois da playlist, 'end' no fim da fila, 'off' não pausa
   use_cookies: false,
   cookies_browser: 'firefox', // não Chromium: o yt-dlp lê sem o erro de DPAPI do Windows
@@ -380,7 +378,7 @@ async function runJob(job: core.Job): Promise<void> {
     job.progress = 100;
     log(`Concluído: ${job.url}` + (partial ? ` (${job.failed!.length} faixa(s) com erro)` : ''));
     const o = job.options;
-    if (o._is_playlist && (o.save_thumbnail || (job.mode === 'audio' && o.save_folder_cover))) {
+    if (o._is_playlist && o.save_thumbnail) { // numa playlist, "Guardar thumbnail" = capa da playlist
       await ytdlpLines(core.playlistCoverArgs(job.url, o.folder), true, 60000);
       await promoteFolderCover(o.folder, job.mode === 'audio');
       await cleanupStrayThumbnails(o.folder); // apaga o playlist_thumb.* original; fica só playlistcover.jpg

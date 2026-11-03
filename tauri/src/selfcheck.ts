@@ -79,7 +79,7 @@ async function run(): Promise<void> {
 
   // 4. playlist + "Guardar thumbnail": nenhuma capa de faixa vai pro disco (só a embutida, recortada);
   //    a capa da playlist vem de um comando à parte que não toca nas faixas
-  c = cmdFor(job('audio', { folder: 'C:/pl', save_thumbnail: true, save_folder_cover: true, _is_playlist: true, embed_metadata_thumb: true }));
+  c = cmdFor(job('audio', { folder: 'C:/pl', save_thumbnail: true, _is_playlist: true, embed_metadata_thumb: true }));
   assert(!c.includes('--write-thumbnail') && !c.some((a) => a.startsWith('pl_thumbnail:')) && c.includes('--ppa'));
   assert(cmdFor(job('audio', { folder: 'C:/m', save_thumbnail: true })).includes('--write-thumbnail'));
   c = cmdFor(job('audio', { folder: 'C:/pl', save_track_covers: true, _is_playlist: true }));

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.5
+
+### Changed
+- "Create playlist (.m3u8)" moved from Settings to the main screen, next to "Save thumbnail" and "Save each track's cover".
+- Removed two duplicated options from Settings → Extra files. "Save album/playlist cover in folder" did the same as "Save thumbnail" on a playlist, which now is the only switch for the playlist cover. "Embed metadata (artist, album, year)" overlapped "Embed metadata and cover"; the Title and Artist you type are now always written to the file.
+- The "Check playlist availability" button is now an icon at the end of that row (its name shows on hover), so the main screen still fits the minimum window without scrolling.
+
 ## v1.3.4
 
 ### Added

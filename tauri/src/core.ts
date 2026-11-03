@@ -213,7 +213,7 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
       job.title && `-metadata title=${shlexQuote(job.title)}`,
       job.artist && `-metadata artist=${shlexQuote(job.artist)}`,
     ].filter(Boolean);
-    if (meta.length && (s.embed_audio_tags ?? true)) args.push('--postprocessor-args', 'ffmpeg:' + meta.join(' '));
+    if (meta.length) args.push('--postprocessor-args', 'ffmpeg:' + meta.join(' '));
   } else {
     args.push('-f', buildFormatSelector(s));
     if (s.container) args.push('--merge-output-format', s.container);

@@ -54,11 +54,12 @@ HELP_CONTENT = {
          "álbum) — automaticamente, sem precisar ligar nada em "
          "Configurações; em vídeo, sai no tamanho/proporção normal da "
          "thumbnail original, sem recorte."),
-        ("Playlists e capa da playlist (Configurações → Arquivos extras)",
+        ("Playlists e capa da playlist",
          "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente "
-         "uma subpasta com o nome da playlist e salva a melhor capa encontrada "
-         "como 'playlistcover.jpg' dentro dela (opção 'Salvar capa do "
-         "álbum/playlist na pasta', ligada por padrão)."),
+         "uma subpasta com o nome da playlist. Com 'Guardar thumbnail' marcado, "
+         "a capa da playlist é salva como 'playlistcover.jpg' dentro dela. (Na "
+         "versão Python, a capa fica na opção 'Salvar capa do álbum/playlist na "
+         "pasta', em Configurações → Arquivos extras.)"),
         ("Playlist: capa e verificação",
          "Com 'Guardar thumbnail' marcado numa playlist, só a capa DA PLAYLIST é "
          "salva (playlistcover.jpg), não uma por faixa. O botão 'Verificar "
@@ -79,9 +80,8 @@ HELP_CONTENT = {
         ("Guardar capa de cada música (versão .exe Tauri)",
          "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da "
          "playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada "
-         "faixa, quadrado em música e no tamanho original em vídeo. Em "
-         "Configurações → Arquivos extras, 'Criar arquivo de playlist (.m3u8)' "
-         "salva na pasta um arquivo com as faixas na ordem da playlist, que abre "
+         "faixa, quadrado em música e no tamanho original em vídeo. 'Criar "
+         "playlist (.m3u8)', ao lado, salva na pasta um arquivo com as faixas na ordem da playlist, que abre "
          "em qualquer player (as substitutas entram no lugar certo)."),
         ("Playlist: faixas com erro e substitutas (versão .exe Tauri)",
          "Quando faixas de uma playlist falham (vídeo indisponível, bloqueio do "
@@ -180,11 +180,12 @@ HELP_CONTENT = {
          "album-cover shape) — automatically, nothing to turn on in "
          "Settings; for video, it comes out at the thumbnail's normal "
          "size/proportions, uncropped."),
-        ("Playlists and playlist cover (Settings → Extra files)",
+        ("Playlists and playlist cover",
          "When downloading a whole playlist/album, the app automatically "
-         "creates a subfolder named after the playlist and saves the best "
-         "cover it found as 'playlistcover.jpg' inside it ('Save "
-         "album/playlist cover in folder' option, on by default)."),
+         "creates a subfolder named after the playlist. With 'Save thumbnail' "
+         "checked, the playlist cover is saved as 'playlistcover.jpg' inside it. "
+         "(In the Python version, the cover is the 'Save album/playlist cover in "
+         "folder' option, in Settings → Extra files.)"),
         ("Playlist: cover and check",
          "With 'Save thumbnail' checked on a playlist, only the PLAYLIST cover "
          "is saved (playlistcover.jpg), not one per track. The 'Check playlist "
@@ -205,8 +206,8 @@ HELP_CONTENT = {
         ("Save each track's cover (Tauri .exe version)",
          "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist "
          "cover), 'Save each track's cover' leaves a .jpg next to every track, "
-         "square for music and at the original size for video. In Settings → "
-         "Extra files, 'Create a playlist file (.m3u8)' saves a file in the folder "
+         "square for music and at the original size for video. 'Create playlist "
+         "(.m3u8)', next to it, saves a file in the folder "
          "with the tracks in playlist order, which opens in any player "
          "(replacements go in the right place)."),
         ("Playlist: failed tracks and replacements (Tauri .exe version)",
