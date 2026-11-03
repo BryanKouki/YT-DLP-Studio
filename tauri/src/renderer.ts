@@ -574,7 +574,7 @@ const SETTINGS_FORM: [string, string[], string[], string[]][] = [
     ['concurrent_fragments', 'retries', 'fragment_retries', 'trim_filenames', 'age_limit', 'sleep_interval']],
   ['extra_files', [],
     ['embed_metadata_thumb', 'embed_chapters', 'split_chapters', 'write_description', 'write_info_json',
-      'embed_audio_tags', 'keep_video', 'save_folder_cover'],
+      'embed_audio_tags', 'keep_video', 'save_folder_cover', 'save_playlist_file'],
     ['sub_langs', 'sub_format']],
 ];
 

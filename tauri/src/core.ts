@@ -109,6 +109,15 @@ export function linksFrom(text: string): string[] {
   return started.length ? [...new Set(started)] : lines;
 }
 
+/** Arquivo .m3u8 da playlist: faixas na ordem da playlist, com caminho relativo à pasta dela. */
+export function m3uText(entries: { pos: number; file: string }[]): string {
+  const lines = ['#EXTM3U'];
+  for (const { file } of [...entries].sort((a, b) => a.pos - b.pos)) {
+    lines.push(`#EXTINF:-1,${path.stem(file)}`, path.basename(file));
+  }
+  return lines.join('\r\n') + '\r\n';
+}
+
 /** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {
   return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'firefox'] : [];

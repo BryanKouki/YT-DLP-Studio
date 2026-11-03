@@ -84,6 +84,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "sub_langs": "Idiomas da legenda",
     "sub_format": "Formato de legenda",
     "save_folder_cover": "Salvar capa do álbum/playlist na pasta (cover.jpg)",
+    "save_playlist_file": "Criar arquivo de playlist (.m3u8) na pasta da playlist",
     "best_any": "Melhor (qualquer)",
     "force_mp4": "Forçar MP4",
     "force_mkv": "Forçar MKV",
@@ -255,6 +256,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "sub_langs": "Subtitle languages",
     "sub_format": "Subtitle format",
     "save_folder_cover": "Save album/playlist cover in folder (cover.jpg)",
+    "save_playlist_file": "Create a playlist file (.m3u8) in the playlist folder",
     "best_any": "Best (any)",
     "force_mp4": "Force MP4",
     "force_mkv": "Force MKV",
@@ -392,7 +394,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Guardar capa de cada música (versão .exe Tauri)",
-      "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada faixa, quadrado em música e no tamanho original em vídeo."
+      "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada faixa, quadrado em música e no tamanho original em vídeo. Em Configurações → Arquivos extras, 'Criar arquivo de playlist (.m3u8)' salva na pasta um arquivo com as faixas na ordem da playlist, que abre em qualquer player (as substitutas entram no lugar certo)."
     ],
     [
       "Playlist: faixas com erro e substitutas (versão .exe Tauri)",
@@ -400,7 +402,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
-      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o Chrome ainda pede duas confirmações. Um navegador Chromium aberto, inclusive em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa entre downloads' também ajuda."
+      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o Chrome ainda pede duas confirmações. Importante: é preciso estar logado na sua conta no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa entre downloads' também ajuda."
     ],
     [
       "Aba Converter",
@@ -462,7 +464,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Save each track's cover (Tauri .exe version)",
-      "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist cover), 'Save each track's cover' leaves a .jpg next to every track, square for music and at the original size for video."
+      "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist cover), 'Save each track's cover' leaves a .jpg next to every track, square for music and at the original size for video. In Settings → Extra files, 'Create a playlist file (.m3u8)' saves a file in the folder with the tracks in playlist order, which opens in any player (replacements go in the right place)."
     ],
     [
       "Playlist: failed tracks and replacements (Tauri .exe version)",
@@ -470,7 +472,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies against the 'not a bot' block (Tauri .exe version)",
-      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your session from one of the browsers it supports. Firefox is the default, since yt-dlp reads it without problems (Safari only exists on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read, even when closed; Chrome also asks for two confirmations. An open Chromium browser, including in the background, locks its cookies: the app asks before closing it. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. A longer 'Pause between downloads' also helps."
+      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your session from one of the browsers it supports. Firefox is the default, since yt-dlp reads it without problems (Safari only exists on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read, even when closed; Chrome also asks for two confirmations. Important: you must be signed in to your account on YouTube in that browser; just opening the site is not enough. An open Chromium browser, including in the background, locks its cookies: the app asks before closing it. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. A longer 'Pause between downloads' also helps."
     ],
     [
       "Convert tab",

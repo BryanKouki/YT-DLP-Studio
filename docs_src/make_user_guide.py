@@ -211,7 +211,9 @@ story.append(body(
     "Numa playlist, <b>Guardar thumbnail</b> guarda só a capa da playlist "
     "(playlistcover.jpg). Para ter também um .jpg ao lado de cada faixa, marque "
     "<b>Guardar capa de cada música</b>: quadrado em música e no tamanho original "
-    "em vídeo."
+    "em vídeo. Em Configurações → Arquivos extras, <b>Criar arquivo de playlist "
+    "(.m3u8)</b> salva na pasta um arquivo com as faixas na ordem da playlist, que "
+    "abre em qualquer player; as substitutas entram no lugar certo."
 ))
 story.append(h3("Cookies contra o bloqueio \"não é um robô\" (versão .exe Tauri)"))
 story.append(body(
@@ -222,7 +224,8 @@ story.append(body(
     "só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, "
     "Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os "
     "cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o "
-    "Chrome ainda pede duas confirmações. Um navegador Chromium aberto, inclusive "
+    "Chrome ainda pede duas confirmações. É preciso estar <b>logado na sua conta</b> "
+    "no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive "
     "em segundo plano, trava os cookies, e o app pergunta antes de fechá-lo. Se "
     "a leitura falhar, a opção é desativada e o item é baixado "
     "de novo sem cookies, sem perder nada da fila. Aumentar <b>Pausa entre "

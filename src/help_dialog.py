@@ -79,7 +79,10 @@ HELP_CONTENT = {
         ("Guardar capa de cada música (versão .exe Tauri)",
          "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da "
          "playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada "
-         "faixa, quadrado em música e no tamanho original em vídeo."),
+         "faixa, quadrado em música e no tamanho original em vídeo. Em "
+         "Configurações → Arquivos extras, 'Criar arquivo de playlist (.m3u8)' "
+         "salva na pasta um arquivo com as faixas na ordem da playlist, que abre "
+         "em qualquer player (as substitutas entram no lugar certo)."),
         ("Playlist: faixas com erro e substitutas (versão .exe Tauri)",
          "Quando faixas de uma playlist falham (vídeo indisponível, bloqueio do "
          "YouTube...), a linha dela na fila ganha o botão 'Faixas com erro'. Ele "
@@ -100,7 +103,8 @@ HELP_CONTENT = {
          "existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, "
          "Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam "
          "os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; "
-         "o Chrome ainda pede duas confirmações. Um navegador Chromium aberto, inclusive "
+         "o Chrome ainda pede duas confirmações. Importante: é preciso estar logado "
+         "na sua conta no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive "
          "em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item "
          "é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa "
          "entre downloads' também ajuda."),
@@ -201,7 +205,10 @@ HELP_CONTENT = {
         ("Save each track's cover (Tauri .exe version)",
          "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist "
          "cover), 'Save each track's cover' leaves a .jpg next to every track, "
-         "square for music and at the original size for video."),
+         "square for music and at the original size for video. In Settings → "
+         "Extra files, 'Create a playlist file (.m3u8)' saves a file in the folder "
+         "with the tracks in playlist order, which opens in any player "
+         "(replacements go in the right place)."),
         ("Playlist: failed tracks and replacements (Tauri .exe version)",
          "When playlist tracks fail (unavailable video, YouTube block...), its "
          "row in the queue gets a 'Failed tracks' button. It lists each track "
@@ -221,7 +228,8 @@ HELP_CONTENT = {
          "on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, "
          "Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way "
          "yt-dlp may not be able to read, even when closed; Chrome also asks for two "
-         "confirmations. An open Chromium browser, including in the background, "
+         "confirmations. Important: you must be signed in to your account on "
+         "YouTube in that browser; just opening the site is not enough. An open Chromium browser, including in the background, "
          "locks its cookies: the app asks before closing it. If "
          "reading fails, the option is turned off and the item is downloaded again "
          "without cookies, so nothing in the queue is lost. A longer 'Pause "

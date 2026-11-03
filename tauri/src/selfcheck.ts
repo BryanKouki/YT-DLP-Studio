@@ -88,6 +88,9 @@ async function run(): Promise<void> {
   assert(cover.includes('--flat-playlist') && after(cover, '--playlist-items') === '0' && cover.at(-1) === 'u');
   assert(cover.some((a) => a.startsWith('pl_thumbnail:') && a.endsWith('playlist_thumb.%(ext)s')));
   assert.equal(core.artistFromUploader('Anitta - Topic'), 'Anitta');
+  // .m3u8: ordem da playlist (a substituta da posição 2 entra entre 1 e 3), caminho relativo
+  assert.equal(core.m3uText([{ pos: 3, file: 'C:\\pl\\c.mp3' }, { pos: 1, file: 'C:\\pl\\a.mp3' }, { pos: 2, file: 'C:\\pl\\b b.mp3' }]),
+    '#EXTM3U\r\n#EXTINF:-1,a\r\na.mp3\r\n#EXTINF:-1,b b\r\nb b.mp3\r\n#EXTINF:-1,c\r\nc.mp3\r\n');
 
   // 5. seletor de vídeo, recorte de trecho e modelo avançado
   assert.equal(core.buildFormatSelector({ resolution: '1080', fps: '0', vcodec: 'avc1', acodec: 'mp4a' }),

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.4
+
+### Added
+- "Create a playlist file (.m3u8)" option (Settings → Extra files): saves a playlist file in the playlist folder with the tracks in playlist order. Replacement tracks are added in their place.
+
+### Fixed
+- Queue items used the cookie setting from the moment they were added. Items queued before turning cookies on were downloaded without them. Every item now uses the current cookie setting when it starts.
+
+### Changed
+- When YouTube still asks to "confirm you're not a bot" with cookies turned on, the Log explains that you must be signed in to your YouTube account in that browser.
+
 ## v1.3.3
 
 ### Added

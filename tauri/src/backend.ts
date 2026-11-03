@@ -270,6 +270,7 @@ async function runQueue(only?: core.Job): Promise<void> {
 const remaining = (job: core.Job) => job.failed?.filter((f) => f.state !== 'done').length ?? 0;
 
 /** Mensagens do yt-dlp que têm uma saída conhecida: explica no Log uma vez por download. */
+const BOT_RE = /Sign in to confirm you.re not a bot/;
 const HINTS: [RegExp, string][] = [
   [/Sign in to confirm you.re not a bot/,
     '[dica] O YouTube bloqueou temporariamente por excesso de downloads seguidos. Ative "Usar cookies do navegador" ' +
@@ -287,6 +288,8 @@ function cancelCurrent(): void {
 async function runJob(job: core.Job): Promise<void> {
   canceled = false;
   Object.assign(job, { status: 'downloading', progress: 0, nowTitle: '', nowArtist: '', idx: '', count: '' });
+  // cookies: vale o que está nas Configurações agora, não o que estava quando o item entrou na fila
+  Object.assign(job.options, { use_cookies: settings.use_cookies, cookies_browser: settings.cookies_browser });
   send('job', job);
   log(`Iniciando: ${job.url}`);
 
@@ -323,8 +326,14 @@ async function runJob(job: core.Job): Promise<void> {
       const err = core.PL_ERR_RE.exec(line);
       if (err && !failed.some((f) => f.id === err[1])) failed.push({ pos: 0, id: err[1], title: '', artist: '', reason: err[2] });
       if (core.COOKIE_ERR_RE.test(line)) cookieFailed = /DPAPI/.test(line) ? 'dpapi' : 'lock';
+      if (BOT_RE.test(line) && job.options.use_cookies && !hinted.has('bot+cookies')) {
+        hinted.add('bot+cookies');
+        setTimeout(() => log('[dica] Os cookies do navegador foram usados, mas o YouTube ainda pediu login. Entre na sua ' +
+          'conta Google no YouTube por esse navegador (só abrir o site não basta), feche-o e tente de novo. Uma pausa ' +
+          'entre downloads (Configurações → "Pausa entre downloads (s)") também reduz o bloqueio.'));
+      }
       for (const [re, hint] of HINTS) {
-        if (re.test(line) && !hinted.has(hint)) {
+        if (re.test(line) && !hinted.has(hint) && !job.options.use_cookies) {
           hinted.add(hint);
           setTimeout(() => log(hint)); // depois da linha de erro original
         }
@@ -358,6 +367,7 @@ async function runJob(job: core.Job): Promise<void> {
     send('job', job);
     return;
   }
+  if (job.options._is_playlist) job.placed = saved.map(({ idx, file }) => ({ pos: Number(idx) || 0, file }));
   if (job.options._is_playlist && failed.length && !canceled) await locateFailed(job, failed, saved);
   // playlist com algumas faixas indisponíveis: o resto baixou, então conta como concluída
   const partial = code !== 0 && Boolean(job.failed?.length) && saved.length > 0;
@@ -376,6 +386,7 @@ async function runJob(job: core.Job): Promise<void> {
       await cleanupStrayThumbnails(o.folder); // apaga o playlist_thumb.* original; fica só playlistcover.jpg
       log('Capa da playlist salva (playlistcover.jpg)');
     }
+    await writePlaylistFile(job);
   } else {
     job.status = 'error';
     job.errorMsg = `yt-dlp saiu com código ${code}`;
@@ -385,6 +396,14 @@ async function runJob(job: core.Job): Promise<void> {
 }
 
 interface Saved { id: string; idx: string; file: string }
+
+/** "Criar arquivo de playlist": <nome da playlist>.m3u8 na pasta, na ordem da playlist. */
+async function writePlaylistFile(job: core.Job): Promise<void> {
+  const o = job.options;
+  if (!o._is_playlist || !o.save_playlist_file || !job.placed?.length) return;
+  const file = path.join(o.folder, `${core.sanitizeFilename(job.name || 'playlist')}.m3u8`);
+  if (await invoke('write_text', { path: file, text: core.m3uText(job.placed) })) log(`Arquivo de playlist salvo: ${file}`);
+}
 
 /** Descobre a posição e o título de cada faixa que falhou (pela lista da playlist) e
  *  guarda os arquivos baixados por posição, para encaixar substitutas entre eles. */
@@ -441,6 +460,7 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
     placed.push({ pos: f.pos, file }); // a próxima substituta encaixa considerando esta
     f.state = 'done';
     log(`Substituta salva na posição ${f.pos}: ${file}`);
+    await writePlaylistFile(job); // a substituta entra no lugar dela no .m3u8
     send('replaced', f);
     send('job', job);
   }
