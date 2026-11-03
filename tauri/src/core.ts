@@ -109,9 +109,9 @@ export function linksFrom(text: string): string[] {
   return started.length ? [...new Set(started)] : lines;
 }
 
-/** Cookies do navegador escolhido (Edge por padrão) contra o "Sign in to confirm you're not a bot". */
+/** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {
-  return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'edge'] : [];
+  return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'firefox'] : [];
 }
 
 /** Datas [criação, modificação] em ms para um arquivo ficar entre prev e next quando a pasta é

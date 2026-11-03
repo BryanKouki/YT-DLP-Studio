@@ -332,6 +332,7 @@ button.remove { margin-right: -6px; }
 button.play:hover { background: var(--red-soft); color: var(--red); }
 .job[data-status="downloading"] .play, .job[data-status="done"] .play { display: none; }
 button.remove:hover { background: var(--red-soft); color: var(--red); }
+.cookie-warn { margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); color: var(--warn); }
 button.fails { background: rgba(245, 158, 11, 0.15); color: var(--warn); font-weight: 600; }
 button.fails:hover { background: rgba(245, 158, 11, 0.25); }
 .log-head { margin-top: 4px; }

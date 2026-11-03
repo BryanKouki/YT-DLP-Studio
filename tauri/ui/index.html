@@ -229,7 +229,23 @@
       <h3 data-i18n="cookies_section"></h3>
       <label class="chk"><input type="checkbox" data-set="use_cookies"><span data-i18n="use_cookies"></span></label>
       <label class="field"><span data-i18n="cookies_browser"></span>
-        <select data-set="cookies_browser"><option value="edge">Microsoft Edge</option><option value="chrome">Google Chrome</option></select></label>
+        <select data-set="cookies_browser">
+          <!-- todos os que o yt-dlp aceita em --cookies-from-browser -->
+          <optgroup data-i18n-label="cookies_group_ok">
+            <option value="firefox">Mozilla Firefox</option>
+            <option value="safari">Apple Safari (macOS)</option>
+          </optgroup>
+          <optgroup data-i18n-label="cookies_group_chromium">
+            <option value="edge">Microsoft Edge</option>
+            <option value="chrome">Google Chrome</option>
+            <option value="brave">Brave</option>
+            <option value="chromium">Chromium</option>
+            <option value="opera">Opera</option>
+            <option value="vivaldi">Vivaldi</option>
+            <option value="whale">Naver Whale</option>
+          </optgroup>
+        </select></label>
+      <p class="cookie-warn small" data-i18n="cookies_chromium_warn" hidden></p>
     </div>
   </div>
   <form method="dialog" class="dlg-foot">

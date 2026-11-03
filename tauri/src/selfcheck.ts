@@ -52,8 +52,8 @@ async function run(): Promise<void> {
   assert(c.includes('--progress'), 'sem --progress o --print esconde o progresso');
   assert(after(c, '--print').endsWith('@@@%(id)s@@@%(filepath|)s') && !c.includes('--cookies-from-browser'));
 
-  // 2b. cookies: Edge por padrão; substituta fica entre as vizinhas (na ordem que a pasta mostra)
-  assert.equal(after(cmdFor(job('audio', { folder: 'C:/m', use_cookies: true })), '--cookies-from-browser'), 'edge');
+  // 2b. cookies: Firefox por padrão (não Chromium); substituta fica entre as vizinhas (na ordem que a pasta mostra)
+  assert.equal(after(cmdFor(job('audio', { folder: 'C:/m', use_cookies: true })), '--cookies-from-browser'), 'firefox');
   assert.equal(core.cookieArgs({ use_cookies: true, cookies_browser: 'chrome' }).join(' '), '--cookies-from-browser chrome');
   const [cr, mo] = core.between([1000, 5000], [3000, 9000], 0);
   assert(cr > 1000 && cr < 3000 && mo > 5000 && mo < 9000, `${cr} ${mo}`);

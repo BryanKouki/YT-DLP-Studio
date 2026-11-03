@@ -151,10 +151,13 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "failed_prev": "Playlist anterior",
     "failed_next": "Próxima playlist",
     "cookies_section": "Cookies (contra o bloqueio \"não é um robô\")",
-    "use_cookies": "Usar cookies do navegador (o navegador precisa estar fechado, inclusive em segundo plano)",
+    "use_cookies": "Usar cookies do navegador",
     "close_browser_confirm": "Para usar os cookies, o {browser} precisa ser fechado, e ele está aberto (talvez em segundo plano). Fechar o {browser} agora? As janelas e abas abertas serão fechadas.",
     "toast_cookies_off": "Não foi possível ler os cookies do navegador. A opção foi desativada e o download continua sem cookies.",
     "cookies_browser": "Navegador",
+    "cookies_group_ok": "Recomendados (não Chromium)",
+    "cookies_group_chromium": "Chromium (podem falhar no Windows)",
+    "cookies_chromium_warn": "Atenção: no Windows, navegadores baseados no Chromium (Edge, Chrome, Brave, Opera, Vivaldi...) criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler (erro DPAPI), mesmo com o navegador fechado. Se isso acontecer, a opção é desativada e o download continua sem cookies. Prefira o Firefox.",
     "chrome_confirm_1": "Usar os cookies do Google Chrome? O yt-dlp lerá os cookies da sua sessão do Chrome, que deve estar fechado durante o download.",
     "chrome_confirm_2": "VOCÊ TEM REALMENTE CERTEZA DISSO?",
     "yes": "Sim",
@@ -319,10 +322,13 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "failed_prev": "Previous playlist",
     "failed_next": "Next playlist",
     "cookies_section": "Cookies (against the \"not a bot\" block)",
-    "use_cookies": "Use browser cookies (the browser must be closed, including in the background)",
+    "use_cookies": "Use browser cookies",
     "close_browser_confirm": "To use the cookies, {browser} must be closed, and it is open (maybe in the background). Close {browser} now? Open windows and tabs will be closed.",
     "toast_cookies_off": "Could not read the browser cookies. The option was turned off and the download continues without cookies.",
     "cookies_browser": "Browser",
+    "cookies_group_ok": "Recommended (not Chromium)",
+    "cookies_group_chromium": "Chromium (may fail on Windows)",
+    "cookies_chromium_warn": "Note: on Windows, Chromium-based browsers (Edge, Chrome, Brave, Opera, Vivaldi...) encrypt cookies in a way yt-dlp may not be able to read (DPAPI error), even with the browser closed. If that happens, the option is turned off and the download continues without cookies. Firefox is the better choice.",
     "chrome_confirm_1": "Use Google Chrome cookies? yt-dlp will read the cookies of your Chrome session, and Chrome must be closed while downloading.",
     "chrome_confirm_2": "ARE YOU REALLY SURE ABOUT THIS?",
     "yes": "Yes",
@@ -394,7 +400,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
-      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão do Edge (padrão) ou do Chrome (pede duas confirmações). O navegador precisa estar fechado, inclusive em segundo plano: se estiver aberto, o app pergunta antes de fechá-lo. Versões recentes do Edge e do Chrome protegem os cookies de um jeito que o yt-dlp pode não conseguir ler. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa entre downloads' também ajuda."
+      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o Chrome ainda pede duas confirmações. Um navegador Chromium aberto, inclusive em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa entre downloads' também ajuda."
     ],
     [
       "Aba Converter",
@@ -464,7 +470,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies against the 'not a bot' block (Tauri .exe version)",
-      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your Edge (default) or Chrome session (Chrome asks for two confirmations). The browser must be closed, including in the background: if it is open, the app asks before closing it. Recent Edge and Chrome versions protect cookies in a way yt-dlp may not be able to read. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. A longer 'Pause between downloads' also helps."
+      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your session from one of the browsers it supports. Firefox is the default, since yt-dlp reads it without problems (Safari only exists on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read, even when closed; Chrome also asks for two confirmations. An open Chromium browser, including in the background, locks its cookies: the app asks before closing it. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. A longer 'Pause between downloads' also helps."
     ],
     [
       "Convert tab",

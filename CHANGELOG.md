@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.3
+
+### Added
+- Every browser yt-dlp can read cookies from is now listed: Firefox, Safari (macOS), Edge, Chrome, Brave, Chromium, Opera, Vivaldi and Whale.
+- Chromium-based browsers show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read (DPAPI error), even with the browser closed.
+
+### Changed
+- Firefox is now the default browser for cookies, since yt-dlp reads it without the Windows decryption problem. A browser chosen before is kept.
+
 ## v1.3.2
 
 ### Fixed

@@ -22,7 +22,7 @@
 - **Playlist availability check** lists every unavailable track with its position and neighbours, without downloading anything
 - **Failed tracks and replacements** (Tauri version): when playlist tracks fail, they are listed with a copyable "Song - Artist", link or ID. Paste a replacement link and it is downloaded into the same folder, with file dates set so it sits exactly between its neighbours. The queue can pause after each playlist, at the end (review one playlist at a time) or not at all
 - Optional cover file for every track of a playlist, separate from the playlist cover (Tauri version)
-- **Browser cookies** (Tauri version) against YouTube's "confirm you're not a bot" block: Edge by default, Chrome after a double confirmation
+- **Browser cookies** (Tauri version) against YouTube's "confirm you're not a bot" block: every browser yt-dlp supports, Firefox by default; Chromium-based browsers show a warning, since yt-dlp may not be able to read their cookies on Windows
 
 **Video**
 - Resolution up to 4320p (8K), FPS cap, preferred video/audio codec (H.264, H.265, VP9, AV1, VP8 / AAC, Opus, MP3, FLAC)

@@ -66,7 +66,7 @@ const settings: Record<string, any> = {
   save_folder_cover: true,
   pause_failed: 'each', // faixas de playlist falharam: 'each' pausa depois da playlist, 'end' no fim da fila, 'off' não pausa
   use_cookies: false,
-  cookies_browser: 'edge',
+  cookies_browser: 'firefox', // não Chromium: o yt-dlp lê sem o erro de DPAPI do Windows
 
   ui: {}, // seleções de cada aba, lembradas entre sessões ("audio.format": "mp3", ...)
   window_size: null,
@@ -141,16 +141,23 @@ async function ytdlpLines(args: string[], withStderr: boolean, timeout = 0, cook
 
 // ---- navegador aberto trava o arquivo de cookies --------------------------------
 
+// só os Chromium travam o arquivo de cookies enquanto abertos; o Firefox é lido aberto mesmo
 const BROWSERS: Record<string, { exe: string; name: string }> = {
   edge: { exe: 'msedge.exe', name: 'Microsoft Edge' },
   chrome: { exe: 'chrome.exe', name: 'Google Chrome' },
+  brave: { exe: 'brave.exe', name: 'Brave' },
+  chromium: { exe: 'chrome.exe', name: 'Chromium' },
+  opera: { exe: 'opera.exe', name: 'Opera' },
+  vivaldi: { exe: 'vivaldi.exe', name: 'Vivaldi' },
+  whale: { exe: 'whale.exe', name: 'Naver Whale' },
 };
 let answerClose: ((ok: boolean) => void) | null = null;
 
 /** Com cookies ligados e o navegador aberto (o Edge fica em segundo plano mesmo sem janelas),
  *  pergunta na tela e, se o usuário aceitar, fecha o navegador antes de baixar. */
 async function closeBrowserForCookies(job: core.Job): Promise<void> {
-  const browser = BROWSERS[job.options.cookies_browser] ?? BROWSERS.edge;
+  const browser = BROWSERS[job.options.cookies_browser];
+  if (!browser) return;
   const tasks: string[] = [];
   await runLines('tasklist', ['/FI', `IMAGENAME eq ${browser.exe}`, '/NH'], (l) => tasks.push(l), true, 15000).done;
   if (!tasks.some((line) => line.toLowerCase().startsWith(browser.exe))) return;

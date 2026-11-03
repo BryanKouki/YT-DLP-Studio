@@ -27,6 +27,7 @@ function retranslate(): void {
   for (const el of $$('[data-i18n]')) el.textContent = t(el.dataset.i18n!);
   for (const el of $$<HTMLTextAreaElement>('[data-i18n-ph]')) el.placeholder = t(el.dataset.i18nPh!);
   for (const el of $$('[data-i18n-title]')) el.title = t(el.dataset.i18nTitle!);
+  for (const el of $$('[data-i18n-label]')) el.setAttribute('label', t(el.dataset.i18nLabel!));
   document.documentElement.lang = lang;
   $('#btn-lang').textContent = lang.toUpperCase();
   renderDeps();
@@ -596,12 +597,17 @@ function setupDialogs(): void {
   }
   // Chrome só depois de duas confirmações; "Não" em qualquer uma volta para o anterior
   const browser = $<HTMLSelectElement>('[data-set="cookies_browser"]', dialog);
-  let lastBrowser = 'edge';
+  // navegadores Chromium no Windows: o yt-dlp pode não abrir os cookies (DPAPI), mesmo fechados
+  const warnChromium = () => {
+    $('.cookie-warn', dialog).hidden = !['edge', 'chrome', 'brave', 'chromium', 'opera', 'vivaldi', 'whale'].includes(browser.value);
+  };
+  let lastBrowser = 'firefox';
   browser.onchange = async () => {
     if (browser.value === 'chrome' && !((await ask(t('chrome_confirm_1'))) && (await ask(t('chrome_confirm_2'))))) {
       browser.value = lastBrowser;
     }
     lastBrowser = browser.value;
+    warnChromium();
   };
   $('#btn-settings').onclick = () => {
     for (const el of fields) {
@@ -609,6 +615,7 @@ function setupDialogs(): void {
       else el.value = cfg[el.dataset.set!] ?? '';
     }
     lastBrowser = browser.value;
+    warnChromium();
     dialog.showModal();
   };
   $('#set-save').onclick = () => {

@@ -95,11 +95,13 @@ HELP_CONTENT = {
         ("Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
          "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to "
          "confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do "
-         "navegador' faz o yt-dlp usar a sua sessão do Edge (padrão) ou do Chrome "
-         "(pede duas confirmações). O navegador precisa estar fechado, inclusive em "
-         "segundo plano: se estiver aberto, o app pergunta antes de fechá-lo. Versões "
-         "recentes do Edge e do Chrome protegem os cookies de um jeito que o yt-dlp "
-         "pode não conseguir ler. Se a leitura falhar, a opção é desativada e o item "
+         "navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele "
+         "aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só "
+         "existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, "
+         "Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam "
+         "os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; "
+         "o Chrome ainda pede duas confirmações. Um navegador Chromium aberto, inclusive "
+         "em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item "
          "é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa "
          "entre downloads' também ajuda."),
         ("Aba Converter",
@@ -214,10 +216,13 @@ HELP_CONTENT = {
         ("Cookies against the 'not a bot' block (Tauri .exe version)",
          "After many downloads in a row YouTube may answer 'Sign in to confirm "
          "you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes "
-         "yt-dlp use your Edge (default) or Chrome session (Chrome asks for two "
-         "confirmations). The browser must be closed, including in the background: "
-         "if it is open, the app asks before closing it. Recent Edge and Chrome "
-         "versions protect cookies in a way yt-dlp may not be able to read. If "
+         "yt-dlp use your session from one of the browsers it supports. Firefox is "
+         "the default, since yt-dlp reads it without problems (Safari only exists "
+         "on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, "
+         "Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way "
+         "yt-dlp may not be able to read, even when closed; Chrome also asks for two "
+         "confirmations. An open Chromium browser, including in the background, "
+         "locks its cookies: the app asks before closing it. If "
          "reading fails, the option is turned off and the item is downloaded again "
          "without cookies, so nothing in the queue is lost. A longer 'Pause "
          "between downloads' also helps."),
