@@ -239,7 +239,11 @@ story.append(body(
     "no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive "
     "em segundo plano, trava os cookies, e o app pergunta antes de fechá-lo. Se "
     "a leitura falhar, a opção é desativada e o item é baixado "
-    "de novo sem cookies, sem perder nada da fila. Aumentar <b>Pausa entre "
+    "de novo sem cookies, sem perder nada da fila. Com <b>Só usar os cookies quando "
+    "o YouTube bloquear</b> (aparece depois de ligar os cookies), os downloads começam "
+    "sem cookies, o que é mais rápido; no primeiro bloqueio o app liga os cookies até "
+    "ser fechado e continua a playlist a partir da faixa onde parou (ex.: 19 de 32). "
+    "Aumentar <b>Pausa entre "
     "downloads</b> também ajuda."
 ))
 

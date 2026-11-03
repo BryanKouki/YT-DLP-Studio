@@ -161,6 +161,8 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "failed_next": "Próxima playlist",
     "cookies_section": "Cookies (contra o bloqueio \"não é um robô\")",
     "use_cookies": "Usar cookies do navegador",
+    "cookies_on_bot": "Só usar os cookies quando o YouTube bloquear (mais rápido; continua de onde parou)",
+    "toast_bot_cookies": "O YouTube bloqueou: cookies ativados até fechar o app, continuando de onde parou.",
     "close_browser_confirm": "Para usar os cookies, o {browser} precisa ser fechado, e ele está aberto (talvez em segundo plano). Fechar o {browser} agora? As janelas e abas abertas serão fechadas.",
     "toast_cookies_off": "Não foi possível ler os cookies do navegador. A opção foi desativada e o download continua sem cookies.",
     "cookies_browser": "Navegador",
@@ -341,6 +343,8 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "failed_next": "Next playlist",
     "cookies_section": "Cookies (against the \"not a bot\" block)",
     "use_cookies": "Use browser cookies",
+    "cookies_on_bot": "Only use cookies when YouTube blocks (faster; resumes where it stopped)",
+    "toast_bot_cookies": "YouTube blocked: cookies turned on until the app closes, resuming where it stopped.",
     "close_browser_confirm": "To use the cookies, {browser} must be closed, and it is open (maybe in the background). Close {browser} now? Open windows and tabs will be closed.",
     "toast_cookies_off": "Could not read the browser cookies. The option was turned off and the download continues without cookies.",
     "cookies_browser": "Browser",
@@ -422,7 +426,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
-      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o Chrome ainda pede duas confirmações. Importante: é preciso estar logado na sua conta no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa entre downloads' também ajuda."
+      "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do navegador' faz o yt-dlp usar a sua sessão de um dos navegadores que ele aceita. O padrão é o Firefox, que o yt-dlp lê sem problemas (o Safari só existe no macOS). Os baseados no Chromium (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) aparecem com um aviso: no Windows eles criptografam os cookies de um jeito que o yt-dlp pode não conseguir ler, mesmo fechados; o Chrome ainda pede duas confirmações. Importante: é preciso estar logado na sua conta no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item é baixado de novo sem cookies, sem perder nada da fila. Com 'Só usar os cookies quando o YouTube bloquear', os downloads começam sem cookies (mais rápido); no primeiro bloqueio o app liga os cookies até ser fechado e continua a playlist da faixa onde parou. Aumentar 'Pausa entre downloads' também ajuda."
     ],
     [
       "Aba Converter",
@@ -496,7 +500,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Cookies against the 'not a bot' block (Tauri .exe version)",
-      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your session from one of the browsers it supports. Firefox is the default, since yt-dlp reads it without problems (Safari only exists on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read, even when closed; Chrome also asks for two confirmations. Important: you must be signed in to your account on YouTube in that browser; just opening the site is not enough. An open Chromium browser, including in the background, locks its cookies: the app asks before closing it. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. A longer 'Pause between downloads' also helps."
+      "After many downloads in a row YouTube may answer 'Sign in to confirm you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes yt-dlp use your session from one of the browsers it supports. Firefox is the default, since yt-dlp reads it without problems (Safari only exists on macOS). Chromium-based browsers (Edge, Chrome, Brave, Chromium, Opera, Vivaldi, Whale) show a warning: on Windows they encrypt cookies in a way yt-dlp may not be able to read, even when closed; Chrome also asks for two confirmations. Important: you must be signed in to your account on YouTube in that browser; just opening the site is not enough. An open Chromium browser, including in the background, locks its cookies: the app asks before closing it. If reading fails, the option is turned off and the item is downloaded again without cookies, so nothing in the queue is lost. With 'Only use cookies when YouTube blocks', downloads start without cookies (faster); at the first block the app turns cookies on until it is closed and resumes the playlist from the track where it stopped. A longer 'Pause between downloads' also helps."
     ],
     [
       "Convert tab",

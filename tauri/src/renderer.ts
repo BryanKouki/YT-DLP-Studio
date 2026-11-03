@@ -620,6 +620,12 @@ function setupDialogs(): void {
     $('.cookie-warn', dialog).hidden = !['edge', 'chrome', 'brave', 'chromium', 'opera', 'vivaldi', 'whale'].includes(browser.value);
   };
   let lastBrowser = 'firefox';
+  // "só quando bloquear" é uma opção da opção: aparece depois de ligar os cookies
+  const useCookies = $<HTMLInputElement>('[data-set="use_cookies"]', dialog);
+  const syncCookiesSub = () => {
+    $('.cookies-sub', dialog).hidden = !useCookies.checked;
+  };
+  useCookies.addEventListener('change', syncCookiesSub);
   browser.onchange = async () => {
     if (browser.value === 'chrome' && !((await ask(t('chrome_confirm_1'))) && (await ask(t('chrome_confirm_2'))))) {
       browser.value = lastBrowser;
@@ -634,6 +640,7 @@ function setupDialogs(): void {
     }
     lastBrowser = browser.value;
     warnChromium();
+    syncCookiesSub();
     dialog.showModal();
   };
   $('#set-save').onclick = () => {
@@ -705,6 +712,8 @@ api.on((kind, data) => {
     if (!dialog.open) dialog.showModal();
   } else if (kind === 'confirm_close') {
     void ask(t('close_browser_confirm', { browser: data })).then((ok) => api.call('answerClose', ok));
+  } else if (kind === 'bot_cookies') {
+    toast(t('toast_bot_cookies'), 'warn');
   } else if (kind === 'cookies_off') {
     cfg.use_cookies = false;
     toast(t('toast_cookies_off'), 'warn');

@@ -115,7 +115,10 @@ HELP_CONTENT = {
          "o Chrome ainda pede duas confirmações. Importante: é preciso estar logado "
          "na sua conta no YouTube por esse navegador; só abrir o site não basta. Um navegador Chromium aberto, inclusive "
          "em segundo plano, trava os cookies: o app pergunta antes de fechá-lo. Se a leitura falhar, a opção é desativada e o item "
-         "é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa "
+         "é baixado de novo sem cookies, sem perder nada da fila. Com 'Só usar os "
+         "cookies quando o YouTube bloquear', os downloads começam sem cookies (mais "
+         "rápido); no primeiro bloqueio o app liga os cookies até ser fechado e "
+         "continua a playlist da faixa onde parou. Aumentar 'Pausa "
          "entre downloads' também ajuda."),
         ("Aba Converter",
          "Converte ou comprime qualquer arquivo do computador usando o FFmpeg do "
@@ -253,7 +256,10 @@ HELP_CONTENT = {
          "YouTube in that browser; just opening the site is not enough. An open Chromium browser, including in the background, "
          "locks its cookies: the app asks before closing it. If "
          "reading fails, the option is turned off and the item is downloaded again "
-         "without cookies, so nothing in the queue is lost. A longer 'Pause "
+         "without cookies, so nothing in the queue is lost. With 'Only use cookies "
+         "when YouTube blocks', downloads start without cookies (faster); at the "
+         "first block the app turns cookies on until it is closed and resumes the "
+         "playlist from the track where it stopped. A longer 'Pause "
          "between downloads' also helps."),
         ("Convert tab",
          "Converts or compresses any file on your computer using the app's "

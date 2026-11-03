@@ -65,6 +65,7 @@ const settings: Record<string, any> = {
   pause_on_error: true, // item com erro pausa a fila: continuar, tentar de novo ou cancelar
   pause_failed: 'each', // faixas de playlist falharam: 'each' pausa depois da playlist, 'end' no fim da fila, 'off' não pausa
   use_cookies: false,
+  cookies_on_bot: false, // só liga os cookies no primeiro bloqueio "not a bot" (até fechar o app)
   cookies_browser: 'firefox', // não Chromium: o yt-dlp lê sem o erro de DPAPI do Windows
 
   ui: {}, // seleções de cada aba, lembradas entre sessões ("audio.format": "mp3", ...)
@@ -138,7 +139,7 @@ function runLines(exe: string, args: string[], onLine: (line: string) => void, w
 /** yt-dlp com saída em UTF-8 (senão títulos com acento chegam quebrados pelo pipe do Windows). */
 async function ytdlpLines(args: string[], withStderr: boolean, timeout = 0, cookies = true): Promise<string[]> {
   const lines: string[] = [];
-  await runLines(YTDLP, ['--encoding', 'utf-8', ...core.jsRuntimeArgs(BIN), ...(cookies ? core.cookieArgs(settings) : []), ...args],
+  await runLines(YTDLP, ['--encoding', 'utf-8', ...core.jsRuntimeArgs(BIN), ...(cookies ? core.cookieArgs({ use_cookies: cookiesNow(), cookies_browser: settings.cookies_browser }) : []), ...args],
     (l) => lines.push(l), withStderr, timeout).done;
   return lines;
 }
@@ -248,6 +249,10 @@ let jobs: core.Job[] = [];
 let running = false;
 let currentId = 0;
 let canceled = false;
+let botCookies = false; // "só quando bloquear": virou true no primeiro bloqueio desta sessão
+
+/** Cookies valem para este download? Com "só quando bloquear", só depois do primeiro bloqueio. */
+const cookiesNow = () => Boolean(settings.use_cookies) && (!settings.cookies_on_bot || botCookies);
 let resumeQueue: (() => void) | null = null; // existe enquanto a fila está pausada
 let pausedOn: core.Job | null = null; // item cujas falhas pausaram a fila
 
@@ -308,7 +313,7 @@ async function runJob(job: core.Job): Promise<void> {
   canceled = false;
   Object.assign(job, { status: 'downloading', progress: 0, nowTitle: '', nowArtist: '', idx: '', count: '' });
   // cookies: vale o que está nas Configurações agora, não o que estava quando o item entrou na fila
-  Object.assign(job.options, { use_cookies: settings.use_cookies, cookies_browser: settings.cookies_browser });
+  Object.assign(job.options, { use_cookies: cookiesNow(), cookies_browser: settings.cookies_browser });
   send('job', job);
   log(`Iniciando: ${job.url}`);
 
@@ -327,8 +332,10 @@ async function runJob(job: core.Job): Promise<void> {
   log('$ ' + cmd.map(core.shlexQuote).join(' '));
 
   let code = -1;
-  const failed: core.Failed[] = [];
-  const saved: Saved[] = [];
+  // numa retomada, o que já tinha baixado/falhado antes do bloqueio continua valendo
+  const failed: core.Failed[] = [...(job.prevFailed ?? [])];
+  const saved: Saved[] = [...(job.prevSaved ?? [])];
+  let botHit = false;
   const hinted = new Set<string>();
   let lastError = ''; // última linha ERROR do yt-dlp: vira o motivo mostrado na fila
   let cookieFailed: '' | 'dpapi' | 'lock' = ''; // dpapi = criptografia que o yt-dlp não abre; lock = navegador aberto
@@ -347,6 +354,11 @@ async function runJob(job: core.Job): Promise<void> {
       if (err && !failed.some((f) => f.id === err[1])) failed.push({ pos: 0, id: err[1], title: '', artist: '', reason: err[2] });
       if (line.startsWith('ERROR: ')) lastError = line.slice(7);
       if (core.COOKIE_ERR_RE.test(line)) cookieFailed = /DPAPI/.test(line) ? 'dpapi' : 'lock';
+      if (BOT_RE.test(line) && !job.options.use_cookies && settings.use_cookies && settings.cookies_on_bot && !botHit) {
+        botHit = true;
+        kill(currentId); // para já: as próximas faixas também falhariam; retoma com cookies
+        return;
+      }
       if (BOT_RE.test(line) && job.options.use_cookies && !hinted.has('bot+cookies')) {
         hinted.add('bot+cookies');
         setTimeout(() => log('[dica] Os cookies do navegador foram usados, mas o YouTube ainda pediu login. Entre na sua ' +
@@ -370,6 +382,21 @@ async function runJob(job: core.Job): Promise<void> {
     currentId = run.id;
     code = await run.done;
     currentId = 0;
+  }
+
+  // "só quando bloquear": liga os cookies até fechar o app e continua da faixa onde o YouTube bloqueou
+  if (botHit && !canceled) {
+    botCookies = true;
+    job.prevSaved = saved;
+    job.prevFailed = failed.filter((f) => !BOT_RE.test(f.reason));
+    const from = core.resumeFrom(saved.map((s) => s.idx));
+    if (job.options._is_playlist && from && !String(settings.playlist_items ?? '').trim()) job.options.playlist_items = from;
+    Object.assign(job, { status: 'queued', progress: 0 });
+    log(`[cookies] O YouTube bloqueou ("not a bot"). Cookies ativados até fechar o app; ` +
+      (from ? `continuando a partir da faixa ${parseInt(from)}.` : 'recomeçando este item.'));
+    send('bot_cookies');
+    send('job', job);
+    return;
   }
 
   // cookies ilegíveis derrubam todo item na hora: desliga a opção e baixa o mesmo item de novo, sem cookies
@@ -489,6 +516,7 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
 
 /** Se o link for uma playlist, cria uma subpasta com o nome dela dentro da pasta de destino. */
 async function resolvePlaylistFolder(job: core.Job): Promise<void> {
+  if (job.options._is_playlist) return; // item baixado de novo (retomada, ▶): a subpasta já existe
   const url = job.url.trim();
   const out = await ytdlpLines(
     ['--get-filename', '--no-warnings', '-o', '%(playlist_title)s', url, '--playlist-items', '1'], false, 20000);

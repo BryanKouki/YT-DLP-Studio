@@ -209,6 +209,7 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 .field > span { font-size: 12px; font-weight: 600; color: var(--muted); }
 .chk { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
 .chk.end { align-self: end; padding-bottom: 9px; }
+.chk.sub { margin-left: 24px; animation: slide-down 0.2s ease-out; }
 .muted { color: var(--muted); }
 .muted-ico { color: var(--muted); }
 .folder-card { padding-top: 7px; padding-bottom: 7px; }

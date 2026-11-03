@@ -29,6 +29,9 @@ export interface Job {
   count: string;
   // playlists: faixas que falharam e arquivos já na pasta, por posição na playlist
   failed?: Failed[];
+  // retomada depois de um bloqueio do YouTube: o que já tinha baixado/falhado antes
+  prevSaved?: { id: string; idx: string; file: string }[];
+  prevFailed?: Failed[];
   name?: string; // só para mostrar na fila: nome da playlist ou título da música
   placed?: { pos: number; file: string }[];
 }
@@ -121,6 +124,13 @@ export function m3uText(entries: { pos: number; file: string }[]): string {
 /** Desde 2025 o YouTube exige resolver um desafio em JavaScript; sem runtime, o yt-dlp perde
  *  formatos ("Requested format is not available", sobretudo com cookies). Deno fica em data/bin. */
 export const jsRuntimeArgs = (bin: string): string[] => ['--js-runtimes', `deno:${path.join(bin, 'deno.exe')}`];
+
+/** --playlist-items para continuar depois da última faixa concluída ("19:" = da 19 até o fim).
+ *  Nenhuma concluída = '' (recomeça a playlist inteira). */
+export function resumeFrom(doneIdx: string[]): string {
+  const last = Math.max(0, ...doneIdx.map(Number).filter((n) => n > 0));
+  return last ? `${last + 1}:` : '';
+}
 
 /** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {

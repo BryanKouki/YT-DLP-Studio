@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.7
+
+### Added
+- "Only use cookies when YouTube blocks" option, shown under "Use browser cookies". Downloads start without cookies, which is faster. At the first "Sign in to confirm you're not a bot" block, the app stops that download, turns cookies on until it is closed, and resumes the playlist from the track where it stopped (for example, 19 of 32). Tracks already downloaded and earlier failures are kept. If the very first track is blocked, the item starts again with cookies.
+
+### Fixed
+- Downloading a playlist again (after a cookie fallback, or with ▶ on a failed or canceled item) created a second folder inside the playlist folder. It now reuses the existing folder.
+- When browser cookies could not be read, the playlist name lookup failed silently and the tracks were saved straight into the main folder, without the playlist subfolder. Lookups now follow the same cookie rule as downloads.
+
 ## v1.3.6
 
 ### Fixed
