@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>YT-DLP Studio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ícones usados com <svg><use href="#i-..."/></svg> -->
+<svg width="0" height="0" class="sprite" aria-hidden="true">
+  <symbol id="i-audio" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/></symbol>
+  <symbol id="i-convert" viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></symbol>
+  <symbol id="i-queue" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+</svg>
+
+<aside class="side">
+  <div class="brand"><img src="icon.png" alt=""><span>YT-DLP Studio</span></div>
+  <nav>
+    <button data-tab="audio"><svg><use href="#i-audio"/></svg><span data-i18n="tab_audio"></span></button>
+    <button data-tab="video"><svg><use href="#i-video"/></svg><span data-i18n="tab_video"></span></button>
+    <button data-tab="convert"><svg><use href="#i-convert"/></svg><span data-i18n="tab_convert"></span></button>
+    <button data-tab="queue"><svg><use href="#i-queue"/></svg><span data-i18n="tab_queue"></span><b id="q-badge" class="badge" hidden></b></button>
+  </nav>
+  <!-- download em andamento, visível de qualquer aba -->
+  <button id="now" class="now" hidden>
+    <span class="now-label"></span>
+    <span class="bar"><i></i></span>
+  </button>
+  <div class="tools">
+    <button id="btn-settings" class="icon" data-i18n-title="settings"><svg><use href="#i-gear"/></svg></button>
+    <button id="btn-help" class="icon" data-i18n-title="help"><svg><use href="#i-help"/></svg></button>
+    <button id="btn-theme" class="icon"><svg><use href="#i-moon"/></svg></button>
+    <button id="btn-lang" class="icon lang"></button>
+  </div>
+</aside>
+
+<main>
+  <section id="tab-audio" class="tab"></section>
+  <section id="tab-video" class="tab"></section>
+
+  <section id="tab-convert" class="tab">
+    <div class="card">
+      <div class="field">
+        <span data-i18n="conv_file"></span>
+        <div class="row"><input id="c-file" class="grow"><button id="c-pick" data-i18n="browse"></button></div>
+      </div>
+    </div>
+    <div class="card grid">
+      <label class="field"><span data-i18n="format"></span>
+        <select id="c-fmt">
+          <option>MP3</option><option>M4A (AAC)</option><option>Opus</option><option>FLAC</option><option>WAV</option>
+          <option>MP4 (H.264)</option><option>MKV (H.265)</option><option>WEBM (VP9)</option>
+        </select></label>
+      <label class="field"><span data-i18n="conv_quality"></span>
+        <select id="c-quality">
+          <option value="0" data-i18n="q_high"></option>
+          <option value="1" data-i18n="q_medium" selected></option>
+          <option value="2" data-i18n="q_low"></option>
+        </select></label>
+      <label class="field"><span data-i18n="resolution"></span>
+        <select id="c-res">
+          <option>Original</option><option>1080p</option><option>720p</option><option>480p</option><option>360p</option>
+        </select></label>
+      <div class="field"><span data-i18n="conv_target"></span>
+        <div class="row"><input id="c-size" class="grow"><select id="c-unit"><option>MB</option><option>GB</option></select></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="c-start" class="primary big grow"><svg><use href="#i-convert"/></svg><span data-i18n="conv_start"></span></button>
+      <button id="c-open" class="big"><svg><use href="#i-folder"/></svg><span data-i18n="open_folder"></span></button>
+    </div>
+    <div class="card status-card">
+      <div class="row"><span id="c-status" class="grow"></span><button id="c-cancel" class="cancel small" data-i18n="cancel"></button></div>
+      <span id="c-bar" class="bar"><i></i></span>
+    </div>
+  </section>
+
+  <section id="tab-queue" class="tab">
+    <div class="card row wrap">
+      <span class="dep"><i id="dot-ytdlp" class="dot"></i><span id="dep-ytdlp"></span></span>
+      <span class="dep"><i id="dot-ffmpeg" class="dot"></i><span id="dep-ffmpeg"></span></span>
+      <span class="grow"></span>
+      <button id="q-deps" class="small" data-i18n="check_reinstall_deps"></button>
+      <button id="q-update" class="small" data-i18n="update_ytdlp"></button>
+      <button id="q-bin" class="small icon" data-i18n-title="open_folder"><svg><use href="#i-folder"/></svg></button>
+    </div>
+    <div class="row wrap">
+      <button id="q-start" class="primary"><svg><use href="#i-download"/></svg><span data-i18n="start_queue"></span></button>
+      <button id="q-cancel" class="cancel" data-i18n="cancel_current"></button>
+      <span class="grow"></span>
+      <button id="q-clear-done" class="ghost small" data-i18n="clear_done"></button>
+      <button id="q-clear-all" class="ghost small" data-i18n="clear_all"></button>
+      <button id="q-open" class="ghost small"><svg><use href="#i-folder"/></svg><span data-i18n="open_folder"></span></button>
+    </div>
+    <div id="q-list" class="list"></div>
+    <div class="log-head row"><b class="grow" data-i18n="log"></b><button id="q-copy" class="ghost small"><svg><use href="#i-copy"/></svg><span data-i18n="copy"></span></button></div>
+    <pre id="q-log"></pre>
+  </section>
+</main>
+
+<div id="toasts" aria-live="polite"></div>
+
+<!-- parte comum das abas Áudio e Vídeo -->
+<template id="tpl-download">
+  <div class="card paste">
+    <textarea class="links" spellcheck="false" data-i18n-ph="link_placeholder"></textarea>
+    <div class="detect" hidden><span class="spinner"></span><b class="detect-kind"></b><span class="detect-name"></span></div>
+  </div>
+  <div class="card grid opts"></div>
+  <details class="card trim">
+    <summary><span data-i18n="trim_section"></span><span class="trim-sum muted small"></span></summary>
+    <div class="row">
+      <input class="time t-start" value="00:00:00">
+      <div class="range grow">
+        <div class="fill"></div>
+        <input type="range" class="r-start" min="0" max="7200" value="0">
+        <input type="range" class="r-end" min="0" max="7200" value="7200">
+      </div>
+      <input class="time t-end" value="00:00:00">
+    </div>
+  </details>
+  <div class="card row wrap folder-card">
+    <svg class="muted-ico"><use href="#i-folder"/></svg>
+    <span class="folder muted small grow"></span>
+    <button class="ghost small change-folder" data-i18n="change_folder"></button>
+    <button class="ghost small open-folder" data-i18n="open_folder"></button>
+  </div>
+  <div class="row wrap">
+    <label class="chk"><input type="checkbox" data-opt="save_thumbnail"><span data-i18n="save_thumbnail"></span></label>
+    <label class="chk"><input type="checkbox" data-opt="save_track_covers"><span data-i18n="save_track_covers"></span></label>
+    <span class="grow"></span>
+    <button class="ghost small check-pl"><svg><use href="#i-list"/></svg><span data-i18n="check_playlist"></span></button>
+  </div>
+  <div class="actions">
+    <button class="primary big grow download"><svg><use href="#i-download"/></svg><span data-i18n="download"></span></button>
+    <button class="big queue-add"><svg><use href="#i-plus"/></svg><span data-i18n="add_to_queue"></span></button>
+  </div>
+  <div class="card status-card">
+    <div class="row"><span class="status grow"></span><button class="cancel small cancel-current" data-i18n="cancel_current"></button></div>
+    <span class="bar"><i></i></span>
+  </div>
+</template>
+
+<template id="tpl-audio-opts">
+  <label class="field"><span data-i18n="format"></span>
+    <select data-opt="format">
+      <option value="best" data-i18n="best_available"></option>
+      <option value="mp3" selected>MP3</option><option value="m4a">M4A</option><option value="aac">AAC</option>
+      <option value="opus">Opus</option><option value="vorbis">Vorbis</option><option value="flac">FLAC</option>
+      <option value="alac">ALAC</option><option value="wav">WAV</option>
+    </select></label>
+  <label class="field single-only"><span data-i18n="title"></span><input data-opt="title"></label>
+  <label class="field"><span data-i18n="quality"></span>
+    <select data-opt="quality">
+      <option value="320K">320 kbps</option><option value="256K">256 kbps</option><option value="224K">224 kbps</option>
+      <option value="192K">192 kbps</option><option value="160K">160 kbps</option><option value="128K">128 kbps</option>
+      <option value="96K">96 kbps</option><option value="64K">64 kbps</option><option value="32K">32 kbps</option>
+    </select></label>
+  <label class="field single-only"><span data-i18n="artist"></span><input data-opt="artist"></label>
+</template>
+
+<template id="tpl-video-opts">
+  <label class="field"><span data-i18n="resolution"></span>
+    <select data-opt="resolution">
+      <option value="0" data-i18n="best_available"></option>
+      <option value="4320">4320p (8K)</option><option value="2160">2160p (4K)</option><option value="1440">1440p (2K)</option>
+      <option value="1080" selected>1080p</option><option value="720">720p</option><option value="480">480p</option>
+      <option value="360">360p</option><option value="240">240p</option><option value="144">144p</option>
+    </select></label>
+  <label class="field"><span data-i18n="fps"></span>
+    <select data-opt="fps">
+      <option value="0" data-i18n="best_available"></option>
+      <option value="60">60 fps</option><option value="30">30 fps</option><option value="24">24 fps</option>
+    </select></label>
+  <label class="field"><span data-i18n="video_codec"></span>
+    <select data-opt="vcodec">
+      <option value="" data-i18n="best_any"></option>
+      <option value="avc1" selected>H.264 (AVC)</option><option value="hev">H.265 (HEVC)</option>
+      <option value="vp9">VP9</option><option value="av01">AV1</option><option value="vp8">VP8</option>
+    </select></label>
+  <label class="field"><span data-i18n="audio_codec"></span>
+    <select data-opt="acodec">
+      <option value="" data-i18n="best_any"></option>
+      <option value="mp4a" selected>AAC</option><option value="opus">Opus</option>
+      <option value="mp3">MP3</option><option value="flac">FLAC</option>
+    </select></label>
+  <label class="field"><span data-i18n="container"></span>
+    <select data-opt="container">
+      <option value="" data-i18n="automatic"></option>
+      <option value="mp4" data-i18n="force_mp4"></option>
+      <option value="mkv" data-i18n="force_mkv"></option>
+    </select></label>
+  <label class="chk end"><input type="checkbox" data-opt="subtitles"><span data-i18n="subtitles"></span></label>
+</template>
+
+<dialog id="dlg-settings">
+  <div class="dlg-body">
+    <h2 data-i18n="settings"></h2>
+    <div id="set-form">
+      <h3 data-i18n="folders"></h3>
+      <div class="field"><span data-i18n="music_folder"></span>
+        <div class="row"><input data-set="audio_folder" class="grow"><button class="browse" data-i18n="browse"></button></div></div>
+      <div class="field"><span data-i18n="video_folder"></span>
+        <div class="row"><input data-set="video_folder" class="grow"><button class="browse" data-i18n="browse"></button></div></div>
+      <h3 data-i18n="queue_section"></h3>
+      <label class="field"><span data-i18n="pause_failed"></span>
+        <select data-set="pause_failed">
+          <option value="each" data-i18n="pause_each"></option>
+          <option value="end" data-i18n="pause_end"></option>
+          <option value="off" data-i18n="pause_off"></option>
+        </select></label>
+      <h3 data-i18n="cookies_section"></h3>
+      <label class="chk"><input type="checkbox" data-set="use_cookies"><span data-i18n="use_cookies"></span></label>
+      <label class="field"><span data-i18n="cookies_browser"></span>
+        <select data-set="cookies_browser"><option value="edge">Microsoft Edge</option><option value="chrome">Google Chrome</option></select></label>
+    </div>
+  </div>
+  <form method="dialog" class="dlg-foot">
+    <button data-i18n="close"></button>
+    <button id="set-save" type="button" class="primary" data-i18n="save"></button>
+  </form>
+</dialog>
+
+<dialog id="dlg-help">
+  <div class="dlg-body">
+    <h2 data-i18n="help_title"></h2>
+    <div id="help-body"></div>
+  </div>
+  <form method="dialog" class="dlg-foot"><button data-i18n="close"></button></form>
+</dialog>
+
+<dialog id="dlg-failed">
+  <div class="dlg-body">
+    <div class="row">
+      <h2 class="grow" data-i18n="failed_title"></h2>
+      <button id="failed-prev" type="button" class="icon" data-i18n-title="failed_prev"><svg><use href="#i-left"/></svg></button>
+      <span id="failed-nav" class="muted small"></span>
+      <button id="failed-next" type="button" class="icon" data-i18n-title="failed_next"><svg><use href="#i-right"/></svg></button>
+    </div>
+    <b id="failed-pl"></b>
+    <p class="muted small" data-i18n="failed_hint"></p>
+    <div id="failed-list"></div>
+  </div>
+  <form method="dialog" class="dlg-foot">
+    <button data-i18n="close"></button>
+    <button id="failed-skip" type="button" data-i18n="failed_continue"></button>
+    <button id="failed-go" type="button" class="primary" data-i18n="failed_download"></button>
+  </form>
+</dialog>
+
+<dialog id="dlg-confirm">
+  <div class="dlg-body"><svg class="confirm-ico"><use href="#i-warn"/></svg><p></p></div>
+  <form method="dialog" class="dlg-foot">
+    <button value="no" data-i18n="no"></button>
+    <button value="yes" class="primary" data-i18n="yes"></button>
+  </form>
+</dialog>
+
+<script type="module" src="js/renderer.js"></script>
+</body>
+</html>

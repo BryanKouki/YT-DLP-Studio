@@ -129,7 +129,9 @@ def build_format_selector(opts: dict) -> str:
 def build_command(job: Job, output_template: str) -> list:
     ytdlp = str(dependencies.ytdlp_path())
     ffdir = str(dependencies.bin_dir())
-    args = [ytdlp, job.url.strip(), "--newline", "--no-color", "--no-warnings", "--ignore-errors",
+    # --progress: o --print implica --quiet, e sem isto nenhuma linha
+    # "[download] N%" sai (a barra de progresso ficava parada até o fim)
+    args = [ytdlp, job.url.strip(), "--newline", "--progress", "--no-color", "--no-warnings", "--ignore-errors",
             "--ffmpeg-location", ffdir,
             "--print", "before_dl:BDL@@@%(title)s@@@%(artist|)s@@@"
                        "%(playlist_index|)s@@@%(playlist_count|)s",
@@ -296,7 +298,7 @@ def promote_folder_cover(folder: str, square: bool = True):
         if not candidates:
             return
         # capa da própria playlist primeiro; senão a imagem mais antiga (1ª faixa)
-        # ponytail: fallback por mtime, playlists sem capa própria pegam a 1ª faixa
+        # fallback por mtime, playlists sem capa própria pegam a 1ª faixa
         candidates.sort(key=lambda p: (p.stem != "playlist_thumb", p.stat().st_mtime))
         source = candidates[0]
         crop = ["-vf", "crop='if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'"] if square else []
@@ -526,7 +528,8 @@ class QueueManager:
             if m:
                 job.progress = float(m.group(1))
                 self._emit("job_update", job=job)
-            self._emit("log", line=line)
+            else:  # linha de porcentagem só move a barra; não enche o Log
+                self._emit("log", line=line)
             if self._stop_flag.is_set():
                 try:
                     self._proc.terminate()

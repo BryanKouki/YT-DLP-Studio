@@ -177,6 +177,49 @@ story.append(body(
     "com a posição e as músicas vizinhas — ex.: <i>12 - Nome — depois de \"A\" e "
     "antes de \"B\"</i> — e o motivo. Playlists grandes levam alguns minutos."
 ))
+story.append(h3("Faixas com erro e músicas substitutas (versão .exe Tauri)"))
+story.append(body(
+    "Quando faixas de uma playlist falham (vídeo apagado, privado ou bloqueio do "
+    "YouTube), a linha da playlist na aba Fila e Log ganha o botão <b>Faixas com "
+    "erro (N)</b>. Em Configurações → Fila você escolhe quando a fila pausa: "
+    "depois de cada playlist, no fim de tudo (as setas da janela passam de uma "
+    "playlist para a outra) ou nunca. A janela lista as faixas com a posição, o "
+    "nome (clique para copiar <i>Música - Artista</i>; vídeos apagados ou privados "
+    "não têm nome) e o motivo. Clique no começo do link "
+    "(<i>https://www.youtube.com/watch?v=</i>) para copiar o link inteiro, ou no "
+    "ID ao lado para copiar só o ID e pesquisar. Cole na caixa o link de uma "
+    "música substituta e clique em <b>Baixar substitutas e continuar</b>: ela é "
+    "baixada na mesma pasta e as datas do arquivo são ajustadas para ela ficar "
+    "exatamente entre as faixas vizinhas quando a pasta é ordenada por data. "
+    "<b>Continuar sem substituir</b> só retoma a fila e passa para a próxima."
+))
+story.append(h3("Colar vários links seguidos (versão .exe Tauri)"))
+story.append(body(
+    "Ao colar um link, aparece logo abaixo o que foi encontrado: <b>Playlist: "
+    "nome</b> (Título e Artista somem, porque não se aplicam) ou <b>Música: "
+    "título</b>. Download e Adicionar à fila não trocam de tela: um aviso "
+    "confirma e a caixa fica limpa para o próximo link, sem herdar nome nem "
+    "artista do anterior. Na fila, cada playlist aparece com o próprio nome. "
+    "Ctrl+Enter na caixa de links começa a baixar. A pasta de destino só recebe "
+    "os arquivos prontos; os temporários ficam em <i>data\\tmp</i>."
+))
+story.append(h3("Guardar capa de cada música (versão .exe Tauri)"))
+story.append(body(
+    "Numa playlist, <b>Guardar thumbnail</b> guarda só a capa da playlist "
+    "(playlistcover.jpg). Para ter também um .jpg ao lado de cada faixa, marque "
+    "<b>Guardar capa de cada música</b>: quadrado em música e no tamanho original "
+    "em vídeo."
+))
+story.append(h3("Cookies contra o bloqueio \"não é um robô\" (versão .exe Tauri)"))
+story.append(body(
+    "Depois de muitos downloads seguidos o YouTube pode responder <i>Sign in to "
+    "confirm you're not a bot</i>. Em Configurações → Cookies, <b>Usar cookies do "
+    "navegador</b> faz o yt-dlp usar a sua sessão do Edge (padrão) ou do Chrome, "
+    "que pede duas confirmações. O Chrome precisa estar fechado, e versões "
+    "recentes do Edge e do Chrome protegem os cookies de um jeito que o yt-dlp "
+    "pode não conseguir ler; nesse caso o Log explica. Aumentar <b>Pausa entre "
+    "downloads</b> também ajuda."
+))
 
 # ------------------------------------------------------- 5. ABA VÍDEO --
 story.append(h1("5. Aba Vídeo"))

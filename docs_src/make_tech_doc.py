@@ -45,6 +45,7 @@ for it in [
     "11. Guia prático: como adicionar/alterar coisas comuns",
     "12. Build e empacotamento (gerando o .exe)",
     "13. Solução de problemas para desenvolvedores",
+    "14. Versão Tauri + TypeScript (pasta tauri/)",
 ]:
     story.append(body(it))
 story.append(PageBreak())
@@ -690,6 +691,83 @@ story.append(simple_table([
      "geralmente é um import faltando em --hidden-import ou um asset não "
      "incluso em --add-data."],
 ], col_widths=[5.5 * cm, 10.5 * cm]))
+
+# ------------------------------------------------------------ 14. TAURI --
+story.append(h1("14. Versão Tauri + TypeScript (pasta tauri/)"))
+story.append(body(
+    "A pasta <tt>tauri/</tt> contém um porte completo do app, com as mesmas "
+    "quatro abas e as mesmas regras de negócio. A interface é HTML/CSS/"
+    "TypeScript puros (sem framework) rodando no WebView2 do próprio Windows, "
+    "e uma casca pequena em Rust cuida do que a página não pode fazer. O "
+    "resultado é um único .exe de cerca de 4 MB, com yt-dlp, FFmpeg e "
+    "configurações numa pasta <tt>data/</tt> ao lado. É independente da "
+    "versão Python."
+))
+story.append(simple_table([
+    ["Arquivo", "Equivalente Python / responsabilidade"],
+    ["src/core.ts", "downloader.build_command + converter_tab.build_ffmpeg_cmd + "
+                    "check_playlist. Funções puras (testadas no selfcheck)."],
+    ["src/backend.ts", "settings_store.py, dependencies.py, QueueManager e o worker do "
+                       "conversor. Expõe o objeto api para a interface."],
+    ["src/renderer.ts", "tabs.py, queue_tab.py, settings_dialog.py e help_dialog.py."],
+    ["src/i18n.ts", "GERADO por tools/gen_i18n.py a partir de src/i18n.py e "
+                    "src/help_dialog.py. Não editar à mão."],
+    ["ui/index.html, ui/style.css", "Estrutura da tela e a paleta (variáveis CSS, tema claro/escuro)."],
+    ["src-tauri/src/main.rs", "Casca nativa, sem lógica do app: iniciar/matar processos, "
+                              "download HTTP, arquivos, diálogos e a janela."],
+], col_widths=[4.5 * cm, 11.5 * cm]))
+story.append(sp())
+story.append(code(
+    "cd tauri\n"
+    "npm install        # uma vez\n"
+    "npm start          # compila e abre o app\n"
+    "npm run check      # selfcheck offline, tem que imprimir \"selfcheck OK\"\n"
+    "npm run dist       # gera release\\YT-DLP Studio.exe"
+))
+story.append(body(
+    "Compilar exige Node.js, Rust e o Visual Studio C++ Build Tools (a "
+    "primeira compilação leva uns 15 minutos). Rodar o .exe não exige nada "
+    "além do WebView2, que já vem no Windows 10/11 atualizado."
+))
+story.append(body("Diferenças em relação à versão Python:"))
+story.append(bullets([
+    "No lugar de <tt>queue.Queue</tt> + <tt>self.after()</tt>: as threads do "
+    "Rust só emitem eventos (<tt>proc</tt>, <tt>exit</tt>, <tt>dl</tt>) e a "
+    "interface fala com o <tt>backend.ts</tt> por <tt>api.call(nome, ...)</tt> "
+    "e <tt>api.on()</tt>.",
+    "O yt-dlp é chamado com <tt>--encoding utf-8</tt> (acentos corretos pelo "
+    "pipe) e <tt>--progress</tt> (o <tt>--print</tt> implica <tt>--quiet</tt> e "
+    "esconderia as linhas de porcentagem).",
+    "Cancelar usa <tt>taskkill /T /F</tt>, que encerra também o ffmpeg filho.",
+    "As seleções das abas ficam em <tt>settings.json → ui</tt> por valor "
+    "técnico (ex.: <tt>audio.format = mp3</tt>), não pelo texto traduzido.",
+    "O zip do FFmpeg é extraído com o <tt>tar.exe</tt> do Windows.",
+    "Faixas com erro (só nesta versão): o <tt>--print after_move</tt> traz também "
+    "<tt>%(id)s</tt> e <tt>%(filepath)s</tt>, e as linhas <tt>ERROR: [extrator] ID: "
+    "motivo</tt> são coletadas. No fim da playlist, <tt>locateFailed()</tt> usa "
+    "<tt>--flat-playlist</tt> para achar a posição de cada faixa; "
+    "<tt>replaceFailed()</tt> baixa a substituta com <tt>--no-playlist</tt> na "
+    "mesma pasta e grava as datas de criação/modificação com "
+    "<tt>core.between()</tt> (meio entre as vizinhas) pelo comando Rust "
+    "<tt>set_times</tt>. <tt>pause_failed</tt> vale <tt>each</tt> (a fila espera "
+    "em <tt>resumeQueue</tt> depois da playlist), <tt>end</tt> (evento "
+    "<tt>review</tt> no fim da fila) ou <tt>off</tt>.",
+    "Pastas: o yt-dlp recebe <tt>-P pasta_destino</tt> e <tt>-P temp:data\\tmp</tt> "
+    "com <tt>-o</tt> relativo, então .part, .webm e a capa a embutir nunca aparecem "
+    "na pasta de destino. Numa playlist, a capa da playlist vem de um comando à "
+    "parte (<tt>core.playlistCoverArgs()</tt>: <tt>--flat-playlist --playlist-items "
+    "0 --write-thumbnail</tt>), sem tocar nas faixas; capas por faixa só com "
+    "<tt>save_track_covers</tt> (e <tt>-o \"pl_thumbnail:\"</tt> vazio, para não "
+    "gravar a capa da playlist com o nome dela).",
+    "Nome na fila: a busca automática usa <tt>--flat-playlist</tt> e devolve "
+    "<tt>%(playlist_title)s</tt>; itens adicionados sem nome são nomeados em "
+    "segundo plano, um por vez (<tt>nameLater()</tt>). <tt>job.name</tt> só é "
+    "exibido; nunca entra no nome do arquivo.",
+    "Cookies: <tt>core.cookieArgs()</tt> adiciona <tt>--cookies-from-browser "
+    "edge|chrome</tt> em todas as chamadas do yt-dlp quando <tt>use_cookies</tt> "
+    "está ligado. Mensagens conhecidas (DPAPI, banco de cookies travado, "
+    "<i>not a bot</i>) ganham uma explicação no Log (<tt>HINTS</tt>).",
+]))
 
 doc = SimpleDocTemplate(
     OUT, pagesize=A4,

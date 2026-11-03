@@ -20,6 +20,9 @@
 - Embedded metadata and cover art, with the cover always center-cropped to **1:1**
 - Playlists go into their own folder named after the playlist, with the playlist cover saved as `playlistcover.jpg`
 - **Playlist availability check** lists every unavailable track with its position and neighbours, without downloading anything
+- **Failed tracks and replacements** (Tauri version): when playlist tracks fail, they are listed with a copyable "Song - Artist", link or ID. Paste a replacement link and it is downloaded into the same folder, with file dates set so it sits exactly between its neighbours. The queue can pause after each playlist, at the end (review one playlist at a time) or not at all
+- Optional cover file for every track of a playlist, separate from the playlist cover (Tauri version)
+- **Browser cookies** (Tauri version) against YouTube's "confirm you're not a bot" block: Edge by default, Chrome after a double confirmation
 
 **Video**
 - Resolution up to 4320p (8K), FPS cap, preferred video/audio codec (H.264, H.265, VP9, AV1, VP8 / AAC, Opus, MP3, FLAC)
@@ -66,6 +69,20 @@ python src/selfcheck.py
 ```
 
 This runs offline tests for the converter command builder, the playlist cover template and the playlist availability parser.
+
+### Tauri + TypeScript version (experimental)
+
+The `tauri/` folder holds a full port of the app: same tabs and features, UI in plain HTML/CSS/TypeScript, and a small Rust shell. It builds to a **single 4 MB `.exe`** that uses the WebView2 runtime already present on Windows 10/11, and keeps yt-dlp, FFmpeg and settings in a `data/` folder next to it.
+
+Building needs [Node.js](https://nodejs.org/) 20+, [Rust](https://rustup.rs/) and the Visual Studio C++ Build Tools. Running the `.exe` needs none of them.
+
+```bash
+cd tauri
+npm install
+npm start        # run from source
+npm run check    # offline self-check
+npm run dist     # build release\YT-DLP Studio.exe
+```
 
 ## Default folders
 
