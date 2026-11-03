@@ -98,6 +98,17 @@ export function playlistCoverArgs(url: string, folder: string): string[] {
 /** Canal "Fulano - Topic" do YouTube Music = artista "Fulano"; em vídeo comum é o canal. */
 export const artistFromUploader = (uploader: string) => uploader.replace(/ - Topic$/, '').trim();
 
+/** Cookies ilegíveis (navegador aberto trava o arquivo; DPAPI = criptografia nova). O yt-dlp
+ *  escreve "Chrome" nessa mensagem para qualquer navegador Chromium, inclusive o Edge. */
+export const COOKIE_ERR_RE = /Failed to decrypt with DPAPI|Could not copy .*cookie database|could not find .*cookies database/;
+
+/** Links colados na caixa. Se for o Log copiado, pega só os links das linhas "Iniciando: <link>". */
+export function linksFrom(text: string): string[] {
+  const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
+  const started = lines.map((line) => /Iniciando: (https?:\/\/\S+)/.exec(line)?.[1]).filter((url): url is string => !!url);
+  return started.length ? [...new Set(started)] : lines;
+}
+
 /** Cookies do navegador escolhido (Edge por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {
   return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'edge'] : [];

@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.2
+
+### Fixed
+- When browser cookies could not be read, every item in the queue failed one after another. Now the option is turned off automatically and the same item is downloaded again without cookies, so nothing in the queue is lost.
+
+### Added
+- If the chosen browser is open (Edge keeps running in the background even with no windows), the app asks before closing it to read the cookies.
+- Pasting a copied Log into the link box extracts the links from its "Iniciando:" lines, to queue them again.
+
+### Changed
+- The Log explains which cookie error happened: the browser was open, or its cookies are encrypted in a way yt-dlp cannot open yet (closing the browser does not help in that case). yt-dlp says "Chrome" in this message even for Edge.
+- The cookies option now says the browser must be closed, including in the background.
+
 ## v1.3.1
 
 ### Added

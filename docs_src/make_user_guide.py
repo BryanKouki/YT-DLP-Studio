@@ -218,9 +218,11 @@ story.append(body(
     "Depois de muitos downloads seguidos o YouTube pode responder <i>Sign in to "
     "confirm you're not a bot</i>. Em Configurações → Cookies, <b>Usar cookies do "
     "navegador</b> faz o yt-dlp usar a sua sessão do Edge (padrão) ou do Chrome, "
-    "que pede duas confirmações. O Chrome precisa estar fechado, e versões "
+    "que pede duas confirmações. O navegador precisa estar fechado, inclusive em "
+    "segundo plano; se estiver aberto, o app pergunta antes de fechá-lo. Versões "
     "recentes do Edge e do Chrome protegem os cookies de um jeito que o yt-dlp "
-    "pode não conseguir ler; nesse caso o Log explica. Aumentar <b>Pausa entre "
+    "pode não conseguir ler: nesse caso a opção é desativada e o item é baixado "
+    "de novo sem cookies, sem perder nada da fila. Aumentar <b>Pausa entre "
     "downloads</b> também ajuda."
 ))
 

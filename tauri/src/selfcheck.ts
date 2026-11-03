@@ -59,6 +59,15 @@ async function run(): Promise<void> {
   assert(cr > 1000 && cr < 3000 && mo > 5000 && mo < 9000, `${cr} ${mo}`);
   assert.equal(core.between([1000, 5000], null, 0)[0], 2000);
   assert.equal(core.between(null, [3000, 9000], 0)[1], 8000);
+  assert(core.COOKIE_ERR_RE.test('ERROR: Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271'));
+  assert(core.COOKIE_ERR_RE.test('ERROR: Failed to decrypt with DPAPI. See  https://github.com/yt-dlp/yt-dlp/issues/10927'));
+  // Log colado na caixa de links: só os links das linhas "Iniciando:", sem repetir
+  const pastedLog = '[11:17:31] $ \'yt-dlp.exe\' \'https://music.youtube.com/playlist?list=A\'\n' +
+    '[11:17:35] ERROR: Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271\n' +
+    '[11:17:36] Iniciando: https://music.youtube.com/playlist?list=A\n[11:17:43] Iniciando: https://music.youtube.com/playlist?list=B\n' +
+    '[11:18:00] Iniciando: https://music.youtube.com/playlist?list=A';
+  assert.equal(core.linksFrom(pastedLog).join(' '), 'https://music.youtube.com/playlist?list=A https://music.youtube.com/playlist?list=B');
+  assert.equal(core.linksFrom(' u1 \n\n u2 ').join(' '), 'u1 u2');
   assert.equal(core.PL_ERR_RE.exec("ERROR: [youtube] nYuJU4AXxk4: Sign in to confirm you're not a bot")?.[1], 'nYuJU4AXxk4');
 
   // 3. capas: áudio sempre recorta 1:1; vídeo nunca; música avulsa não deixa arquivo de capa

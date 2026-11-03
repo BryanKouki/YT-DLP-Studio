@@ -132,11 +132,35 @@ function runLines(exe: string, args: string[], onLine: (line: string) => void, w
 }
 
 /** yt-dlp com saída em UTF-8 (senão títulos com acento chegam quebrados pelo pipe do Windows). */
-async function ytdlpLines(args: string[], withStderr: boolean, timeout = 0): Promise<string[]> {
+async function ytdlpLines(args: string[], withStderr: boolean, timeout = 0, cookies = true): Promise<string[]> {
   const lines: string[] = [];
-  await runLines(YTDLP, ['--encoding', 'utf-8', ...core.cookieArgs(settings), ...args], (l) => lines.push(l),
-    withStderr, timeout).done;
+  await runLines(YTDLP, ['--encoding', 'utf-8', ...(cookies ? core.cookieArgs(settings) : []), ...args],
+    (l) => lines.push(l), withStderr, timeout).done;
   return lines;
+}
+
+// ---- navegador aberto trava o arquivo de cookies --------------------------------
+
+const BROWSERS: Record<string, { exe: string; name: string }> = {
+  edge: { exe: 'msedge.exe', name: 'Microsoft Edge' },
+  chrome: { exe: 'chrome.exe', name: 'Google Chrome' },
+};
+let answerClose: ((ok: boolean) => void) | null = null;
+
+/** Com cookies ligados e o navegador aberto (o Edge fica em segundo plano mesmo sem janelas),
+ *  pergunta na tela e, se o usuário aceitar, fecha o navegador antes de baixar. */
+async function closeBrowserForCookies(job: core.Job): Promise<void> {
+  const browser = BROWSERS[job.options.cookies_browser] ?? BROWSERS.edge;
+  const tasks: string[] = [];
+  await runLines('tasklist', ['/FI', `IMAGENAME eq ${browser.exe}`, '/NH'], (l) => tasks.push(l), true, 15000).done;
+  if (!tasks.some((line) => line.toLowerCase().startsWith(browser.exe))) return;
+  send('confirm_close', browser.name);
+  const ok = await new Promise<boolean>((resolve) => (answerClose = resolve));
+  answerClose = null;
+  if (!ok) return log(`[cookies] ${browser.name} continua aberto; os cookies provavelmente não serão lidos.`);
+  await runLines('taskkill', ['/F', '/T', '/IM', browser.exe], () => {}, true, 15000).done;
+  await new Promise((resolve) => setTimeout(resolve, 1500)); // o Windows solta o arquivo de cookies logo depois
+  log(`[cookies] ${browser.name} fechado para ler os cookies.`);
 }
 
 // ---- dependências (yt-dlp + FFmpeg em data/bin; nada vem embutido no .exe) -----------
@@ -240,12 +264,9 @@ const remaining = (job: core.Job) => job.failed?.filter((f) => f.state !== 'done
 
 /** Mensagens do yt-dlp que têm uma saída conhecida: explica no Log uma vez por download. */
 const HINTS: [RegExp, string][] = [
-  [/Failed to decrypt with DPAPI|Could not copy .*cookie database|could not find .*cookies database/,
-    '[cookies] Não foi possível ler os cookies do navegador. O Chrome deve estar fechado, e as versões recentes do ' +
-    'Edge e do Chrome criptografam os cookies de uma forma que o yt-dlp pode não conseguir abrir. Desmarque "Usar cookies do navegador" ' +
-    'em Configurações para voltar a baixar sem eles.'],
   [/Sign in to confirm you.re not a bot/,
-    '[dica] O YouTube bloqueou temporariamente por excesso de downloads seguidos. Ative "Usar cookies do navegador" ou aumente ' +
+    '[dica] O YouTube bloqueou temporariamente por excesso de downloads seguidos. Ative "Usar cookies do navegador" ' +
+    '(com o navegador fechado) ou aumente ' +
     '"Pausa entre downloads (s)" em Configurações, ou aguarde alguns minutos antes de continuar.'],
 ];
 
@@ -270,6 +291,7 @@ async function runJob(job: core.Job): Promise<void> {
   }
 
   // tem que rodar antes de montar o nome do arquivo e o comando (muda pasta/título do job)
+  if (job.options.use_cookies) await closeBrowserForCookies(job);
   await resolvePlaylistFolder(job);
   await invoke('mkdir', { path: job.options.folder });
   const cmd = core.buildCommand(job, core.outputTemplate(job), YTDLP, BIN, TEMP);
@@ -279,6 +301,7 @@ async function runJob(job: core.Job): Promise<void> {
   const failed: core.Failed[] = [];
   const saved: Saved[] = [];
   const hinted = new Set<string>();
+  let cookieFailed: '' | 'dpapi' | 'lock' = ''; // dpapi = criptografia que o yt-dlp não abre; lock = navegador aberto
   if (!canceled) {
     const run = runLines(cmd[0], cmd.slice(1), (line) => {
       const now = core.NOW_PLAYING_RE.exec(line);
@@ -292,6 +315,7 @@ async function runJob(job: core.Job): Promise<void> {
       }
       const err = core.PL_ERR_RE.exec(line);
       if (err && !failed.some((f) => f.id === err[1])) failed.push({ pos: 0, id: err[1], title: '', artist: '', reason: err[2] });
+      if (core.COOKIE_ERR_RE.test(line)) cookieFailed = /DPAPI/.test(line) ? 'dpapi' : 'lock';
       for (const [re, hint] of HINTS) {
         if (re.test(line) && !hinted.has(hint)) {
           hinted.add(hint);
@@ -311,6 +335,22 @@ async function runJob(job: core.Job): Promise<void> {
     currentId = 0;
   }
 
+  // cookies ilegíveis derrubam todo item na hora: desliga a opção e baixa o mesmo item de novo, sem cookies
+  if (cookieFailed && code !== 0 && !canceled && job.options.use_cookies) {
+    saveSettings({ use_cookies: false });
+    for (const j of jobs) if (j.status === 'queued' || j === job) j.options.use_cookies = false;
+    Object.assign(job, { status: 'queued', progress: 0 });
+    log(cookieFailed === 'dpapi'
+      ? '[cookies] O navegador criptografa os cookies de um jeito que o yt-dlp ainda não consegue abrir ' +
+        '("Failed to decrypt with DPAPI", problema conhecido do yt-dlp); fechar o navegador não resolve. ' +
+        'A opção foi desativada e o item será baixado novamente sem cookies.'
+      : '[cookies] Não foi possível ler os cookies: o navegador estava aberto (o Edge fica em segundo plano mesmo ' +
+        'sem janelas). O yt-dlp escreve "Chrome" nessa mensagem mesmo quando é o Edge. A opção foi desativada e o ' +
+        'item será baixado novamente sem cookies.');
+    send('cookies_off');
+    send('job', job);
+    return;
+  }
   if (job.options._is_playlist && failed.length && !canceled) await locateFailed(job, failed, saved);
   // playlist com algumas faixas indisponíveis: o resto baixou, então conta como concluída
   const partial = code !== 0 && Boolean(job.failed?.length) && saved.length > 0;
@@ -452,8 +492,9 @@ async function cleanupStrayThumbnails(folder: string): Promise<void> {
  *  para uploader/canal (o nome do arquivo de áudio é só o título). */
 async function probe(url: string) {
   if (!(await invoke('is_file', { path: YTDLP }))) return { title: '', artist: '', duration: 0, playlist: '' };
+  // sem cookies: a busca é só para mostrar o nome, e não pode falhar com o navegador aberto
   const out = await ytdlpLines(['--flat-playlist', '--print', '%(title|)s@@@%(artist|)s@@@%(duration|0)s@@@%(playlist_title|)s',
-    '--no-warnings', '--skip-download', '--playlist-items', '1', url.trim()], false, 20000);
+    '--no-warnings', '--skip-download', '--playlist-items', '1', url.trim()], false, 20000, false);
   const [title = '', artist = '', dur = '0', playlist = ''] = (out.at(-1) ?? '').split('@@@');
   return { title: title.trim(), artist: artist.trim(), duration: Math.floor(parseFloat(dur)) || 0, playlist: playlist.trim() };
 }
@@ -580,6 +621,7 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
     return 'next';
   },
   resumeQueue: () => resumeQueue?.(),
+  answerClose: (ok: boolean) => answerClose?.(ok),
   replaceFailed: async (jobId: string, links: Record<string, string>) => {
     await replaceFailed(jobId, links);
     resumeQueue?.();

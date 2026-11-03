@@ -1,5 +1,6 @@
 /** Interface: abas, diálogos e i18n. Só conversa com o resto do app por `api` (backend.ts). */
 import { api } from './backend.js';
+import { linksFrom } from './core.js';
 import { HELP, STRINGS } from './i18n.js';
 
 const cfg: Record<string, any> = structuredClone(api.init.settings);
@@ -107,7 +108,7 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
   // o que a busca automática encontrou para o link atual
   let found = { playlist: '', title: '', autoTitle: '', autoArtist: '' };
 
-  const urls = () => links.value.split('\n').map((line) => line.trim()).filter(Boolean);
+  const urls = () => linksFrom(links.value);
   const showFolder = () => {
     $('.folder', root).textContent = cfg[folderKey];
   };
@@ -669,6 +670,11 @@ api.on((kind, data) => {
     toast(t('queue_paused', { n: remaining(data) }), 'warn', { label: t('view_failed'), run: () => openFailed(data.id) });
   } else if (kind === 'review') {
     toast(t('queue_review', { n: data }), 'warn', { label: t('view_failed'), run: () => openFailed(failedJobs()[0]?.id) });
+  } else if (kind === 'confirm_close') {
+    void ask(t('close_browser_confirm', { browser: data })).then((ok) => api.call('answerClose', ok));
+  } else if (kind === 'cookies_off') {
+    cfg.use_cookies = false;
+    toast(t('toast_cookies_off'), 'warn');
   } else if (kind === 'replaced') {
     toast(t('toast_replaced', { pos: data.pos }));
   } else if (kind === 'conv') onConvert(data);

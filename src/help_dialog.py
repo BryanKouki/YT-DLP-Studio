@@ -96,9 +96,11 @@ HELP_CONTENT = {
          "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to "
          "confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do "
          "navegador' faz o yt-dlp usar a sua sessão do Edge (padrão) ou do Chrome "
-         "(pede duas confirmações). Atenção: o Chrome precisa estar fechado, e "
-         "versões recentes do Edge e do Chrome protegem os cookies de um jeito que o "
-         "yt-dlp pode não conseguir ler; nesse caso o Log explica. Aumentar 'Pausa "
+         "(pede duas confirmações). O navegador precisa estar fechado, inclusive em "
+         "segundo plano: se estiver aberto, o app pergunta antes de fechá-lo. Versões "
+         "recentes do Edge e do Chrome protegem os cookies de um jeito que o yt-dlp "
+         "pode não conseguir ler. Se a leitura falhar, a opção é desativada e o item "
+         "é baixado de novo sem cookies, sem perder nada da fila. Aumentar 'Pausa "
          "entre downloads' também ajuda."),
         ("Aba Converter",
          "Converte ou comprime qualquer arquivo do computador usando o FFmpeg do "
@@ -213,10 +215,12 @@ HELP_CONTENT = {
          "After many downloads in a row YouTube may answer 'Sign in to confirm "
          "you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes "
          "yt-dlp use your Edge (default) or Chrome session (Chrome asks for two "
-         "confirmations). Note: Chrome must be closed, and recent Edge and Chrome "
-         "versions protect cookies in a way yt-dlp may not be able to read; the "
-         "Log explains when that happens. A longer 'Pause between downloads' also "
-         "helps."),
+         "confirmations). The browser must be closed, including in the background: "
+         "if it is open, the app asks before closing it. Recent Edge and Chrome "
+         "versions protect cookies in a way yt-dlp may not be able to read. If "
+         "reading fails, the option is turned off and the item is downloaded again "
+         "without cookies, so nothing in the queue is lost. A longer 'Pause "
+         "between downloads' also helps."),
         ("Convert tab",
          "Converts or compresses any file on your computer using the app's "
          "FFmpeg. Pick the file, format (MP3, M4A, Opus, FLAC, WAV, MP4, MKV, "
