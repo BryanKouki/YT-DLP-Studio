@@ -11,7 +11,7 @@ use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use tauri::webview::PageLoadEvent;
-use tauri::{AppHandle, Emitter, Manager, RunEvent, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, RunEvent, State, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 const CREATE_NO_WINDOW: u32 = 0x0800_0000; // sem janela de console piscando
 
@@ -192,6 +192,11 @@ fn set_times(path: String, created: f64, modified: f64) -> bool {
 }
 
 #[tauri::command]
+fn quit(app: AppHandle) {
+    app.exit(0); // RunEvent::Exit mata os downloads em andamento
+}
+
+#[tauri::command]
 fn open_path(path: String) {
     let _ = Command::new("explorer").arg(path).spawn();
 }
@@ -226,7 +231,7 @@ fn main() {
     tauri::Builder::default()
         .manage(Procs::default())
         .invoke_handler(tauri::generate_handler![
-            spawn, kill, download, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick
+            spawn, kill, download, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick, quit
         ])
         .on_page_load(|webview, payload| {
             if payload.event() == PageLoadEvent::Finished {
@@ -234,7 +239,7 @@ fn main() {
             }
         })
         .setup(move |app| {
-            WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+            let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("YT-DLP Studio")
                 .inner_size(width, height)
                 .min_inner_size(720.0, 620.0)
@@ -242,6 +247,14 @@ fn main() {
                 .data_directory(dir.join("webview")) // cache do WebView2 também fica em data/
                 .initialization_script(&format!("window.__INIT__ = {init};"))
                 .build()?;
+            // fechar pede confirmação na interface; o comando quit fecha de verdade
+            let handle = window.clone();
+            window.on_window_event(move |event| {
+                if let WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = handle.emit("close_requested", ());
+                }
+            });
             Ok(())
         })
         .build(tauri::generate_context!())

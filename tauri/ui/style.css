@@ -410,6 +410,19 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 #dlg-confirm .dlg-body { align-items: center; text-align: center; font-weight: 600; font-size: 14px; }
 .confirm-ico { width: 34px; height: 34px; color: var(--warn); animation: shake 0.4s ease-out; }
 #dlg-failed { width: 720px; }
+#err-text {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--err);
+  font: 12px/1.5 Consolas, monospace;
+  user-select: text;
+}
 #failed-pl { font-size: 14px; }
 .fail { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid var(--border); animation: fade-in 0.2s ease-out; }
 .fail .pos { min-width: 34px; color: var(--muted); }

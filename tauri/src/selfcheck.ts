@@ -50,6 +50,7 @@ async function run(): Promise<void> {
   assert.equal(after(cmdFor(job('video', { folder: 'C:/v' })), '-o'), '%(title)s - %(channel,uploader)s.%(ext)s');
   assert(!c.join(' ').includes('uploader') && c.join(' ').includes('%(artist|)s'));
   assert(c.includes('--progress'), 'sem --progress o --print esconde o progresso');
+  assert.equal(after(c, '--js-runtimes'), core.path.join('bin', 'deno.exe').replace(/^/, 'deno:'));
   assert(after(c, '--print').endsWith('@@@%(id)s@@@%(filepath|)s') && !c.includes('--cookies-from-browser'));
 
   // 2b. cookies: Firefox por padrão (não Chromium); substituta fica entre as vizinhas (na ordem que a pasta mostra)

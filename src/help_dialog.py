@@ -65,6 +65,13 @@ HELP_CONTENT = {
          "salva (playlistcover.jpg), não uma por faixa. O botão 'Verificar "
          "disponibilidade da playlist' testa todas as faixas sem baixar nada e "
          "lista no Log as indisponíveis, com a posição e as músicas vizinhas."),
+        ("Deno, erros e fechar o app (versão .exe Tauri)",
+         "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para "
+         "data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele "
+         "alguns formatos somem ('Requested format is not available'). Quando um "
+         "item da fila dá erro, a fila pausa e mostra o motivo, com as opções "
+         "Continuar fila, Tentar de novo ou Cancelar fila (dá para desligar em "
+         "Configurações → Fila). Fechar a janela sempre pede confirmação."),
         ("Colar vários links seguidos (versão .exe Tauri)",
          "Ao colar um link, o programa mostra logo abaixo o que encontrou: "
          "'Playlist: nome' (aí Título e Artista somem, porque não se aplicam) ou "
@@ -94,7 +101,9 @@ HELP_CONTENT = {
          "ajustadas para ela ficar exatamente entre as faixas vizinhas. Em "
          "Configurações → Fila você escolhe quando a fila pausa: depois de cada "
          "playlist, no fim de tudo (as setas passam de uma playlist para a outra) "
-         "ou nunca."),
+         "ou nunca. Aberta pelo botão da playlist, a janela só fecha depois de "
+         "baixar ou continuar; aberta pelo botão 'Faixas com erro' no topo da "
+         "Fila e Log, ela passa para a próxima playlist com erro."),
         ("Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
          "Depois de muitos downloads seguidos o YouTube pode responder 'Sign in to "
          "confirm you're not a bot'. Em Configurações → Cookies, 'Usar cookies do "
@@ -191,6 +200,14 @@ HELP_CONTENT = {
          "is saved (playlistcover.jpg), not one per track. The 'Check playlist "
          "availability' button tests every track without downloading and lists "
          "unavailable ones in the Log, with position and neighbouring tracks."),
+        ("Deno, errors and closing the app (Tauri .exe version)",
+         "Besides yt-dlp and FFmpeg, the app downloads Deno (~45 MB) into "
+         "data\\bin on its own: YouTube requires solving a JavaScript challenge, "
+         "and without it some formats disappear ('Requested format is not "
+         "available'). When a queue item fails, the queue pauses and shows the "
+         "reason, with Continue queue, Try again or Cancel queue (this can be "
+         "turned off in Settings → Queue). Closing the window always asks for "
+         "confirmation."),
         ("Pasting several links in a row (Tauri .exe version)",
          "When you paste a link, the app shows right below what it found: "
          "'Playlist: name' (Title and Artist are then hidden, since they don't "
@@ -220,7 +237,10 @@ HELP_CONTENT = {
          "it is downloaded to the same folder and the file dates are set so it "
          "sits exactly between the neighbouring tracks. In Settings → Queue you "
          "choose when the queue pauses: after each playlist, at the very end "
-         "(the arrows move from one playlist to the next) or never."),
+         "(the arrows move from one playlist to the next) or never. Opened from "
+         "a playlist's button, the window just closes after you download or "
+         "continue; opened from the 'Failed tracks' button at the top of Queue & "
+         "Log, it moves on to the next playlist with failed tracks."),
         ("Cookies against the 'not a bot' block (Tauri .exe version)",
          "After many downloads in a row YouTube may answer 'Sign in to confirm "
          "you're not a bot'. In Settings → Cookies, 'Use browser cookies' makes "

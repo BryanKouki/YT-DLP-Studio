@@ -96,6 +96,7 @@
     <div class="card row wrap">
       <span class="dep"><i id="dot-ytdlp" class="dot"></i><span id="dep-ytdlp"></span></span>
       <span class="dep"><i id="dot-ffmpeg" class="dot"></i><span id="dep-ffmpeg"></span></span>
+      <span class="dep"><i id="dot-deno" class="dot"></i><span id="dep-deno"></span></span>
       <span class="grow"></span>
       <button id="q-deps" class="small" data-i18n="check_reinstall_deps"></button>
       <button id="q-update" class="small" data-i18n="update_ytdlp"></button>
@@ -105,6 +106,7 @@
       <button id="q-start" class="primary"><svg><use href="#i-download"/></svg><span data-i18n="start_queue"></span></button>
       <button id="q-cancel" class="cancel" data-i18n="cancel_current"></button>
       <span class="grow"></span>
+      <button id="q-failed" class="fails small" disabled></button>
       <button id="q-clear-done" class="ghost small" data-i18n="clear_done"></button>
       <button id="q-clear-all" class="ghost small" data-i18n="clear_all"></button>
       <button id="q-open" class="ghost small"><svg><use href="#i-folder"/></svg><span data-i18n="open_folder"></span></button>
@@ -221,6 +223,7 @@
       <div class="field"><span data-i18n="video_folder"></span>
         <div class="row"><input data-set="video_folder" class="grow"><button class="browse" data-i18n="browse"></button></div></div>
       <h3 data-i18n="queue_section"></h3>
+      <label class="chk"><input type="checkbox" data-set="pause_on_error"><span data-i18n="pause_on_error"></span></label>
       <label class="field"><span data-i18n="pause_failed"></span>
         <select data-set="pause_failed">
           <option value="each" data-i18n="pause_each"></option>
@@ -279,6 +282,19 @@
     <button data-i18n="close"></button>
     <button id="failed-skip" type="button" data-i18n="failed_continue"></button>
     <button id="failed-go" type="button" class="primary" data-i18n="failed_download"></button>
+  </form>
+</dialog>
+
+<dialog id="dlg-error">
+  <div class="dlg-body">
+    <h2 data-i18n="error_pause_title"></h2>
+    <b id="err-name"></b>
+    <pre id="err-text"></pre>
+  </div>
+  <form method="dialog" class="dlg-foot">
+    <button id="err-stop" class="cancel" data-i18n="error_stop"></button>
+    <button id="err-retry" data-i18n="error_retry"></button>
+    <button id="err-continue" class="primary" data-i18n="error_continue"></button>
   </form>
 </dialog>
 

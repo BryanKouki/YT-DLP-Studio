@@ -118,6 +118,10 @@ export function m3uText(entries: { pos: number; file: string }[]): string {
   return lines.join('\r\n') + '\r\n';
 }
 
+/** Desde 2025 o YouTube exige resolver um desafio em JavaScript; sem runtime, o yt-dlp perde
+ *  formatos ("Requested format is not available", sobretudo com cookies). Deno fica em data/bin. */
+export const jsRuntimeArgs = (bin: string): string[] => ['--js-runtimes', `deno:${path.join(bin, 'deno.exe')}`];
+
 /** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {
   return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'firefox'] : [];
@@ -168,7 +172,7 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
   const args = [
     // --progress: o --print implica --quiet, e sem isto nenhuma linha "[download] N%" sai (barra parada)
     ytdlp, job.url.trim(), '--encoding', 'utf-8', '--newline', '--progress', '--no-color', '--no-warnings', '--ignore-errors',
-    '--ffmpeg-location', ffdir,
+    '--ffmpeg-location', ffdir, ...jsRuntimeArgs(ffdir),
     '--print', `before_dl:BDL@@@${fields}`,
     '--print', `after_move:ADL@@@${fields}`,
     '-P', s.folder, ...(tempDir ? ['-P', `temp:${tempDir}`] : []),

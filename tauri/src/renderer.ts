@@ -325,6 +325,7 @@ function onConvert(ev: { progress?: number; done?: boolean; ok?: boolean; cancel
 const depState: Record<string, { state: string; extra?: Record<string, any> }> = {
   ytdlp: { state: 'missing' },
   ffmpeg: { state: 'missing' },
+  deno: { state: 'missing' },
 };
 
 function renderDeps(): void {
@@ -406,6 +407,11 @@ function paintJob(job: any): void {
 function paintSummary(): void {
   const pending = jobList.filter((j) => j.status === 'queued' || j.status === 'downloading').length;
   const failing = jobList.filter(remaining).length;
+  // botão do topo da fila: abre as faixas com erro (conta só as que ainda não ganharam substituta)
+  const failedTracks = jobList.reduce((sum, j) => sum + remaining(j), 0);
+  const failedBtn = $<HTMLButtonElement>('#q-failed');
+  failedBtn.disabled = !failedTracks;
+  failedBtn.textContent = t('failed_button', { n: failedTracks });
   const badge = $('#q-badge');
   badge.hidden = !pending && !failing;
   badge.textContent = String(pending || failing);
@@ -448,6 +454,7 @@ function appendLog(line: string): void {
 // ---- faixas com erro das playlists ---------------------------------------------
 
 let failedJobId = '';
+let reviewAll = false; // aberto pelo botão do topo: depois de cada playlist, vai para a próxima
 const failedJobs = () => jobList.filter((j) => j.failed?.length);
 
 async function copyText(text: string, el: HTMLElement): Promise<void> {
@@ -460,10 +467,12 @@ async function copyText(text: string, el: HTMLElement): Promise<void> {
 
 /** Lista as faixas que falharam numa playlist: nome (copia "Música - Artista"), link copiável
  *  (inteiro ou só o ID) e caixa para o link substituto. Setas passam para as outras playlists. */
-function openFailed(jobId: string): void {
+function openFailed(jobId: string, fromTop = false): void {
   const job = jobList.find((j) => j.id === jobId);
   if (!job?.failed?.length) return;
   failedJobId = jobId;
+  const dialogOpen = $<HTMLDialogElement>('#dlg-failed').open;
+  if (!dialogOpen) reviewAll = fromTop;
   const all = failedJobs();
   const at = all.indexOf(job);
   $('#failed-nav').textContent = all.length > 1 ? t('failed_nav', { i: at + 1, n: all.length }) : '';
@@ -530,11 +539,13 @@ function setupFailedDialog(): void {
     for (const row of $$('.fail', dialog)) links[row.dataset.id!] = $<HTMLInputElement>('input', row).value.trim();
     void api.call('replaceFailed', failedJobId, links);
     if (Object.values(links).some(Boolean)) toast(t('toast_replacing'));
-    step(1); // revisão uma playlist por vez
+    if (reviewAll) step(1);
+    else dialog.close(); // aberto pela linha da playlist: só fecha
   };
   $('#failed-skip').onclick = () => {
     void api.call('resumeQueue');
-    step(1);
+    if (reviewAll) step(1);
+    else dialog.close();
   };
 }
 
@@ -547,12 +558,19 @@ function ask(text: string): Promise<boolean> {
   return new Promise((resolve) => dialog.addEventListener('close', () => resolve(dialog.returnValue === 'yes'), { once: true }));
 }
 
+function setupErrorDialog(): void {
+  $('#err-continue').onclick = () => api.call('resumeQueue');
+  $('#err-retry').onclick = () => api.call('retryPaused');
+  $('#err-stop').onclick = () => api.call('stopQueue');
+}
+
 function setupQueueTab(): void {
   $('#q-deps').onclick = () => api.call('checkDeps', true);
   $('#q-update').onclick = () => api.call('updateYtdlp');
   $('#q-bin').onclick = () => api.call('openBin');
   $('#q-start').onclick = () => api.call('queueStart');
   $('#q-cancel').onclick = () => api.call('queueCancel');
+  $('#q-failed').onclick = () => openFailed((jobList.find(remaining) ?? failedJobs()[0])?.id, true);
   $('#q-clear-done').onclick = () => api.call('clearFinished');
   $('#q-clear-all').onclick = () => api.call('clearAll');
   $('#q-open').onclick = () => api.call('openFolder', cfg.audio_folder, true);
@@ -655,6 +673,7 @@ const downloadTabs: Record<string, DownloadTab> = { audio: setupDownloadTab('aud
 setupConvertTab();
 setupQueueTab();
 setupFailedDialog();
+setupErrorDialog();
 setupDialogs();
 applyTheme();
 retranslate();
@@ -676,7 +695,14 @@ api.on((kind, data) => {
     downloadTabs[data.mode].setStatus(t('queue_paused', { n: remaining(data) }));
     toast(t('queue_paused', { n: remaining(data) }), 'warn', { label: t('view_failed'), run: () => openFailed(data.id) });
   } else if (kind === 'review') {
-    toast(t('queue_review', { n: data }), 'warn', { label: t('view_failed'), run: () => openFailed(failedJobs()[0]?.id) });
+    toast(t('queue_review', { n: data }), 'warn', { label: t('view_failed'), run: () => openFailed(failedJobs()[0]?.id, true) });
+  } else if (kind === 'close_requested') {
+    void ask(t(data.busy ? 'quit_confirm_busy' : 'quit_confirm')).then((ok) => ok && api.call('quit'));
+  } else if (kind === 'error_pause') {
+    $('#err-name').textContent = data.name || data.title || data.url;
+    $('#err-text').textContent = data.errorMsg; // vem do yt-dlp: só textContent
+    const dialog = $<HTMLDialogElement>('#dlg-error');
+    if (!dialog.open) dialog.showModal();
   } else if (kind === 'confirm_close') {
     void ask(t('close_browser_confirm', { browser: data })).then((ok) => api.call('answerClose', ok));
   } else if (kind === 'cookies_off') {

@@ -62,6 +62,7 @@ const settings: Record<string, any> = {
   keep_video: false,
   sub_langs: 'en.*',
   sub_format: '',
+  pause_on_error: true, // item com erro pausa a fila: continuar, tentar de novo ou cancelar
   pause_failed: 'each', // faixas de playlist falharam: 'each' pausa depois da playlist, 'end' no fim da fila, 'off' não pausa
   use_cookies: false,
   cookies_browser: 'firefox', // não Chromium: o yt-dlp lê sem o erro de DPAPI do Windows
@@ -82,6 +83,7 @@ const BIN = path.join(INIT.dir, 'bin');
 const YTDLP = path.join(BIN, 'yt-dlp.exe');
 const FFMPEG = path.join(BIN, 'ffmpeg.exe');
 const FFPROBE = path.join(BIN, 'ffprobe.exe');
+const DENO = path.join(BIN, 'deno.exe');
 const TEMP = path.join(INIT.dir, 'tmp'); // intermediários do yt-dlp: a pasta de destino só vê o arquivo pronto
 
 let resizeTimer = 0;
@@ -111,6 +113,10 @@ await Promise.all([
 
 const kill = (id: number) => void invoke('kill', { id });
 
+// fechar a janela pede confirmação na interface (o Rust segura o fechamento e avisa aqui)
+await listen('close_requested', () =>
+  send('close_requested', { busy: running || jobs.some((j) => j.status === 'queued' || j.status === 'downloading') }));
+
 /** Roda um processo entregando a saída linha a linha. done resolve com o código de saída (-1 = não iniciou). */
 function runLines(exe: string, args: string[], onLine: (line: string) => void, withStderr = true, timeout = 0) {
   const id = nextId++;
@@ -132,7 +138,7 @@ function runLines(exe: string, args: string[], onLine: (line: string) => void, w
 /** yt-dlp com saída em UTF-8 (senão títulos com acento chegam quebrados pelo pipe do Windows). */
 async function ytdlpLines(args: string[], withStderr: boolean, timeout = 0, cookies = true): Promise<string[]> {
   const lines: string[] = [];
-  await runLines(YTDLP, ['--encoding', 'utf-8', ...(cookies ? core.cookieArgs(settings) : []), ...args],
+  await runLines(YTDLP, ['--encoding', 'utf-8', ...core.jsRuntimeArgs(BIN), ...(cookies ? core.cookieArgs(settings) : []), ...args],
     (l) => lines.push(l), withStderr, timeout).done;
   return lines;
 }
@@ -172,9 +178,11 @@ async function closeBrowserForCookies(job: core.Job): Promise<void> {
 
 const YTDLP_URL = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe';
 const FFMPEG_URL = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip';
+const DENO_URL = 'https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip';
 const DEPS = {
   ytdlp: { exe: YTDLP, versionArg: '--version', size: '15MB' }, // o texto do i18n já põe o "~"
   ffmpeg: { exe: FFMPEG, versionArg: '-version', size: '100MB' },
+  deno: { exe: DENO, versionArg: '--version', size: '45MB' },
 };
 type Dep = keyof typeof DEPS;
 
@@ -204,6 +212,11 @@ async function installDep(component: Dep): Promise<void> {
     await invoke('mkdir', { path: BIN });
     if (component === 'ytdlp') {
       await download(YTDLP_URL, YTDLP, onPct);
+    } else if (component === 'deno') {
+      const zip = path.join(BIN, 'deno.zip');
+      await download(DENO_URL, zip, onPct);
+      await runLines(INIT.tar, ['-xf', zip, '-C', BIN, 'deno.exe'], () => {}, true, 120000).done;
+      await invoke('remove', { path: zip });
     } else {
       const zip = path.join(BIN, 'ffmpeg.zip');
       await download(FFMPEG_URL, zip, onPct);
@@ -222,7 +235,7 @@ async function installDep(component: Dep): Promise<void> {
 
 async function ensureDeps(force = false, initial = false): Promise<void> {
   if (initial) log(`Verificando dependências... (pasta: ${BIN})`);
-  for (const component of ['ytdlp', 'ffmpeg'] as const) {
+  for (const component of ['ytdlp', 'ffmpeg', 'deno'] as const) {
     depReport(component, 'checking');
     if (!force && (await checkDep(component))) depReport(component, 'ok');
     else await installDep(component);
@@ -246,6 +259,14 @@ async function runQueue(only?: core.Job): Promise<void> {
     : jobs.find((j) => j.status === 'queued'));
   for (let job; (job = next()); ) {
     await runJob(job);
+    if (job.status === 'error' && settings.pause_on_error) {
+      log(`Fila pausada por erro em ${job.name || job.url}.`);
+      send('error_pause', job);
+      pausedOn = job;
+      await new Promise<void>((resolve) => (resumeQueue = resolve));
+      pausedOn = null;
+      continue;
+    }
     if (remaining(job) && settings.pause_failed === 'each') {
       log(`Fila pausada: ${remaining(job)} faixa(s) falharam em ${job.url}. Use "Faixas com erro" na fila.`);
       send('paused', job);
@@ -309,6 +330,7 @@ async function runJob(job: core.Job): Promise<void> {
   const failed: core.Failed[] = [];
   const saved: Saved[] = [];
   const hinted = new Set<string>();
+  let lastError = ''; // última linha ERROR do yt-dlp: vira o motivo mostrado na fila
   let cookieFailed: '' | 'dpapi' | 'lock' = ''; // dpapi = criptografia que o yt-dlp não abre; lock = navegador aberto
   if (!canceled) {
     const run = runLines(cmd[0], cmd.slice(1), (line) => {
@@ -323,6 +345,7 @@ async function runJob(job: core.Job): Promise<void> {
       }
       const err = core.PL_ERR_RE.exec(line);
       if (err && !failed.some((f) => f.id === err[1])) failed.push({ pos: 0, id: err[1], title: '', artist: '', reason: err[2] });
+      if (line.startsWith('ERROR: ')) lastError = line.slice(7);
       if (core.COOKIE_ERR_RE.test(line)) cookieFailed = /DPAPI/.test(line) ? 'dpapi' : 'lock';
       if (BOT_RE.test(line) && job.options.use_cookies && !hinted.has('bot+cookies')) {
         hinted.add('bot+cookies');
@@ -387,7 +410,7 @@ async function runJob(job: core.Job): Promise<void> {
     await writePlaylistFile(job);
   } else {
     job.status = 'error';
-    job.errorMsg = `yt-dlp saiu com código ${code}`;
+    job.errorMsg = lastError || `yt-dlp saiu com código ${code}`;
     log(`[erro] código ${code}: ${job.url}`);
   }
   send('job', job);
@@ -646,6 +669,18 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
     return 'next';
   },
   resumeQueue: () => resumeQueue?.(),
+  /** Pausa por erro: tenta o mesmo item de novo, ou cancela o resto da fila. */
+  retryPaused: () => {
+    if (pausedOn) Object.assign(pausedOn, { status: 'queued', progress: 0, errorMsg: '' });
+    send('jobs', jobs);
+    resumeQueue?.();
+  },
+  stopQueue: () => {
+    for (const j of jobs) if (j.status === 'queued') j.status = 'canceled';
+    send('jobs', jobs);
+    resumeQueue?.();
+  },
+  quit: () => invoke('quit'),
   answerClose: (ok: boolean) => answerClose?.(ok),
   replaceFailed: async (jobId: string, links: Record<string, string>) => {
     await replaceFailed(jobId, links);

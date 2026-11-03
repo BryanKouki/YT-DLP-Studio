@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.6
+
+### Fixed
+- "Requested format is not available" on YouTube, mostly with cookies turned on. YouTube now requires solving a JavaScript challenge, and yt-dlp had no JavaScript runtime to do it. The app now downloads Deno into `data\bin` on first run, like yt-dlp and FFmpeg, and passes it to yt-dlp.
+
+### Added
+- When a queue item fails, the queue pauses and shows the error, with Continue queue, Try again or Cancel queue. It can be turned off in Settings → Queue.
+- Closing the window asks for confirmation, and warns when a download is running.
+- Queue items show the actual yt-dlp error instead of only the exit code.
+- A "Failed tracks (N)" button at the top of the queue, left of "Clear Finished", opens the failed tracks window.
+- Opened from a playlist's own button, "Download replacements" and "Continue without replacing" now only close the window. Opened from the top button, they move on to the next playlist with failed tracks, one at a time.
+
 ## v1.3.5
 
 ### Changed

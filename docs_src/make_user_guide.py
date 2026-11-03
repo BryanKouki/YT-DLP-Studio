@@ -191,7 +191,19 @@ story.append(body(
     "música substituta e clique em <b>Baixar substitutas e continuar</b>: ela é "
     "baixada na mesma pasta e as datas do arquivo são ajustadas para ela ficar "
     "exatamente entre as faixas vizinhas quando a pasta é ordenada por data. "
-    "<b>Continuar sem substituir</b> só retoma a fila e passa para a próxima."
+    "<b>Continuar sem substituir</b> só retoma a fila. Aberta pelo botão da própria "
+    "playlist, a janela apenas fecha depois disso; aberta pelo botão <b>Faixas com "
+    "erro</b> no topo da Fila e Log, ela passa para a próxima playlist com erro. As "
+    "setas também passam de uma playlist para a outra."
+))
+story.append(h3("Deno, erros e fechar o app (versão .exe Tauri)"))
+story.append(body(
+    "Além do yt-dlp e do FFmpeg, o app baixa sozinho o <b>Deno</b> (~45 MB) para "
+    "<i>data\\bin</i>. O YouTube exige resolver um desafio em JavaScript, e sem ele "
+    "alguns formatos somem e aparece <i>Requested format is not available</i>. "
+    "Quando um item da fila dá erro, a fila pausa e mostra o motivo, com as opções "
+    "<b>Continuar fila</b>, <b>Tentar de novo</b> e <b>Cancelar fila</b>; isso pode "
+    "ser desligado em Configurações → Fila. Fechar a janela sempre pede confirmação."
 ))
 story.append(h3("Colar vários links seguidos (versão .exe Tauri)"))
 story.append(body(
