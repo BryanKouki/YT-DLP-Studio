@@ -207,16 +207,22 @@ let running = false;
 let currentId = 0;
 let canceled = false;
 let resumeQueue: (() => void) | null = null; // existe enquanto a fila está pausada
+let pausedOn: core.Job | null = null; // item cujas falhas pausaram a fila
 
-async function runQueue(): Promise<void> {
+/** only: baixa só esse item (o resto da fila continua esperando). */
+async function runQueue(only?: core.Job): Promise<void> {
   if (running) return;
   running = true;
-  for (let job; (job = jobs.find((j) => j.status === 'queued')); ) {
+  const next = () => (only ? (only.status === 'queued' && jobs.includes(only) ? only : undefined)
+    : jobs.find((j) => j.status === 'queued'));
+  for (let job; (job = next()); ) {
     await runJob(job);
     if (remaining(job) && settings.pause_failed === 'each') {
       log(`Fila pausada: ${remaining(job)} faixa(s) falharam em ${job.url}. Use "Faixas com erro" na fila.`);
       send('paused', job);
+      pausedOn = job;
       await new Promise<void>((resolve) => (resumeQueue = resolve));
+      pausedOn = null;
       resumeQueue = null;
       log('Fila retomada.');
     }
@@ -235,12 +241,12 @@ const remaining = (job: core.Job) => job.failed?.filter((f) => f.state !== 'done
 /** Mensagens do yt-dlp que têm uma saída conhecida: explica no Log uma vez por download. */
 const HINTS: [RegExp, string][] = [
   [/Failed to decrypt with DPAPI|Could not copy .*cookie database|could not find .*cookies database/,
-    '[cookies] O yt-dlp não conseguiu ler os cookies do navegador. O Chrome precisa estar fechado, e Edge/Chrome ' +
-    'recentes criptografam os cookies de um jeito que o yt-dlp pode não abrir. Desmarque "Usar cookies do navegador" ' +
+    '[cookies] Não foi possível ler os cookies do navegador. O Chrome deve estar fechado, e as versões recentes do ' +
+    'Edge e do Chrome criptografam os cookies de uma forma que o yt-dlp pode não conseguir abrir. Desmarque "Usar cookies do navegador" ' +
     'em Configurações para voltar a baixar sem eles.'],
   [/Sign in to confirm you.re not a bot/,
-    '[dica] O YouTube bloqueou por excesso de downloads seguidos. Ative "Usar cookies do navegador" ou aumente ' +
-    '"Pausa entre downloads (s)" em Configurações, ou espere um pouco antes de continuar.'],
+    '[dica] O YouTube bloqueou temporariamente por excesso de downloads seguidos. Ative "Usar cookies do navegador" ou aumente ' +
+    '"Pausa entre downloads (s)" em Configurações, ou aguarde alguns minutos antes de continuar.'],
 ];
 
 /** Cancela só o item atual; a fila continua. */
@@ -557,6 +563,22 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
     if (start) void runQueue();
   },
   queueStart: () => (resumeQueue ? resumeQueue() : void runQueue()),
+  /** ▶ de um item: parado = baixa só ele; fila rodando = vira o próximo. Erro/cancelado tenta de novo. */
+  startJob: (id: string) => {
+    const job = jobs.find((j) => j.id === id);
+    if (!job || job.status === 'downloading' || job.status === 'done') return '';
+    Object.assign(job, { status: 'queued', progress: 0, errorMsg: '' });
+    if (!running) {
+      send('job', job);
+      void runQueue(job);
+      return 'started';
+    }
+    jobs = jobs.filter((j) => j !== job);
+    const at = jobs.findIndex((j) => j.status === 'queued');
+    jobs.splice(at < 0 ? jobs.length : at, 0, job);
+    send('jobs', jobs);
+    return 'next';
+  },
   resumeQueue: () => resumeQueue?.(),
   replaceFailed: async (jobId: string, links: Record<string, string>) => {
     await replaceFailed(jobId, links);
@@ -566,6 +588,14 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
   clearFinished: () => {
     jobs = jobs.filter((j) => j.status === 'queued' || j.status === 'downloading');
     send('jobs', jobs);
+  },
+  removeJob: (id: string) => {
+    const job = jobs.find((j) => j.id === id);
+    if (!job) return;
+    if (job.status === 'downloading') cancelCurrent();
+    jobs = jobs.filter((j) => j !== job);
+    send('jobs', jobs);
+    if (pausedOn === job) resumeQueue?.(); // a pausa era por causa dele
   },
   clearAll: () => {
     if (running) return;

@@ -327,6 +327,11 @@ details.trim[open] summary + .row { margin-top: 12px; animation: slide-down 0.2s
 .job[data-status="done"] .bar i { background: var(--ok); }
 .job[data-status="error"] .bar i { background: var(--err); }
 .job:not([data-status="downloading"]) .cancel { display: none; }
+button.remove, button.play { width: 28px; height: 28px; }
+button.remove { margin-right: -6px; }
+button.play:hover { background: var(--red-soft); color: var(--red); }
+.job[data-status="downloading"] .play, .job[data-status="done"] .play { display: none; }
+button.remove:hover { background: var(--red-soft); color: var(--red); }
 button.fails { background: rgba(245, 158, 11, 0.15); color: var(--warn); font-weight: 600; }
 button.fails:hover { background: rgba(245, 158, 11, 0.25); }
 .log-head { margin-top: 4px; }

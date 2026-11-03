@@ -71,7 +71,11 @@ HELP_CONTENT = {
          "aviso confirma e a caixa fica limpa para o próximo link. Na fila, cada "
          "playlist aparece com o próprio nome. Ctrl+Enter na caixa de links "
          "começa a baixar. Durante o download, a pasta de destino só recebe os "
-         "arquivos prontos; os temporários ficam em data\\tmp."),
+         "arquivos prontos; os temporários ficam em data\\tmp. Na fila, o X à "
+         "direita de cada item o remove (se estiver baixando, o download é "
+         "cancelado antes), e o ▶ baixa só aquele item agora; com a fila "
+         "rodando, ele vira o próximo. Em item com erro ou cancelado, o ▶ tenta "
+         "de novo."),
         ("Guardar capa de cada música (versão .exe Tauri)",
          "Além de 'Guardar thumbnail' (que, numa playlist, guarda só a capa da "
          "playlist), 'Guardar capa de cada música' deixa um .jpg ao lado de cada "
@@ -185,7 +189,11 @@ HELP_CONTENT = {
          "screens: a notice confirms it and the box is cleared for the next link. "
          "In the queue, each playlist shows its own name. Ctrl+Enter in the link "
          "box starts downloading. While downloading, the destination folder only "
-         "receives finished files; temporary ones stay in data\\tmp."),
+         "receives finished files; temporary ones stay in data\\tmp. In the "
+         "queue, the X on the right of each item removes it (if it is "
+         "downloading, the download is canceled first), and the ▶ downloads "
+         "just that item now; while the queue is running, it becomes the next "
+         "one. On a failed or canceled item, the ▶ tries again."),
         ("Save each track's cover (Tauri .exe version)",
          "Besides 'Save thumbnail' (which, on a playlist, only keeps the playlist "
          "cover), 'Save each track's cover' leaves a .jpg next to every track, "

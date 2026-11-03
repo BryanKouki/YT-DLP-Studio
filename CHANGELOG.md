@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.1
+
+### Added
+- Remove a single item from the queue with the X on the right of it. If that item is downloading, the download is canceled first and the queue moves on to the next item.
+- Start a single item from the queue with the ▶ next to it. With the queue stopped, only that item is downloaded; with the queue running, it becomes the next one. On a failed or canceled item, ▶ tries it again.
+
+### Changed
+- More formal wording in notices, confirmations and Log hints (for example "Next: ..." and "Could not identify the link. It can still be downloaded.").
+
 ## v1.3.0
 
 ### Added

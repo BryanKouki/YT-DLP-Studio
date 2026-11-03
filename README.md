@@ -37,7 +37,7 @@
 
 **General**
 - Trim a section of the media before downloading (range slider or HH:MM:SS fields)
-- Download queue with per-item progress and a live log
+- Download queue with per-item progress and a live log; any item can be started or removed on its own (Tauri version)
 - yt-dlp and FFmpeg are downloaded automatically on first run and can be updated with one click
 - Portable: settings and binaries live in a `data/` folder next to the executable
 - English / Portuguese (BR) interface, dark and light themes

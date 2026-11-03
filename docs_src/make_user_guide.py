@@ -201,7 +201,10 @@ story.append(body(
     "confirma e a caixa fica limpa para o próximo link, sem herdar nome nem "
     "artista do anterior. Na fila, cada playlist aparece com o próprio nome. "
     "Ctrl+Enter na caixa de links começa a baixar. A pasta de destino só recebe "
-    "os arquivos prontos; os temporários ficam em <i>data\\tmp</i>."
+    "os arquivos prontos; os temporários ficam em <i>data\\tmp</i>. Na fila, o "
+    "<b>X</b> à direita de cada item o remove; se ele estiver baixando, o "
+    "download é cancelado antes. O <b>▶</b> baixa só aquele item agora (com a "
+    "fila rodando, ele vira o próximo); em item com erro ou cancelado, tenta de novo."
 ))
 story.append(h3("Guardar capa de cada música (versão .exe Tauri)"))
 story.append(body(

@@ -359,9 +359,15 @@ function renderJobs(): void {
     row.id = `job-${job.id}`;
     row.innerHTML = '<span class="job-ico"><svg><use/></svg></span><div class="info grow"><span class="tag"></span>' +
       '<div class="name"></div><div class="state muted small"></div><span class="bar"><i></i></span></div>' +
-      '<button class="fails small" hidden></button><button class="cancel small"></button>';
+      '<button class="fails small" hidden></button><button class="cancel small"></button>' +
+      '<button class="icon play"><svg><use href="#i-play"/></svg></button>' +
+      '<button class="icon remove"><svg><use href="#i-x"/></svg></button>';
     $('.cancel', row).onclick = () => api.call('queueCancel');
     $('.fails', row).onclick = () => openFailed(job.id);
+    $('.remove', row).onclick = () => api.call('removeJob', job.id);
+    $('.play', row).onclick = async () => {
+      if ((await api.call('startJob', job.id)) === 'next') toast(t('toast_next', { name: job.name || job.title || job.url }));
+    };
     list.append(row);
     paintJob(job);
   }
@@ -389,6 +395,8 @@ function paintJob(job: any): void {
   $('.name', row).title = job.url;
   $('.state', row).textContent = state;
   $('.cancel', row).textContent = t('cancel_current');
+  $('.remove', row).title = t('remove_item');
+  $('.play', row).title = t('start_item');
   setBar($('.bar', row), job.progress);
 }
 
