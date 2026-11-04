@@ -196,6 +196,16 @@ story.append(body(
     "erro</b> no topo da Fila e Log, ela passa para a próxima playlist com erro. As "
     "setas também passam de uma playlist para a outra."
 ))
+story.append(h3("Barra de progresso por etapa (versão .exe Tauri)"))
+story.append(body(
+    "Durante o download, a linha da música atual, embaixo do nome da playlist, mostra "
+    "a etapa: <b>Baixando</b>, <b>Preparando a capa</b>, <b>Convertendo o áudio</b>, "
+    "<b>Aplicando metadados</b>, <b>Incorporando a capa</b> e <b>Finalizando</b>. A "
+    "barra acompanha: o download vai até 75% e as etapas seguintes completam o resto. "
+    "Quando a música fica pronta na pasta, aparece um <b>✓</b> ao lado do nome dela. "
+    "No menu de faixas com erro de playlists do YouTube, cada faixa com nome conhecido "
+    "tem botões que copiam a busca dela no YouTube Music e no YouTube."
+))
 story.append(h3("Deno, erros e fechar o app (versão .exe Tauri)"))
 story.append(body(
     "Além do yt-dlp e do FFmpeg, o app baixa sozinho o <b>Deno</b> (~45 MB) para "

@@ -28,6 +28,18 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "dep_ytdlp": "yt-dlp:",
     "dep_ffmpeg": "FFmpeg:",
     "dep_deno": "Deno:",
+    "phase_download": "Baixando",
+    "pp_MetadataParser": "Lendo as informações da faixa",
+    "pp_ThumbnailsConvertor": "Preparando a capa",
+    "pp_ExtractAudio": "Convertendo o áudio",
+    "pp_Merger": "Juntando vídeo e áudio",
+    "pp_Metadata": "Aplicando metadados",
+    "pp_EmbedThumbnail": "Incorporando a capa",
+    "pp_EmbedSubtitle": "Incorporando legendas",
+    "pp_MoveFiles": "Finalizando",
+    "pp_other": "Processando",
+    "copy_search_music": "Copiar busca do YouTube Music",
+    "copy_search_youtube": "Copiar busca do YouTube",
     "pause_on_error": "Pausar a fila quando um item der erro",
     "error_pause_title": "Erro no download",
     "error_continue": "Continuar fila",
@@ -210,6 +222,18 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "dep_ytdlp": "yt-dlp:",
     "dep_ffmpeg": "FFmpeg:",
     "dep_deno": "Deno:",
+    "phase_download": "Downloading",
+    "pp_MetadataParser": "Reading track information",
+    "pp_ThumbnailsConvertor": "Preparing the cover",
+    "pp_ExtractAudio": "Converting the audio",
+    "pp_Merger": "Merging video and audio",
+    "pp_Metadata": "Writing metadata",
+    "pp_EmbedThumbnail": "Embedding the cover",
+    "pp_EmbedSubtitle": "Embedding subtitles",
+    "pp_MoveFiles": "Finishing",
+    "pp_other": "Processing",
+    "copy_search_music": "Copy YouTube Music search",
+    "copy_search_youtube": "Copy YouTube search",
     "pause_on_error": "Pause the queue when an item fails",
     "error_pause_title": "Download error",
     "error_continue": "Continue queue",
@@ -409,6 +433,10 @@ export const HELP: Record<string, [string, string][]> = {
       "Com 'Guardar thumbnail' marcado numa playlist, só a capa DA PLAYLIST é salva (playlistcover.jpg), não uma por faixa. O botão 'Verificar disponibilidade da playlist' testa todas as faixas sem baixar nada e lista no Log as indisponíveis, com a posição e as músicas vizinhas."
     ],
     [
+      "Barra de progresso por etapa (versão .exe Tauri)",
+      "Durante o download, a linha da música atual mostra a etapa: Baixando, Preparando a capa, Convertendo o áudio, Aplicando metadados, Incorporando a capa e Finalizando. A barra avança junto: o download vai até 75% e as etapas seguintes completam o resto. Quando a música está pronta na pasta, aparece um ✓ ao lado do nome dela."
+    ],
+    [
       "Deno, erros e fechar o app (versão .exe Tauri)",
       "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele alguns formatos somem ('Requested format is not available'). Quando um item da fila dá erro, a fila pausa e mostra o motivo, com as opções Continuar fila, Tentar de novo ou Cancelar fila (dá para desligar em Configurações → Fila). Fechar a janela sempre pede confirmação."
     ],
@@ -422,7 +450,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Playlist: faixas com erro e substitutas (versão .exe Tauri)",
-      "Quando faixas de uma playlist falham (vídeo indisponível, bloqueio do YouTube...), a linha dela na fila ganha o botão 'Faixas com erro'. Ele lista cada faixa com a posição, o nome (clique para copiar 'Música - Artista'; vídeos apagados ou privados não têm nome) e o link: clique no começo do link para copiar o link inteiro, ou no ID para copiar só o ID. Cole ao lado o link de uma música substituta e clique em 'Baixar substitutas': ela é baixada na mesma pasta e as datas do arquivo são ajustadas para ela ficar exatamente entre as faixas vizinhas. Em Configurações → Fila você escolhe quando a fila pausa: depois de cada playlist, no fim de tudo (as setas passam de uma playlist para a outra) ou nunca. Aberta pelo botão da playlist, a janela só fecha depois de baixar ou continuar; aberta pelo botão 'Faixas com erro' no topo da Fila e Log, ela passa para a próxima playlist com erro."
+      "Quando faixas de uma playlist falham (vídeo indisponível, bloqueio do YouTube...), a linha dela na fila ganha o botão 'Faixas com erro'. Ele lista cada faixa com a posição, o nome (clique para copiar 'Música - Artista'; vídeos apagados ou privados não têm nome), botões que copiam a busca dela no YouTube Music e no YouTube (só em playlists do YouTube) e o link: clique no começo do link para copiar o link inteiro, ou no ID para copiar só o ID. Cole ao lado o link de uma música substituta e clique em 'Baixar substitutas': ela é baixada na mesma pasta e as datas do arquivo são ajustadas para ela ficar exatamente entre as faixas vizinhas. Em Configurações → Fila você escolhe quando a fila pausa: depois de cada playlist, no fim de tudo (as setas passam de uma playlist para a outra) ou nunca. Aberta pelo botão da playlist, a janela só fecha depois de baixar ou continuar; aberta pelo botão 'Faixas com erro' no topo da Fila e Log, ela passa para a próxima playlist com erro."
     ],
     [
       "Cookies contra o bloqueio 'não é um robô' (versão .exe Tauri)",
@@ -483,6 +511,10 @@ export const HELP: Record<string, [string, string][]> = {
       "With 'Save thumbnail' checked on a playlist, only the PLAYLIST cover is saved (playlistcover.jpg), not one per track. The 'Check playlist availability' button tests every track without downloading and lists unavailable ones in the Log, with position and neighbouring tracks."
     ],
     [
+      "Progress bar by step (Tauri .exe version)",
+      "While downloading, the current track's line shows the step: Downloading, Preparing the cover, Converting the audio, Writing metadata, Embedding the cover and Finishing. The bar follows it: the download goes up to 75% and the next steps fill the rest. When the track is ready in the folder, a ✓ appears next to its name."
+    ],
+    [
       "Deno, errors and closing the app (Tauri .exe version)",
       "Besides yt-dlp and FFmpeg, the app downloads Deno (~45 MB) into data\\bin on its own: YouTube requires solving a JavaScript challenge, and without it some formats disappear ('Requested format is not available'). When a queue item fails, the queue pauses and shows the reason, with Continue queue, Try again or Cancel queue (this can be turned off in Settings → Queue). Closing the window always asks for confirmation."
     ],
@@ -496,7 +528,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Playlist: failed tracks and replacements (Tauri .exe version)",
-      "When playlist tracks fail (unavailable video, YouTube block...), its row in the queue gets a 'Failed tracks' button. It lists each track with its position, name (click to copy 'Song - Artist'; deleted or private videos have no name) and link: click the start of the link to copy the whole link, or the ID to copy only the ID. Paste a replacement song link next to it and click 'Download replacements': it is downloaded to the same folder and the file dates are set so it sits exactly between the neighbouring tracks. In Settings → Queue you choose when the queue pauses: after each playlist, at the very end (the arrows move from one playlist to the next) or never. Opened from a playlist's button, the window just closes after you download or continue; opened from the 'Failed tracks' button at the top of Queue & Log, it moves on to the next playlist with failed tracks."
+      "When playlist tracks fail (unavailable video, YouTube block...), its row in the queue gets a 'Failed tracks' button. It lists each track with its position, name (click to copy 'Song - Artist'; deleted or private videos have no name), buttons that copy its YouTube Music and YouTube search (only for YouTube playlists) and link: click the start of the link to copy the whole link, or the ID to copy only the ID. Paste a replacement song link next to it and click 'Download replacements': it is downloaded to the same folder and the file dates are set so it sits exactly between the neighbouring tracks. In Settings → Queue you choose when the queue pauses: after each playlist, at the very end (the arrows move from one playlist to the next) or never. Opened from a playlist's button, the window just closes after you download or continue; opened from the 'Failed tracks' button at the top of Queue & Log, it moves on to the next playlist with failed tracks."
     ],
     [
       "Cookies against the 'not a bot' block (Tauri .exe version)",

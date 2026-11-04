@@ -29,6 +29,7 @@ export interface Job {
   count: string;
   // playlists: faixas que falharam e arquivos já na pasta, por posição na playlist
   failed?: Failed[];
+  phase?: string; // faixa atual: 'download', etapa do pós-processamento (ExtractAudio...) ou 'done'
   // retomada depois de um bloqueio do YouTube: o que já tinha baixado/falhado antes
   prevSaved?: { id: string; idx: string; file: string }[];
   prevFailed?: Failed[];
@@ -47,6 +48,19 @@ export interface Failed {
 
 export const PROGRESS_RE = /\[download\]\s+(\d{1,3}(?:\.\d+)?)%/;
 export const NOW_PLAYING_RE = /^(BDL|ADL)@@@(.*)$/;
+/** Etapas depois do download (--progress-template postprocess): PP@@@started|finished@@@Nome */
+export const PP_RE = /^PP@@@(\w+)@@@(\w+)/;
+/** Onde a barra fica quando cada etapa começa; o download em si vai de 0 a 75%. */
+export const PP_PROGRESS: Record<string, number> = {
+  ThumbnailsConvertor: 78, ExtractAudio: 82, Merger: 82, Metadata: 90, EmbedThumbnail: 94, EmbedSubtitle: 94, MoveFiles: 98,
+};
+
+/** Links de busca da faixa no YouTube Music e no YouTube ("Try Again - Aaliyah" -> "Try+Again+-+Aaliyah"). */
+export function searchUrls(query: string): { music: string; youtube: string } {
+  const q = encodeURIComponent(query).replace(/%20/g, '+');
+  return { music: `https://music.youtube.com/search?q=${q}`, youtube: `https://www.youtube.com/results?search_query=${q}` };
+}
+export const isYouTube = (url: string) => /^https?:\/\/([\w-]+\.)*(youtube\.com|youtu\.be)\//i.test(url.trim());
 export const THUMB_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
 
 // Recorte quadrado (1:1) da capa via --ppa. As aspas simples protegem as vírgulas
@@ -185,6 +199,7 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
     '--ffmpeg-location', ffdir, ...jsRuntimeArgs(ffdir),
     '--print', `before_dl:BDL@@@${fields}`,
     '--print', `after_move:ADL@@@${fields}`,
+    '--progress-template', 'postprocess:PP@@@%(progress.status)s@@@%(progress.postprocessor)s',
     '-P', s.folder, ...(tempDir ? ['-P', `temp:${tempDir}`] : []),
     '-o', str('output_template') || outTemplate,
     ...cookieArgs(s),

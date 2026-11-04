@@ -65,6 +65,12 @@ HELP_CONTENT = {
          "salva (playlistcover.jpg), não uma por faixa. O botão 'Verificar "
          "disponibilidade da playlist' testa todas as faixas sem baixar nada e "
          "lista no Log as indisponíveis, com a posição e as músicas vizinhas."),
+        ("Barra de progresso por etapa (versão .exe Tauri)",
+         "Durante o download, a linha da música atual mostra a etapa: Baixando, "
+         "Preparando a capa, Convertendo o áudio, Aplicando metadados, "
+         "Incorporando a capa e Finalizando. A barra avança junto: o download vai "
+         "até 75% e as etapas seguintes completam o resto. Quando a música está "
+         "pronta na pasta, aparece um ✓ ao lado do nome dela."),
         ("Deno, erros e fechar o app (versão .exe Tauri)",
          "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para "
          "data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele "
@@ -94,7 +100,8 @@ HELP_CONTENT = {
          "Quando faixas de uma playlist falham (vídeo indisponível, bloqueio do "
          "YouTube...), a linha dela na fila ganha o botão 'Faixas com erro'. Ele "
          "lista cada faixa com a posição, o nome (clique para copiar 'Música - "
-         "Artista'; vídeos apagados ou privados não têm nome) e o link: clique no "
+         "Artista'; vídeos apagados ou privados não têm nome), botões que copiam a "
+         "busca dela no YouTube Music e no YouTube (só em playlists do YouTube) e o link: clique no "
          "começo do link para copiar o link inteiro, ou no ID para copiar só o ID. "
          "Cole ao lado o link de uma música substituta e clique em 'Baixar "
          "substitutas': ela é baixada na mesma pasta e as datas do arquivo são "
@@ -203,6 +210,12 @@ HELP_CONTENT = {
          "is saved (playlistcover.jpg), not one per track. The 'Check playlist "
          "availability' button tests every track without downloading and lists "
          "unavailable ones in the Log, with position and neighbouring tracks."),
+        ("Progress bar by step (Tauri .exe version)",
+         "While downloading, the current track's line shows the step: "
+         "Downloading, Preparing the cover, Converting the audio, Writing "
+         "metadata, Embedding the cover and Finishing. The bar follows it: the "
+         "download goes up to 75% and the next steps fill the rest. When the track "
+         "is ready in the folder, a ✓ appears next to its name."),
         ("Deno, errors and closing the app (Tauri .exe version)",
          "Besides yt-dlp and FFmpeg, the app downloads Deno (~45 MB) into "
          "data\\bin on its own: YouTube requires solving a JavaScript challenge, "
@@ -234,7 +247,8 @@ HELP_CONTENT = {
          "When playlist tracks fail (unavailable video, YouTube block...), its "
          "row in the queue gets a 'Failed tracks' button. It lists each track "
          "with its position, name (click to copy 'Song - Artist'; deleted or "
-         "private videos have no name) and link: click the start of the link to "
+         "private videos have no name), buttons that copy its YouTube Music and "
+         "YouTube search (only for YouTube playlists) and link: click the start of the link to "
          "copy the whole link, or the ID to copy only the ID. Paste a "
          "replacement song link next to it and click 'Download replacements': "
          "it is downloaded to the same folder and the file dates are set so it "

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.8
+
+### Added
+- The progress bar follows each step of the current track: downloading (up to 75%), preparing the cover, converting the audio, writing metadata, embedding the cover and finishing. The step is shown next to the track name, and a ✓ appears when the track is ready in the folder.
+- In the failed tracks window, tracks with a known name get two buttons that copy a search link for them, on YouTube Music (for example `https://music.youtube.com/search?q=Try+Again+-+Aaliyah`) and on YouTube. Only for YouTube playlists.
+
 ## v1.3.7
 
 ### Added

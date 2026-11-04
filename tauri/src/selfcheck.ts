@@ -50,6 +50,13 @@ async function run(): Promise<void> {
   assert.equal(after(cmdFor(job('video', { folder: 'C:/v' })), '-o'), '%(title)s - %(channel,uploader)s.%(ext)s');
   assert(!c.join(' ').includes('uploader') && c.join(' ').includes('%(artist|)s'));
   assert(c.includes('--progress'), 'sem --progress o --print esconde o progresso');
+  assert(c.includes('postprocess:PP@@@%(progress.status)s@@@%(progress.postprocessor)s'));
+  assert.equal(core.PP_RE.exec('PP@@@started@@@ExtractAudio')?.[2], 'ExtractAudio');
+  const busca = core.searchUrls('Try Again - Aaliyah');
+  assert.equal(busca.music, 'https://music.youtube.com/search?q=Try+Again+-+Aaliyah');
+  assert.equal(busca.youtube, 'https://www.youtube.com/results?search_query=Try+Again+-+Aaliyah');
+  assert(core.isYouTube('https://music.youtube.com/playlist?list=X') && core.isYouTube('https://youtu.be/abc'));
+  assert(!core.isYouTube('https://soundcloud.com/a/sets/b') && !core.isYouTube('https://notyoutube.com.evil/x'));
   assert.equal(after(c, '--js-runtimes'), core.path.join('bin', 'deno.exe').replace(/^/, 'deno:'));
   assert(after(c, '--print').endsWith('@@@%(id)s@@@%(filepath|)s') && !c.includes('--cookies-from-browser'));
 

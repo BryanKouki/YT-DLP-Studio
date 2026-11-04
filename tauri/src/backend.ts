@@ -345,6 +345,8 @@ async function runJob(job: core.Job): Promise<void> {
       if (now) {
         const [nowTitle = '', nowArtist = '', idx = '', count = '', id = '', file = ''] = now[2].split('@@@');
         Object.assign(job, { nowTitle, nowArtist: nowArtist.trim(), idx: idx.trim(), count: count.trim() });
+        // BDL = faixa começou; ADL = faixa pronta na pasta (✓ ao lado do nome)
+        Object.assign(job, now[1] === 'BDL' ? { phase: 'download', progress: 0 } : { phase: 'done', progress: 100 });
         if (now[1] === 'ADL' && file) saved.push({ id, idx: idx.trim(), file });
         send('job', job);
         send('now', { id: job.id, phase: now[1] === 'BDL' ? 'start' : 'done' });
@@ -371,9 +373,20 @@ async function runJob(job: core.Job): Promise<void> {
           setTimeout(() => log(hint)); // depois da linha de erro original
         }
       }
+      const pp = core.PP_RE.exec(line);
+      if (pp) {
+        // depois do ✓ o yt-dlp já roda etapas da PRÓXIMA faixa antes de anunciá-la: o ✓ fica até ela começar
+        if (pp[1] === 'started' && job.phase !== 'done') {
+          job.phase = pp[2];
+          job.progress = Math.max(job.progress, core.PP_PROGRESS[pp[2]] ?? job.progress);
+          send('job', job);
+        }
+        return;
+      }
       const pct = core.PROGRESS_RE.exec(line);
       if (pct) {
-        job.progress = parseFloat(pct[1]);
+        job.phase = 'download';
+        job.progress = parseFloat(pct[1]) * 0.75; // o resto da barra é o pós-processamento
         send('job', job);
         return; // só move a barra; não enche o Log com uma linha por porcentagem
       }
@@ -491,7 +504,7 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
     const code = await runLines(cmd[0], cmd.slice(1), (line) => {
       const now = core.NOW_PLAYING_RE.exec(line);
       if (now?.[1] === 'ADL') file = now[2].split('@@@')[5] ?? '';
-      else if (!now && !core.PROGRESS_RE.test(line)) log(line);
+      else if (!now && !core.PROGRESS_RE.test(line) && !core.PP_RE.test(line)) log(line);
     }).done;
     if (code !== 0 || !file) {
       f.state = 'error';

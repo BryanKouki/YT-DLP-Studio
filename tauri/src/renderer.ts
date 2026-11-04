@@ -1,6 +1,6 @@
 /** Interface: abas, diálogos e i18n. Só conversa com o resto do app por `api` (backend.ts). */
 import { api } from './backend.js';
-import { linksFrom } from './core.js';
+import { isYouTube, linksFrom, searchUrls } from './core.js';
 import { HELP, STRINGS } from './i18n.js';
 
 const cfg: Record<string, any> = structuredClone(api.init.settings);
@@ -377,6 +377,24 @@ function renderJobs(): void {
   paintSummary();
 }
 
+const PHASES = new Set(['MetadataParser', 'ThumbnailsConvertor', 'ExtractAudio', 'Merger', 'Metadata', 'EmbedThumbnail', 'EmbedSubtitle', 'MoveFiles']);
+
+/** O que está acontecendo com a faixa atual: baixando, convertendo, capa, metadados... */
+function phaseLabel(job: any): string {
+  if (!job.phase || job.phase === 'download') return t('phase_download');
+  return t(PHASES.has(job.phase) ? `pp_${job.phase}` : 'pp_other');
+}
+
+/** Linha da faixa atual: "Etapa · Título - Artista (X de Y)", ou ✓ quando ela já está na pasta. */
+function paintTrack(el: HTMLElement, job: any): void {
+  if (job.phase !== 'done') {
+    el.textContent = `${phaseLabel(job)} · ${nowLabel(job)}`;
+    return;
+  }
+  if (!el.querySelector('.done-check')) el.innerHTML = '<svg class="done-check"><use href="#i-check"/></svg><span></span>';
+  $('span', el).textContent = nowLabel(job); // vem do yt-dlp: só textContent
+}
+
 function paintJob(job: any): void {
   const row = document.getElementById(`job-${job.id}`);
   if (!row) return;
@@ -396,7 +414,8 @@ function paintJob(job: any): void {
   $('.tag', row).textContent = `${t(`tab_${job.mode}`)} · ${position}`;
   $('.name', row).textContent = job.name || [job.title, job.artist].filter(Boolean).join(' - ') || job.url;
   $('.name', row).title = job.url;
-  $('.state', row).textContent = state;
+  if (job.status === 'downloading' && job.nowTitle) paintTrack($('.state', row), job);
+  else $('.state', row).textContent = state;
   $('.cancel', row).textContent = t('cancel_current');
   $('.remove', row).title = t('remove_item');
   $('.play', row).title = t('start_item');
@@ -435,7 +454,10 @@ function onJob(job: any): void {
   if (failedJobId === job.id) paintFailedStates(job);
   const tab = downloadTabs[job.mode];
   const name = job.name || job.title || job.url;
-  if (job.status === 'downloading') tab.setStatus(job.nowTitle ? nowLabel(job) : `${t('status_downloading')} ${name}`);
+  if (job.status === 'downloading') {
+    tab.setStatus(!job.nowTitle ? `${t('status_downloading')} ${name}`
+      : job.phase === 'done' ? `✓ ${nowLabel(job)}` : `${phaseLabel(job)} · ${nowLabel(job)}`);
+  }
   else tab.setStatus(`${t(`status_${job.status}`)} — ${name}`);
   tab.setProgress(job.status === 'downloading' ? job.progress : job.status === 'done' ? 100 : 0);
   if (before !== job.status && job.status === 'done') toast(`${t('status_done')}: ${name}`);
@@ -488,7 +510,9 @@ function openFailed(jobId: string, fromTop = false): void {
     row.className = 'fail';
     row.dataset.id = f.id;
     row.innerHTML = '<div class="row"><b class="pos"></b><button type="button" class="copy-name grow"></button>' +
-      '<span class="state small"></span></div><div class="reason muted small"></div><div class="row">' +
+      '<span class="state small"></span></div><div class="reason muted small"></div>' +
+      '<div class="row search-links"><button type="button" class="ghost small"></button>' +
+      '<button type="button" class="ghost small"></button></div><div class="row">' +
       '<span class="copy-link"><button type="button"></button><button type="button" class="id"></button></span>' +
       '<input class="grow"></div>';
     $('.pos', row).textContent = `${f.pos || '?'}.`;
@@ -501,6 +525,16 @@ function openFailed(jobId: string, fromTop = false): void {
     name.title = known ? t('failed_copy_name') : t('failed_no_name');
     name.onclick = () => copyText(song, name);
     $('.reason', row).textContent = $('.reason', row).title = f.reason;
+    // links de busca prontos, só para playlists do YouTube e faixas com nome conhecido
+    $('.search-links', row).hidden = !(known && isYouTube(job.url));
+    const search = searchUrls(song);
+    const [onMusic, onYouTube] = $$<HTMLButtonElement>('.search-links button', row);
+    onMusic.textContent = t('copy_search_music');
+    onMusic.title = search.music;
+    onMusic.onclick = () => copyText(search.music, onMusic);
+    onYouTube.textContent = t('copy_search_youtube');
+    onYouTube.title = search.youtube;
+    onYouTube.onclick = () => copyText(search.youtube, onYouTube);
     const [whole, id] = $$<HTMLButtonElement>('.copy-link button', row);
     whole.textContent = prefix;
     whole.title = prefix + f.id;
