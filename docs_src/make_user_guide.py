@@ -206,6 +206,16 @@ story.append(body(
     "No menu de faixas com erro de playlists do YouTube, cada faixa com nome conhecido "
     "tem botões que copiam a busca dela no YouTube Music e no YouTube."
 ))
+story.append(h3("Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)"))
+story.append(body(
+    "Em Configurações → Fila, <b>Músicas baixadas ao mesmo tempo em cada playlist</b> "
+    "(1 a 5, padrão 1) divide a playlist entre vários downloads simultâneos. Com 3, "
+    "uma playlist de teste baixou em cerca de metade do tempo. No fim, as datas dos "
+    "arquivos são ajustadas para a ordem da playlist, e o .m3u8, a capa e as faixas "
+    "com erro funcionam igual. Mais downloads juntos aumentam a chance de bloqueio do "
+    "YouTube. No menu de faixas com erro, <b>Ignorar esta música</b> tira da contagem "
+    "uma faixa para a qual você não achou substituta; <b>Desfazer</b> volta atrás."
+))
 story.append(h3("Deno, erros e fechar o app (versão .exe Tauri)"))
 story.append(body(
     "Além do yt-dlp e do FFmpeg, o app baixa sozinho o <b>Deno</b> (~45 MB) para "

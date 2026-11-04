@@ -759,6 +759,13 @@ story.append(bullets([
     "0 --write-thumbnail</tt>), sem tocar nas faixas; capas por faixa só com "
     "<tt>save_track_covers</tt> (e <tt>-o \"pl_thumbnail:\"</tt> vazio, para não "
     "gravar a capa da playlist com o nome dela).",
+    "Desempenho (1.4.0): o yt-dlp é a versão em pasta (<tt>yt-dlp_win.zip</tt> em "
+    "<tt>data\\bin\\yt-dlp\\</tt>), que abre em ~1 s contra 4-7 s da de arquivo único. "
+    "Uma única consulta <tt>--flat-playlist --no-simulate</tt> devolve o nome da "
+    "playlist, os índices das faixas e grava a capa da playlist em <tt>data\\tmp</tt>. "
+    "Com <tt>parallel_tracks</tt> &gt; 1, <tt>splitPlaylist()</tt> divide os índices "
+    "(<tt>core.splitRoundRobin</tt>) entre vários processos e <tt>stampInOrder()</tt> "
+    "reajusta as datas dos arquivos na ordem da playlist.",
     "Nome na fila: a busca automática usa <tt>--flat-playlist</tt> e devolve "
     "<tt>%(playlist_title)s</tt>; itens adicionados sem nome são nomeados em "
     "segundo plano, um por vez (<tt>nameLater()</tt>). <tt>job.name</tt> só é "

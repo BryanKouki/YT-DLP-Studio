@@ -62,6 +62,7 @@ const settings: Record<string, any> = {
   keep_video: false,
   sub_langs: 'en.*',
   sub_format: '',
+  parallel_tracks: '1', // músicas ao mesmo tempo em cada playlist (1 a 5)
   pause_on_error: true, // item com erro pausa a fila: continuar, tentar de novo ou cancelar
   pause_failed: 'each', // faixas de playlist falharam: 'each' pausa depois da playlist, 'end' no fim da fila, 'off' não pausa
   use_cookies: false,
@@ -81,7 +82,9 @@ function saveSettings(patch: Record<string, unknown>): void {
 }
 
 const BIN = path.join(INIT.dir, 'bin');
-const YTDLP = path.join(BIN, 'yt-dlp.exe');
+// versão em pasta do yt-dlp: abre em ~1 s; a de arquivo único se descompacta a cada execução (4-7 s medidos)
+const YTDLP_DIR = path.join(BIN, 'yt-dlp');
+const YTDLP = path.join(YTDLP_DIR, 'yt-dlp.exe');
 const FFMPEG = path.join(BIN, 'ffmpeg.exe');
 const FFPROBE = path.join(BIN, 'ffprobe.exe');
 const DENO = path.join(BIN, 'deno.exe');
@@ -177,11 +180,11 @@ async function closeBrowserForCookies(job: core.Job): Promise<void> {
 
 // ---- dependências (yt-dlp + FFmpeg em data/bin; nada vem embutido no .exe) -----------
 
-const YTDLP_URL = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe';
+const YTDLP_URL = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_win.zip';
 const FFMPEG_URL = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip';
 const DENO_URL = 'https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip';
 const DEPS = {
-  ytdlp: { exe: YTDLP, versionArg: '--version', size: '15MB' }, // o texto do i18n já põe o "~"
+  ytdlp: { exe: YTDLP, versionArg: '--version', size: '25MB' }, // o texto do i18n já põe o "~"
   ffmpeg: { exe: FFMPEG, versionArg: '-version', size: '100MB' },
   deno: { exe: DENO, versionArg: '--version', size: '45MB' },
 };
@@ -212,7 +215,12 @@ async function installDep(component: Dep): Promise<void> {
   try {
     await invoke('mkdir', { path: BIN });
     if (component === 'ytdlp') {
-      await download(YTDLP_URL, YTDLP, onPct);
+      const zip = path.join(BIN, 'yt-dlp.zip');
+      await download(YTDLP_URL, zip, onPct);
+      await invoke('mkdir', { path: YTDLP_DIR });
+      await runLines(INIT.tar, ['-xf', zip, '-C', YTDLP_DIR], () => {}, true, 120000).done;
+      await invoke('remove', { path: zip });
+      await invoke('remove', { path: path.join(BIN, 'yt-dlp.exe') }); // a versão antiga, de arquivo único
     } else if (component === 'deno') {
       const zip = path.join(BIN, 'deno.zip');
       await download(DENO_URL, zip, onPct);
@@ -247,7 +255,7 @@ async function ensureDeps(force = false, initial = false): Promise<void> {
 
 let jobs: core.Job[] = [];
 let running = false;
-let currentId = 0;
+let currentIds: number[] = []; // processos do yt-dlp do item atual (vários com "músicas ao mesmo tempo")
 let canceled = false;
 let botCookies = false; // "só quando bloquear": virou true no primeiro bloqueio desta sessão
 
@@ -291,7 +299,7 @@ async function runQueue(only?: core.Job): Promise<void> {
 }
 
 /** Faixas com erro que ainda não ganharam substituta. */
-const remaining = (job: core.Job) => job.failed?.filter((f) => f.state !== 'done').length ?? 0;
+const remaining = (job: core.Job) => job.failed?.filter((f) => f.state !== 'done' && f.state !== 'ignored').length ?? 0;
 
 /** Mensagens do yt-dlp que têm uma saída conhecida: explica no Log uma vez por download. */
 const BOT_RE = /Sign in to confirm you.re not a bot/;
@@ -306,7 +314,7 @@ const HINTS: [RegExp, string][] = [
 function cancelCurrent(): void {
   if (!running) return;
   canceled = true;
-  if (currentId) kill(currentId);
+  for (const id of currentIds) kill(id);
 }
 
 async function runJob(job: core.Job): Promise<void> {
@@ -328,8 +336,15 @@ async function runJob(job: core.Job): Promise<void> {
   if (job.options.use_cookies) await closeBrowserForCookies(job);
   await resolvePlaylistFolder(job);
   await invoke('mkdir', { path: job.options.folder });
-  const cmd = core.buildCommand(job, core.outputTemplate(job), YTDLP, BIN, TEMP);
-  log('$ ' + cmd.map(core.shlexQuote).join(' '));
+  // "Músicas ao mesmo tempo": a playlist é dividida entre vários processos do yt-dlp
+  const parts = await splitPlaylist(job);
+  const cmds = (parts ?? [null]).map((part) => core.buildCommand(
+    part ? { ...job, options: { ...job.options, playlist_items: part.join(',') } } : job,
+    core.outputTemplate(job), YTDLP, BIN, TEMP));
+  for (const cmd of cmds) log('$ ' + cmd.map(core.shlexQuote).join(' '));
+  const parallel = cmds.length > 1;
+  const total = parts?.flat().length ?? 0;
+  let doneHere = 0;
 
   let code = -1;
   // numa retomada, o que já tinha baixado/falhado antes do bloqueio continua valendo
@@ -340,13 +355,16 @@ async function runJob(job: core.Job): Promise<void> {
   let lastError = ''; // última linha ERROR do yt-dlp: vira o motivo mostrado na fila
   let cookieFailed: '' | 'dpapi' | 'lock' = ''; // dpapi = criptografia que o yt-dlp não abre; lock = navegador aberto
   if (!canceled) {
-    const run = runLines(cmd[0], cmd.slice(1), (line) => {
+    const onLine = (line: string) => {
       const now = core.NOW_PLAYING_RE.exec(line);
       if (now) {
         const [nowTitle = '', nowArtist = '', idx = '', count = '', id = '', file = ''] = now[2].split('@@@');
         Object.assign(job, { nowTitle, nowArtist: nowArtist.trim(), idx: idx.trim(), count: count.trim() });
         // BDL = faixa começou; ADL = faixa pronta na pasta (✓ ao lado do nome)
-        Object.assign(job, now[1] === 'BDL' ? { phase: 'download', progress: 0 } : { phase: 'done', progress: 100 });
+        if (now[1] === 'ADL') doneHere++;
+        // com várias ao mesmo tempo a barra mostra a playlist inteira (faixas prontas / total)
+        Object.assign(job, now[1] === 'BDL' ? { phase: 'download', progress: parallel ? job.progress : 0 }
+          : { phase: 'done', progress: parallel ? (doneHere / total) * 100 : 100 });
         if (now[1] === 'ADL' && file) saved.push({ id, idx: idx.trim(), file });
         send('job', job);
         send('now', { id: job.id, phase: now[1] === 'BDL' ? 'start' : 'done' });
@@ -358,7 +376,7 @@ async function runJob(job: core.Job): Promise<void> {
       if (core.COOKIE_ERR_RE.test(line)) cookieFailed = /DPAPI/.test(line) ? 'dpapi' : 'lock';
       if (BOT_RE.test(line) && !job.options.use_cookies && settings.use_cookies && settings.cookies_on_bot && !botHit) {
         botHit = true;
-        kill(currentId); // para já: as próximas faixas também falhariam; retoma com cookies
+        for (const id of currentIds) kill(id); // para já: as próximas faixas também falhariam; retoma com cookies
         return;
       }
       if (BOT_RE.test(line) && job.options.use_cookies && !hinted.has('bot+cookies')) {
@@ -378,7 +396,7 @@ async function runJob(job: core.Job): Promise<void> {
         // depois do ✓ o yt-dlp já roda etapas da PRÓXIMA faixa antes de anunciá-la: o ✓ fica até ela começar
         if (pp[1] === 'started' && job.phase !== 'done') {
           job.phase = pp[2];
-          job.progress = Math.max(job.progress, core.PP_PROGRESS[pp[2]] ?? job.progress);
+          if (!parallel) job.progress = Math.max(job.progress, core.PP_PROGRESS[pp[2]] ?? job.progress);
           send('job', job);
         }
         return;
@@ -386,24 +404,30 @@ async function runJob(job: core.Job): Promise<void> {
       const pct = core.PROGRESS_RE.exec(line);
       if (pct) {
         job.phase = 'download';
-        job.progress = parseFloat(pct[1]) * 0.75; // o resto da barra é o pós-processamento
+        if (!parallel) job.progress = parseFloat(pct[1]) * 0.75; // o resto da barra é o pós-processamento
         send('job', job);
         return; // só move a barra; não enche o Log com uma linha por porcentagem
       }
       log(line);
-    });
-    currentId = run.id;
-    code = await run.done;
-    currentId = 0;
+    };
+    const runs = cmds.map((cmd) => runLines(cmd[0], cmd.slice(1), onLine));
+    currentIds = runs.map((run) => run.id);
+    const codes = await Promise.all(runs.map((run) => run.done));
+    currentIds = [];
+    code = codes.find((c) => c !== 0) ?? 0;
   }
+  // baixadas fora de ordem: datas de criação/modificação voltam à ordem da playlist (é por elas que você ordena)
+  if (parallel) await stampInOrder(saved);
 
   // "só quando bloquear": liga os cookies até fechar o app e continua da faixa onde o YouTube bloqueou
   if (botHit && !canceled) {
     botCookies = true;
     job.prevSaved = saved;
     job.prevFailed = failed.filter((f) => !BOT_RE.test(f.reason));
-    const from = core.resumeFrom(saved.map((s) => s.idx));
-    if (job.options._is_playlist && from && !String(settings.playlist_items ?? '').trim()) job.options.playlist_items = from;
+    const doneIdx = new Set(saved.map((s) => Number(s.idx)));
+    // em partes, faixas anteriores podem ter ficado pela metade: retoma exatamente as que faltam
+    const from = parallel ? parts!.flat().filter((i) => !doneIdx.has(Number(i))).join(',') : core.resumeFrom(saved.map((s) => s.idx));
+    if (job.options._is_playlist && from && (parallel || !String(settings.playlist_items ?? '').trim())) job.options.playlist_items = from;
     Object.assign(job, { status: 'queued', progress: 0 });
     log(`[cookies] O YouTube bloqueou ("not a bot"). Cookies ativados até fechar o app; ` +
       (from ? `continuando a partir da faixa ${parseInt(from)}.` : 'recomeçando este item.'));
@@ -442,7 +466,15 @@ async function runJob(job: core.Job): Promise<void> {
     log(`Concluído: ${job.url}` + (partial ? ` (${job.failed!.length} faixa(s) com erro)` : ''));
     const o = job.options;
     if (o._is_playlist && o.save_thumbnail) { // numa playlist, "Guardar thumbnail" = capa da playlist
-      await ytdlpLines(core.playlistCoverArgs(job.url, o.folder), true, 60000);
+      const files: [string, number][] = await invoke('list_dir', { path: TEMP });
+      const early = files.find(([f]) => f.startsWith(`pl_${job.id}.`));
+      if (early) { // já veio na consulta inicial
+        const src = path.join(TEMP, early[0]);
+        await invoke('copy', { from: src, to: path.join(o.folder, `playlist_thumb${path.extname(early[0])}`) });
+        await invoke('remove', { path: src });
+      } else {
+        await ytdlpLines(core.playlistCoverArgs(job.url, o.folder), true, 60000); // ex.: item retomado depois de fechar
+      }
       await promoteFolderCover(o.folder, job.mode === 'audio');
       await cleanupStrayThumbnails(o.folder); // apaga o playlist_thumb.* original; fica só playlistcover.jpg
       log('Capa da playlist salva (playlistcover.jpg)');
@@ -457,6 +489,34 @@ async function runJob(job: core.Job): Promise<void> {
 }
 
 interface Saved { id: string; idx: string; file: string }
+
+/** Índices das faixas (respeitando "Itens da playlist" e a retomada) divididos entre os processos.
+ *  null = um processo só (opção em 1, não é playlist ou a listagem falhou). */
+const parallelCount = () => Math.min(5, Math.max(1, Number(settings.parallel_tracks) || 1));
+
+async function splitPlaylist(job: core.Job): Promise<string[][] | null> {
+  const n = parallelCount();
+  if (n < 2 || !job.options._is_playlist) return null;
+  const items = String(job.options.playlist_items ?? '').trim();
+  // retomada: "19,22,25" já é a lista das que faltam; senão a da consulta inicial; só lista de novo se não houver
+  let idx = /^\d+(,\d+)*$/.test(items) ? items.split(',') : job.indices ?? [];
+  job.indices = undefined; // vale só para esta rodada
+  if (!idx.length) {
+    idx = (await ytdlpLines(['--flat-playlist', '--no-warnings', '--print', '%(playlist_index)s',
+      ...(items ? ['--playlist-items', items] : []), job.url.trim()], false, 120000))
+      .map(Number).filter((i) => i > 0).map(String);
+  }
+  return idx.length > 1 ? core.splitRoundRobin(idx, n) : null;
+}
+
+/** Datas dos arquivos na ordem da playlist, 1 s entre cada (as substitutas também se guiam por elas). */
+async function stampInOrder(saved: Saved[]): Promise<void> {
+  const ordered = [...saved].sort((a, b) => Number(a.idx) - Number(b.idx));
+  const base = Date.now() - ordered.length * 1000;
+  for (const [i, s] of ordered.entries()) {
+    await invoke('set_times', { path: s.file, created: base + i * 1000, modified: base + i * 1000 });
+  }
+}
 
 /** "Criar arquivo de playlist": <nome da playlist>.m3u8 na pasta, na ordem da playlist. */
 async function writePlaylistFile(job: core.Job): Promise<void> {
@@ -490,7 +550,7 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
   if (!job?.failed) return;
   for (const f of job.failed) {
     const link = links[f.id]?.trim();
-    if (!link || f.state === 'done') continue;
+    if (!link || f.state === 'done' || f.state === 'ignored') continue;
     f.state = 'downloading';
     send('job', job);
     const sub: core.Job = {
@@ -532,12 +592,21 @@ async function resolvePlaylistFolder(job: core.Job): Promise<void> {
   if (job.options._is_playlist) return; // item baixado de novo (retomada, ▶): a subpasta já existe
   if (job.options.no_playlist) return; // "Somente este vídeo": o yt-dlp baixa só o vídeo do link
   const url = job.url.trim();
-  // só a listagem (~3 s): não abre faixa nenhuma, então não sofre com o desafio do YouTube nem com o limite de tempo.
+  // Uma chamada só, só a listagem (não abre faixa nenhuma): nome da playlist, as faixas (para dividir entre
+  // processos) e a capa da playlist. --no-simulate porque o --print sozinho não grava a capa.
   // Se a primeira tentativa falhar com cookies (navegador aberto, ilegíveis), tenta de novo sem eles.
-  const lookup = async (cookies: boolean) => (await ytdlpLines(['--flat-playlist', '--no-warnings', '--skip-download',
-    '--playlist-items', '1', '--print', '%(playlist_title|)s', url], false, 60000, cookies)).at(-1)?.trim() ?? '';
-  let name = await lookup(true);
-  if (!name && cookiesNow()) name = await lookup(false);
+  const items = String(job.options.playlist_items ?? '').trim();
+  const cover = job.options.save_thumbnail ? path.join(TEMP, `pl_${job.id}.%(ext)s`) : '';
+  if (cover) await invoke('mkdir', { path: TEMP });
+  const lookup = async (cookies: boolean) => (await ytdlpLines(['--flat-playlist', '--no-warnings', '--no-simulate',
+    '--skip-download', ...(parallelCount() > 1 ? (items ? ['--playlist-items', items] : []) : ['--playlist-items', '1']),
+    '--print', '%(playlist_title|)s\t%(playlist_index|)s',
+    ...(cover ? ['--write-thumbnail', '-o', `pl_thumbnail:${cover}`, '-o', 'thumbnail:'] : []), url], false, 120000, cookies))
+    .map((line) => line.split('\t'));
+  let rows = await lookup(true);
+  if (!rows.some(([title]) => title?.trim()) && cookiesNow()) rows = await lookup(false);
+  let name = rows.find(([title]) => title?.trim())?.[0].trim() ?? '';
+  job.indices = rows.map(([, idx]) => Number(idx)).filter((i) => i > 0).map(String);
   const listId = core.playlistIdFrom(url);
   if (!name || name.toUpperCase() === 'NA' || name === url) {
     if (!listId) return; // link sem playlist: música/vídeo avulso
@@ -721,6 +790,14 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
     return 'next';
   },
   resumeQueue: () => resumeQueue?.(),
+  /** "Ignorar esta música": sem substituta, de propósito (de novo = desfaz). */
+  ignoreFailed: (jobId: string, trackId: string) => {
+    const job = jobs.find((j) => j.id === jobId);
+    const f = job?.failed?.find((x) => x.id === trackId);
+    if (!job || !f || f.state === 'done' || f.state === 'downloading') return;
+    f.state = f.state === 'ignored' ? undefined : 'ignored';
+    send('job', job);
+  },
   /** Pausa por erro: tenta o mesmo item de novo, ou cancela o resto da fila. */
   retryPaused: () => {
     if (pausedOn) Object.assign(pausedOn, { status: 'queued', progress: 0, errorMsg: '' });

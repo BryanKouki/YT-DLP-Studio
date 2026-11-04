@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.4.0
+
+### Changed (performance)
+- yt-dlp now uses its official folder version instead of the single-file one. The single-file version unpacked itself on every run and took 4 to 7 seconds just to start; the folder version starts in about 1 second. The app runs yt-dlp several times per item, so every download starts faster. It is downloaded automatically (about 25 MB) the first time version 1.4.0 opens, and the old file is removed.
+- One lookup per playlist instead of three: the playlist name, the list of tracks and the playlist cover now come from a single yt-dlp call.
+
+### Added
+- "Tracks downloaded at the same time in each playlist" (Settings → Queue, 1 to 5, default 1). The playlist is split across several simultaneous downloads; in a test playlist, 3 at a time took 55 s against 104 s one at a time. When it finishes, the files' creation and modification dates are set back to playlist order, so sorting the folder by date still shows the playlist order, and the .m3u8, playlist cover, failed tracks and cookie resume work the same. More downloads at once raise the chance of a YouTube block.
+- "Ignore this track" in the failed tracks window, for when you cannot find a replacement: the track stops counting as pending. "Undo" reverts it.
+
 ## v1.3.9
 
 ### Fixed

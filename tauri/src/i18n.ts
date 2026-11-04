@@ -41,6 +41,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "copy_search_music": "Copiar busca do YouTube Music",
     "copy_search_youtube": "Copiar busca do YouTube",
     "pause_on_error": "Pausar a fila quando um item der erro",
+    "parallel_tracks": "Músicas baixadas ao mesmo tempo em cada playlist (mais = mais rápido, mas mais chance de bloqueio do YouTube)",
     "error_pause_title": "Erro no download",
     "error_continue": "Continuar fila",
     "error_retry": "Tentar de novo",
@@ -139,6 +140,9 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "status_done": "Concluído",
     "status_error": "Erro",
     "status_canceled": "Cancelado",
+    "status_ignored": "Ignorada",
+    "failed_ignore": "Ignorar esta música",
+    "failed_unignore": "Desfazer",
     "confirm_delete_title": "Confirmar",
     "no_link_error": "Cole ao menos um link antes de continuar.",
     "select_folder": "Selecione a pasta",
@@ -236,6 +240,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "copy_search_music": "Copy YouTube Music search",
     "copy_search_youtube": "Copy YouTube search",
     "pause_on_error": "Pause the queue when an item fails",
+    "parallel_tracks": "Tracks downloaded at the same time in each playlist (more = faster, but a higher chance of a YouTube block)",
     "error_pause_title": "Download error",
     "error_continue": "Continue queue",
     "error_retry": "Try again",
@@ -334,6 +339,9 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "status_done": "Done",
     "status_error": "Error",
     "status_canceled": "Canceled",
+    "status_ignored": "Ignored",
+    "failed_ignore": "Ignore this track",
+    "failed_unignore": "Undo",
     "confirm_delete_title": "Confirm",
     "no_link_error": "Paste at least one link before continuing.",
     "select_folder": "Select folder",
@@ -439,6 +447,10 @@ export const HELP: Record<string, [string, string][]> = {
       "Durante o download, a linha da música atual mostra a etapa: Baixando, Preparando a capa, Convertendo o áudio, Aplicando metadados, Incorporando a capa e Finalizando. A barra avança junto: o download vai até 75% e as etapas seguintes completam o resto. Quando a música está pronta na pasta, aparece um ✓ ao lado do nome dela."
     ],
     [
+      "Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)",
+      "Em Configurações → Fila, 'Músicas baixadas ao mesmo tempo em cada playlist' (1 a 5, padrão 1) divide a playlist entre vários downloads simultâneos. Com 3, uma playlist de teste baixou em cerca de metade do tempo. No fim, as datas dos arquivos são ajustadas para a ordem da playlist, e o .m3u8, a capa e as faixas com erro funcionam igual. Mais downloads juntos aumentam a chance de bloqueio do YouTube. No menu de faixas com erro, 'Ignorar esta música' tira da contagem uma faixa para a qual você não achou substituta ('Desfazer' volta atrás)."
+    ],
+    [
       "Deno, erros e fechar o app (versão .exe Tauri)",
       "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele alguns formatos somem ('Requested format is not available'). Quando um item da fila dá erro, a fila pausa e mostra o motivo, com as opções Continuar fila, Tentar de novo ou Cancelar fila (dá para desligar em Configurações → Fila). Fechar a janela sempre pede confirmação."
     ],
@@ -515,6 +527,10 @@ export const HELP: Record<string, [string, string][]> = {
     [
       "Progress bar by step (Tauri .exe version)",
       "While downloading, the current track's line shows the step: Downloading, Preparing the cover, Converting the audio, Writing metadata, Embedding the cover and Finishing. The bar follows it: the download goes up to 75% and the next steps fill the rest. When the track is ready in the folder, a ✓ appears next to its name."
+    ],
+    [
+      "Faster: tracks at the same time (Tauri .exe version)",
+      "In Settings → Queue, 'Tracks downloaded at the same time in each playlist' (1 to 5, default 1) splits the playlist across several simultaneous downloads. With 3, a test playlist downloaded in about half the time. At the end the file dates are set back to playlist order, and the .m3u8, the cover and failed tracks work the same. More downloads at once raise the chance of a YouTube block. In the failed tracks window, 'Ignore this track' removes from the count a track you could not find a replacement for ('Undo' reverts it)."
     ],
     [
       "Deno, errors and closing the app (Tauri .exe version)",

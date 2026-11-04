@@ -73,6 +73,15 @@ HELP_CONTENT = {
          "Incorporando a capa e Finalizando. A barra avança junto: o download vai "
          "até 75% e as etapas seguintes completam o resto. Quando a música está "
          "pronta na pasta, aparece um ✓ ao lado do nome dela."),
+        ("Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)",
+         "Em Configurações → Fila, 'Músicas baixadas ao mesmo tempo em cada "
+         "playlist' (1 a 5, padrão 1) divide a playlist entre vários downloads "
+         "simultâneos. Com 3, uma playlist de teste baixou em cerca de metade do "
+         "tempo. No fim, as datas dos arquivos são ajustadas para a ordem da "
+         "playlist, e o .m3u8, a capa e as faixas com erro funcionam igual. Mais "
+         "downloads juntos aumentam a chance de bloqueio do YouTube. No menu de "
+         "faixas com erro, 'Ignorar esta música' tira da contagem uma faixa para a "
+         "qual você não achou substituta ('Desfazer' volta atrás)."),
         ("Deno, erros e fechar o app (versão .exe Tauri)",
          "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para "
          "data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele "
@@ -220,6 +229,15 @@ HELP_CONTENT = {
          "metadata, Embedding the cover and Finishing. The bar follows it: the "
          "download goes up to 75% and the next steps fill the rest. When the track "
          "is ready in the folder, a ✓ appears next to its name."),
+        ("Faster: tracks at the same time (Tauri .exe version)",
+         "In Settings → Queue, 'Tracks downloaded at the same time in each "
+         "playlist' (1 to 5, default 1) splits the playlist across several "
+         "simultaneous downloads. With 3, a test playlist downloaded in about "
+         "half the time. At the end the file dates are set back to playlist "
+         "order, and the .m3u8, the cover and failed tracks work the same. More "
+         "downloads at once raise the chance of a YouTube block. In the failed "
+         "tracks window, 'Ignore this track' removes from the count a track you "
+         "could not find a replacement for ('Undo' reverts it)."),
         ("Deno, errors and closing the app (Tauri .exe version)",
          "Besides yt-dlp and FFmpeg, the app downloads Deno (~45 MB) into "
          "data\\bin on its own: YouTube requires solving a JavaScript challenge, "

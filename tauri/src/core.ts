@@ -30,6 +30,7 @@ export interface Job {
   // playlists: faixas que falharam e arquivos já na pasta, por posição na playlist
   failed?: Failed[];
   phase?: string; // faixa atual: 'download', etapa do pós-processamento (ExtractAudio...) ou 'done'
+  indices?: string[]; // faixas da playlist (da consulta inicial), para dividir entre processos
   // retomada depois de um bloqueio do YouTube: o que já tinha baixado/falhado antes
   prevSaved?: { id: string; idx: string; file: string }[];
   prevFailed?: Failed[];
@@ -43,7 +44,7 @@ export interface Failed {
   title: string;
   artist: string;
   reason: string;
-  state?: 'downloading' | 'done' | 'error'; // da substituta
+  state?: 'downloading' | 'done' | 'error' | 'ignored'; // da substituta; 'ignored' = sem substituta, de propósito
 }
 
 export const PROGRESS_RE = /\[download\]\s+(\d{1,3}(?:\.\d+)?)%/;
@@ -149,6 +150,13 @@ export function resumeFrom(doneIdx: string[]): string {
 /** ID da playlist num link do YouTube (list=...). Serve para nunca baixar uma playlist solta
  *  na pasta principal quando o nome dela não puder ser lido. */
 export const playlistIdFrom = (url: string): string => /[?&]list=([\w-]+)/.exec(url)?.[1] ?? '';
+
+/** Divide as faixas entre n processos, alternando (1,4,7 / 2,5,8 / 3,6,9): todos andam juntos pela playlist. */
+export function splitRoundRobin<T>(items: T[], n: number): T[][] {
+  const groups: T[][] = Array.from({ length: Math.max(1, Math.min(n, items.length)) }, () => []);
+  items.forEach((item, i) => groups[i % groups.length].push(item));
+  return groups;
+}
 
 /** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {

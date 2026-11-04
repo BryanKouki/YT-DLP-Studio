@@ -99,6 +99,8 @@ async function run(): Promise<void> {
   // bloqueio na 19 de 32 depois de baixar até a 18: continua da 19
   assert.equal(core.resumeFrom(['16', '17', '18']), '19:');
   assert.equal(core.resumeFrom([]), '');
+  assert.equal(JSON.stringify(core.splitRoundRobin(['1', '2', '3', '4', '5', '6', '7'], 3)), '[["1","4","7"],["2","5"],["3","6"]]');
+  assert.equal(core.splitRoundRobin(['9'], 3).length, 1); // menos faixas que processos: um processo por faixa
   assert.equal(core.playlistIdFrom('https://music.youtube.com/playlist?list=PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41'), 'PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41');
   assert.equal(core.playlistIdFrom('https://www.youtube.com/watch?v=abc&list=RDabc&index=2'), 'RDabc');
   assert.equal(core.playlistIdFrom('https://www.youtube.com/watch?v=abc'), ''); // bloqueou logo na primeira: recomeça do início

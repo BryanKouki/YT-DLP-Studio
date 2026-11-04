@@ -346,7 +346,7 @@ function nowLabel(job: any): string {
 }
 
 /** Faixas com erro que ainda não ganharam substituta. */
-const remaining = (job: any): number => job.failed?.filter((f: any) => f.state !== 'done').length ?? 0;
+const remaining = (job: any): number => job.failed?.filter((f: any) => f.state !== 'done' && f.state !== 'ignored').length ?? 0;
 const STATUS_ICON: Record<string, string> = { queued: 'i-queue', done: 'i-check', error: 'i-x', canceled: 'i-x' };
 
 function renderJobs(): void {
@@ -510,7 +510,7 @@ function openFailed(jobId: string, fromTop = false): void {
     row.className = 'fail';
     row.dataset.id = f.id;
     row.innerHTML = '<div class="row"><b class="pos"></b><button type="button" class="copy-name grow"></button>' +
-      '<span class="state small"></span></div><div class="reason muted small"></div>' +
+      '<span class="state small"></span><button type="button" class="ghost small ignore"></button></div><div class="reason muted small"></div>' +
       '<div class="row search-links"><button type="button" class="ghost small"></button>' +
       '<button type="button" class="ghost small"></button></div><div class="row">' +
       '<span class="copy-link"><button type="button"></button><button type="button" class="id"></button></span>' +
@@ -525,6 +525,7 @@ function openFailed(jobId: string, fromTop = false): void {
     name.title = known ? t('failed_copy_name') : t('failed_no_name');
     name.onclick = () => copyText(song, name);
     $('.reason', row).textContent = $('.reason', row).title = f.reason;
+    $('.ignore', row).onclick = () => api.call('ignoreFailed', job.id, f.id);
     // links de busca prontos, só para playlists do YouTube e faixas com nome conhecido
     $('.search-links', row).hidden = !(known && isYouTube(job.url));
     const search = searchUrls(song);
@@ -554,7 +555,11 @@ function paintFailedStates(job: any): void {
     const row = document.querySelector<HTMLElement>(`#failed-list .fail[data-id="${CSS.escape(f.id)}"]`);
     if (!row) continue;
     row.dataset.state = f.state ?? '';
-    $('.state', row).textContent = f.state ? t(`status_${f.state === 'downloading' ? 'downloading' : f.state}`) : '';
+    $('.state', row).textContent = f.state ? t(`status_${f.state}`) : '';
+    const ignore = $<HTMLButtonElement>('.ignore', row);
+    ignore.textContent = t(f.state === 'ignored' ? 'failed_unignore' : 'failed_ignore');
+    ignore.hidden = f.state === 'done' || f.state === 'downloading';
+    $<HTMLInputElement>('input', row).disabled = f.state === 'ignored';
   }
 }
 

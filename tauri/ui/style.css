@@ -429,6 +429,8 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 .fail .pos { min-width: 34px; color: var(--muted); }
 .fail .reason { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fail[data-state="done"] { opacity: 0.6; }
+.fail[data-state="ignored"] { opacity: 0.5; }
+.fail[data-state="ignored"] .state { color: var(--muted); }
 .fail .state { font-weight: 600; }
 .fail[data-state="done"] .state { color: var(--ok); }
 .fail[data-state="error"] .state { color: var(--err); }
