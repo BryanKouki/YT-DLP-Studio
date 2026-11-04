@@ -746,6 +746,8 @@ api.on((kind, data) => {
     if (!dialog.open) dialog.showModal();
   } else if (kind === 'confirm_close') {
     void ask(t('close_browser_confirm', { browser: data })).then((ok) => api.call('answerClose', ok));
+  } else if (kind === 'playlist_fallback') {
+    toast(t('toast_playlist_fallback', { name: data }), 'warn');
   } else if (kind === 'bot_cookies') {
     toast(t('toast_bot_cookies'), 'warn');
   } else if (kind === 'cookies_off') {

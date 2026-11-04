@@ -530,11 +530,22 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
 /** Se o link for uma playlist, cria uma subpasta com o nome dela dentro da pasta de destino. */
 async function resolvePlaylistFolder(job: core.Job): Promise<void> {
   if (job.options._is_playlist) return; // item baixado de novo (retomada, ▶): a subpasta já existe
+  if (job.options.no_playlist) return; // "Somente este vídeo": o yt-dlp baixa só o vídeo do link
   const url = job.url.trim();
-  const out = await ytdlpLines(
-    ['--get-filename', '--no-warnings', '-o', '%(playlist_title)s', url, '--playlist-items', '1'], false, 20000);
-  const name = out.at(-1) ?? '';
-  if (!name || name.toUpperCase() === 'NA' || name === url) return;
+  // só a listagem (~3 s): não abre faixa nenhuma, então não sofre com o desafio do YouTube nem com o limite de tempo.
+  // Se a primeira tentativa falhar com cookies (navegador aberto, ilegíveis), tenta de novo sem eles.
+  const lookup = async (cookies: boolean) => (await ytdlpLines(['--flat-playlist', '--no-warnings', '--skip-download',
+    '--playlist-items', '1', '--print', '%(playlist_title|)s', url], false, 60000, cookies)).at(-1)?.trim() ?? '';
+  let name = await lookup(true);
+  if (!name && cookiesNow()) name = await lookup(false);
+  const listId = core.playlistIdFrom(url);
+  if (!name || name.toUpperCase() === 'NA' || name === url) {
+    if (!listId) return; // link sem playlist: música/vídeo avulso
+    // é playlist, mas o nome não veio: pasta com o ID, nunca solta na pasta principal
+    name = `Playlist ${listId}`;
+    log(`[aviso] Não foi possível ler o nome da playlist; salvando em "${name}".`);
+    send('playlist_fallback', name);
+  }
   const target = path.join(job.options.folder, core.sanitizeFilename(name));
   if (!(await invoke('mkdir', { path: target }))) return;
   job.options.folder = target;

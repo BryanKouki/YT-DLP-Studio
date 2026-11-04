@@ -174,6 +174,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "cookies_section": "Cookies (contra o bloqueio \"não é um robô\")",
     "use_cookies": "Usar cookies do navegador",
     "cookies_on_bot": "Só usar os cookies quando o YouTube bloquear (mais rápido; continua de onde parou)",
+    "toast_playlist_fallback": "Não foi possível ler o nome da playlist. Os arquivos vão para a pasta \"{name}\".",
     "toast_bot_cookies": "O YouTube bloqueou: cookies ativados até fechar o app, continuando de onde parou.",
     "close_browser_confirm": "Para usar os cookies, o {browser} precisa ser fechado, e ele está aberto (talvez em segundo plano). Fechar o {browser} agora? As janelas e abas abertas serão fechadas.",
     "toast_cookies_off": "Não foi possível ler os cookies do navegador. A opção foi desativada e o download continua sem cookies.",
@@ -368,6 +369,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "cookies_section": "Cookies (against the \"not a bot\" block)",
     "use_cookies": "Use browser cookies",
     "cookies_on_bot": "Only use cookies when YouTube blocks (faster; resumes where it stopped)",
+    "toast_playlist_fallback": "Could not read the playlist name. The files go to the \"{name}\" folder.",
     "toast_bot_cookies": "YouTube blocked: cookies turned on until the app closes, resuming where it stopped.",
     "close_browser_confirm": "To use the cookies, {browser} must be closed, and it is open (maybe in the background). Close {browser} now? Open windows and tabs will be closed.",
     "toast_cookies_off": "Could not read the browser cookies. The option was turned off and the download continues without cookies.",
@@ -426,7 +428,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Playlists e capa da playlist",
-      "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente uma subpasta com o nome da playlist. Com 'Guardar thumbnail' marcado, a capa da playlist é salva como 'playlistcover.jpg' dentro dela. (Na versão Python, a capa fica na opção 'Salvar capa do álbum/playlist na pasta', em Configurações → Arquivos extras.)"
+      "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente uma subpasta com o nome da playlist (na versão .exe Tauri, se o nome não puder ser lido, a pasta recebe o ID da playlist e um aviso aparece; os arquivos nunca ficam soltos na pasta principal). Com 'Guardar thumbnail' marcado, a capa da playlist é salva como 'playlistcover.jpg' dentro dela. (Na versão Python, a capa fica na opção 'Salvar capa do álbum/playlist na pasta', em Configurações → Arquivos extras.)"
     ],
     [
       "Playlist: capa e verificação",
@@ -504,7 +506,7 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Playlists and playlist cover",
-      "When downloading a whole playlist/album, the app automatically creates a subfolder named after the playlist. With 'Save thumbnail' checked, the playlist cover is saved as 'playlistcover.jpg' inside it. (In the Python version, the cover is the 'Save album/playlist cover in folder' option, in Settings → Extra files.)"
+      "When downloading a whole playlist/album, the app automatically creates a subfolder named after the playlist (in the Tauri .exe version, if the name cannot be read, the folder gets the playlist ID and a warning shows up; files never end up loose in the main folder). With 'Save thumbnail' checked, the playlist cover is saved as 'playlistcover.jpg' inside it. (In the Python version, the cover is the 'Save album/playlist cover in folder' option, in Settings → Extra files.)"
     ],
     [
       "Playlist: cover and check",

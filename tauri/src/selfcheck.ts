@@ -98,7 +98,10 @@ async function run(): Promise<void> {
   assert.equal(core.artistFromUploader('Anitta - Topic'), 'Anitta');
   // bloqueio na 19 de 32 depois de baixar até a 18: continua da 19
   assert.equal(core.resumeFrom(['16', '17', '18']), '19:');
-  assert.equal(core.resumeFrom([]), ''); // bloqueou logo na primeira: recomeça do início
+  assert.equal(core.resumeFrom([]), '');
+  assert.equal(core.playlistIdFrom('https://music.youtube.com/playlist?list=PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41'), 'PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41');
+  assert.equal(core.playlistIdFrom('https://www.youtube.com/watch?v=abc&list=RDabc&index=2'), 'RDabc');
+  assert.equal(core.playlistIdFrom('https://www.youtube.com/watch?v=abc'), ''); // bloqueou logo na primeira: recomeça do início
   // .m3u8: ordem da playlist (a substituta da posição 2 entra entre 1 e 3), caminho relativo
   assert.equal(core.m3uText([{ pos: 3, file: 'C:\\pl\\c.mp3' }, { pos: 1, file: 'C:\\pl\\a.mp3' }, { pos: 2, file: 'C:\\pl\\b b.mp3' }]),
     '#EXTM3U\r\n#EXTINF:-1,a\r\na.mp3\r\n#EXTINF:-1,b b\r\nb b.mp3\r\n#EXTINF:-1,c\r\nc.mp3\r\n');

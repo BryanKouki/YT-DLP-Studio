@@ -56,7 +56,9 @@ HELP_CONTENT = {
          "thumbnail original, sem recorte."),
         ("Playlists e capa da playlist",
          "Ao baixar uma playlist/álbum inteiro, o programa cria automaticamente "
-         "uma subpasta com o nome da playlist. Com 'Guardar thumbnail' marcado, "
+         "uma subpasta com o nome da playlist (na versão .exe Tauri, se o nome não "
+         "puder ser lido, a pasta recebe o ID da playlist e um aviso aparece; os "
+         "arquivos nunca ficam soltos na pasta principal). Com 'Guardar thumbnail' marcado, "
          "a capa da playlist é salva como 'playlistcover.jpg' dentro dela. (Na "
          "versão Python, a capa fica na opção 'Salvar capa do álbum/playlist na "
          "pasta', em Configurações → Arquivos extras.)"),
@@ -201,7 +203,9 @@ HELP_CONTENT = {
          "size/proportions, uncropped."),
         ("Playlists and playlist cover",
          "When downloading a whole playlist/album, the app automatically "
-         "creates a subfolder named after the playlist. With 'Save thumbnail' "
+         "creates a subfolder named after the playlist (in the Tauri .exe version, if "
+         "the name cannot be read, the folder gets the playlist ID and a warning "
+         "shows up; files never end up loose in the main folder). With 'Save thumbnail' "
          "checked, the playlist cover is saved as 'playlistcover.jpg' inside it. "
          "(In the Python version, the cover is the 'Save album/playlist cover in "
          "folder' option, in Settings → Extra files.)"),

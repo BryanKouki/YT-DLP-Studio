@@ -146,6 +146,10 @@ export function resumeFrom(doneIdx: string[]): string {
   return last ? `${last + 1}:` : '';
 }
 
+/** ID da playlist num link do YouTube (list=...). Serve para nunca baixar uma playlist solta
+ *  na pasta principal quando o nome dela não puder ser lido. */
+export const playlistIdFrom = (url: string): string => /[?&]list=([\w-]+)/.exec(url)?.[1] ?? '';
+
 /** Cookies do navegador escolhido (Firefox por padrão) contra o "Sign in to confirm you're not a bot". */
 export function cookieArgs(s: Opts): string[] {
   return s.use_cookies ? ['--cookies-from-browser', s.cookies_browser || 'firefox'] : [];

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.9
+
+### Fixed
+- Some playlists were saved straight into the main folder, mixed with other files and with one cover image per track, without any warning. The playlist name lookup opened the first track in full under a 20-second limit; with YouTube's JavaScript challenge, cookies or a slow YouTube it ran out of time or was blocked, and the playlist was treated as a single track. The name now comes from the playlist listing only, tries again without cookies if needed, and if it still cannot be read, the files go to a folder named after the playlist ID, with a warning on screen and in the Log.
+- With "This video only (ignore playlist)" turned on, a video link that also carries a playlist (`list=`) no longer gets a playlist folder.
+
 ## v1.3.8
 
 ### Added
