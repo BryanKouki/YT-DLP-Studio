@@ -210,6 +210,35 @@ fn set_times(path: String, created: f64, modified: f64) -> bool {
     std::fs::OpenOptions::new().write(true).open(path).and_then(|file| file.set_times(times)).is_ok()
 }
 
+/// Atualização: troca o .exe em uso pelo baixado (o Windows deixa renomear um .exe aberto, não sobrescrever).
+/// Devolve o caminho do .exe novo; se a cópia falhar, o original volta ao lugar.
+#[tauri::command]
+fn replace_exe(update: String) -> Result<String, String> {
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let old = exe.with_extension("old.exe");
+    let _ = std::fs::remove_file(&old);
+    std::fs::rename(&exe, &old).map_err(|e| e.to_string())?;
+    if let Err(e) = std::fs::copy(&update, &exe) {
+        let _ = std::fs::rename(&old, &exe);
+        return Err(e.to_string());
+    }
+    let _ = std::fs::remove_file(update);
+    Ok(exe.to_string_lossy().into_owned())
+}
+
+/// Abre o app de novo e fecha este (atualização, configurações de fábrica). Fora da lista de
+/// processos, que é encerrada ao sair.
+#[tauri::command]
+fn relaunch(app: AppHandle, path: Option<String>) -> Result<(), String> {
+    let exe = match path {
+        Some(p) => PathBuf::from(p),
+        None => std::env::current_exe().map_err(|e| e.to_string())?,
+    };
+    Command::new(exe).spawn().map_err(|e| e.to_string())?;
+    app.exit(0);
+    Ok(())
+}
+
 #[tauri::command]
 fn quit(app: AppHandle) {
     app.exit(0); // RunEvent::Exit mata os downloads em andamento
@@ -232,6 +261,18 @@ async fn pick(window: tauri::WebviewWindow, folder: bool, initial: Option<String
 }
 
 fn main() {
+    // sobra de uma atualização: o .exe antigo só pode ser apagado depois que o processo dele fecha
+    if let Ok(exe) = std::env::current_exe() {
+        std::thread::spawn(move || {
+            let old = exe.with_extension("old.exe");
+            for _ in 0..20 {
+                if !old.exists() || std::fs::remove_file(&old).is_ok() {
+                    break;
+                }
+                std::thread::sleep(Duration::from_millis(500));
+            }
+        });
+    }
     let dir = data_dir();
     let settings = std::fs::read_to_string(dir.join("settings.json")).unwrap_or_default();
     let saved: serde_json::Value = serde_json::from_str(&settings).unwrap_or_default();
@@ -250,7 +291,8 @@ fn main() {
     tauri::Builder::default()
         .manage(Procs::default())
         .invoke_handler(tauri::generate_handler![
-            spawn, kill, download, fetch_text, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick, quit
+            spawn, kill, download, fetch_text, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick,
+            replace_exe, relaunch, quit
         ])
         .on_page_load(|webview, payload| {
             if payload.event() == PageLoadEvent::Finished {
@@ -258,6 +300,9 @@ fn main() {
             }
         })
         .setup(move |app| {
+            // versão do tauri.conf.json: a mesma das propriedades do .exe
+            let mut init = init.clone();
+            init["version"] = app.package_info().version.to_string().into();
             let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("YT-DLP Studio")
                 .inner_size(width, height)

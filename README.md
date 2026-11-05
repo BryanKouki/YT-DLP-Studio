@@ -38,6 +38,7 @@
 
 **General**
 - Trim a section of the media before downloading (range slider or HH:MM:SS fields)
+- Version shown in the side menu and in the .exe properties; check for updates and update in one click from GitHub (the download is checked against GitHub's SHA-256), and restore factory settings (Tauri version)
 - Download queue with per-item progress and a live log; any item can be started or removed on its own, and the queue pauses on errors so you can continue, retry or cancel (Tauri version)
 - Optional simultaneous downloads inside a playlist (1 to 5, default 1), keeping file dates in playlist order (Tauri version)
 - yt-dlp and FFmpeg are downloaded automatically on first run and can be updated with one click (the Tauri version also downloads Deno, which yt-dlp needs for YouTube)

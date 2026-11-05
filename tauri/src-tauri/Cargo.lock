@@ -4975,7 +4975,7 @@ dependencies = [
 
 [[package]]
 name = "yt-dlp-studio"
-version = "1.0.0"
+version = "1.4.2"
 dependencies = [
  "rfd",
  "serde_json",

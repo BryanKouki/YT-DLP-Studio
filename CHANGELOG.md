@@ -9,6 +9,10 @@
 ### Added
 - Album artist tag: the track's first artist, or the artist typed in the Artist field.
 - Track number when downloading an album (also EPs and singles): each track's position in the album. Other playlists keep the field empty.
+- Version shown at the bottom of the side menu and in the .exe properties (it used to say 1.0.0).
+- Settings → About and updates: "Check for updates" looks up the latest release on GitHub; "Update now" downloads the new .exe, checks it against the SHA-256 GitHub reports, replaces the running .exe and reopens the app, keeping the data folder.
+- "Restore factory settings" at the end of Settings: resets every setting and reopens the app; music, videos, yt-dlp, FFmpeg and Deno are kept.
+- Build a playlist: type any number of songs to load, not only 10, 25, 50, 100 or all (empty = all).
 - Settings → File properties: choose which tags go into each file, separately for audio (title, artist, album, album artist, year, track number, genre, description, video link, cover) and video (title, artist, year, description, video link, cover). Everything is on by default except genre.
 - Genre (off by default): the app looks up the album's genre in Apple's catalog (iTunes Search, in Portuguese when the app is in Portuguese), one lookup per album and at most one every 3 seconds while the tracks download, and writes it to MP3, M4A and FLAC files without re-encoding, keeping the cover and the file dates. If the artist is not found, the track gets no genre rather than a wrong one. Opus and Vorbis files get no genre: ffmpeg cannot copy their cover.
 

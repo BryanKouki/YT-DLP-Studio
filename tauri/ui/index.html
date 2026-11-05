@@ -50,6 +50,7 @@
     <button id="btn-theme" class="icon"><svg><use href="#i-moon"/></svg></button>
     <button id="btn-lang" class="icon lang"></button>
   </div>
+  <button id="app-version" class="version" data-i18n-title="version_tip"></button>
 </aside>
 
 <main>
@@ -256,6 +257,16 @@
         </select></label>
       <p class="cookie-warn small" data-i18n="cookies_chromium_warn" hidden></p>
     </div>
+    <div id="set-about">
+      <h3 data-i18n="about_section"></h3>
+      <div class="row wrap">
+        <span class="grow">YT-DLP Studio <b id="about-version"></b></span>
+        <button id="update-check" type="button" class="small" data-i18n="update_check"></button>
+        <button id="update-install" type="button" class="small primary" data-i18n="update_install" hidden></button>
+      </div>
+      <p id="update-status" class="muted small"></p>
+      <button id="factory-reset" type="button" class="cancel small" data-i18n="reset_factory"></button>
+    </div>
   </div>
   <form method="dialog" class="dlg-foot">
     <button data-i18n="close"></button>
@@ -296,10 +307,9 @@
     <p class="muted small" data-i18n="artist_hint"></p>
     <div class="row">
       <input id="artist-q" class="grow" data-i18n-ph="artist_ph">
-      <select id="artist-n">
-        <option value="10">Top 10</option><option value="25">Top 25</option><option value="50" selected>Top 50</option>
-        <option value="100">Top 100</option><option value="" data-i18n="artist_all"></option>
-      </select>
+      <!-- quantidade: sugestões ou qualquer número; vazio = todas -->
+      <input id="artist-n" inputmode="numeric" list="artist-n-list" value="50" data-i18n-ph="artist_all" data-i18n-title="artist_count">
+      <datalist id="artist-n-list"><option value="10"><option value="25"><option value="50"><option value="100"></datalist>
       <button id="artist-find" type="button" data-i18n="artist_find"></button>
     </div>
     <label class="field"><span data-i18n="pl_name"></span><input id="pl-name" placeholder="Playlist"></label>

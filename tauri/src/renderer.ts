@@ -289,7 +289,12 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
 function setupArtistDialog(): void {
   const dialog = $<HTMLDialogElement>('#dlg-artist');
   const query = $<HTMLInputElement>('#artist-q');
-  const count = $<HTMLSelectElement>('#artist-n');
+  const count = $<HTMLInputElement>('#artist-n');
+  // quantidade digitada: número inteiro positivo; vazio ou inválido = todas
+  const howMany = () => {
+    const n = parseInt(count.value, 10);
+    return n > 0 ? String(n) : '';
+  };
   const nameInput = $<HTMLInputElement>('#pl-name');
   const status = $('#pl-status');
   const list = $('#pl-list');
@@ -332,6 +337,7 @@ function setupArtistDialog(): void {
     if (!name) return query.focus();
     const mine = ++artistSeq;
     status.textContent = t('artist_searching');
+    count.value = howMany(); // mostra o que vai valer ("abc" vira vazio = todas)
     const r = await api.call('findArtist', name, count.value);
     if (mine !== artistSeq) return; // outro nome foi buscado nesse meio-tempo
     if (r.error) {
@@ -373,9 +379,8 @@ function setupArtistDialog(): void {
   };
 
   $('#artist-find').onclick = loadArtist;
-  count.onchange = () => source && void loadArtist(); // trocou o Top N depois de carregar: recarrega
   $('#song-find').onclick = findSongs;
-  for (const [input, run] of [[query, loadArtist], [songQuery, findSongs], [songPos, findSongs]] as const) {
+  for (const [input, run] of [[query, loadArtist], [count, loadArtist], [songQuery, findSongs], [songPos, findSongs]] as const) {
     input.onkeydown = (event) => {
       if (event.key === 'Enter') void run();
     };
@@ -713,6 +718,42 @@ function ask(text: string): Promise<boolean> {
   return new Promise((resolve) => dialog.addEventListener('close', () => resolve(dialog.returnValue === 'yes'), { once: true }));
 }
 
+/** Versão no menu, verificar/instalar atualização e configurações de fábrica (fim das Configurações). */
+function setupAbout(): void {
+  const version = `v${api.init.version}`;
+  $('#app-version').textContent = $('#about-version').textContent = version;
+  $('#app-version').onclick = () => {
+    $('#btn-settings').click();
+    $('#set-about').scrollIntoView();
+  };
+  const status = $('#update-status');
+  const install = $<HTMLButtonElement>('#update-install');
+  let found: any = null;
+  $('#update-check').onclick = async () => {
+    status.textContent = t('update_checking');
+    install.hidden = true;
+    found = await api.call('checkUpdate');
+    if (found.error) status.textContent = t('update_error');
+    else if (!found.newer) status.textContent = t('update_latest', { v: found.latest || api.init.version });
+    else {
+      status.textContent = t(found.url ? 'update_available' : 'update_no_exe', { v: found.latest });
+      install.hidden = !found.url;
+    }
+  };
+  install.onclick = async () => {
+    if (!found?.url || !(await ask(t('update_confirm', { v: found.latest })))) return;
+    install.disabled = true;
+    const r = await api.call('installUpdate', found); // deu certo = o app fecha e reabre na versão nova
+    if (r?.error) {
+      status.textContent = t('update_failed');
+      install.disabled = false;
+    }
+  };
+  $('#factory-reset').onclick = async () => {
+    if (await ask(t('reset_confirm'))) void api.call('factoryReset');
+  };
+}
+
 function setupErrorDialog(): void {
   $('#err-continue').onclick = () => api.call('resumeQueue');
   $('#err-retry').onclick = () => api.call('retryPaused');
@@ -844,6 +885,7 @@ setupFailedDialog();
 setupArtistDialog();
 setupErrorDialog();
 setupDialogs();
+setupAbout();
 applyTheme();
 retranslate();
 showTab('audio');
@@ -883,6 +925,8 @@ api.on((kind, data) => {
     toast(t('toast_cookies_off'), 'warn');
   } else if (kind === 'replaced') {
     toast(t('toast_replaced', { pos: data.pos }));
+  } else if (kind === 'update_pct') {
+    $('#update-status').textContent = t('update_downloading', { p: data === null ? '' : `${data}%` });
   } else if (kind === 'conv') onConvert(data);
 });
 void api.call('checkDeps', false, true);

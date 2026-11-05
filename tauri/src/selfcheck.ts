@@ -64,6 +64,12 @@ async function run(): Promise<void> {
   assert.equal(trackRe.exec('Album - Thriller|02')?.groups?.track_number, '2');
   assert.equal(trackRe.exec('Album - Bad|12')?.groups?.track_number, '12');
   assert.equal(trackRe.exec('Top 100 Funk|02'), null); // playlist comum: sem número de faixa
+  // atualização: compara número a número; acha o .exe mesmo com o nome que o GitHub dá ("YT-DLP.Studio.exe")
+  assert(core.isNewer('1.4.10', '1.4.2') && core.isNewer('v2.0.0', '1.9.9') && !core.isNewer('1.4.2', '1.4.2') && !core.isNewer('1.4.1', '1.4.2'));
+  const rel = { tag_name: 'v1.4.3', assets: [{ name: 'YT-DLP-Studio-v1.4.3-source.zip', browser_download_url: 'z' },
+    { name: 'YT-DLP.Studio.exe', browser_download_url: 'https://x/YT-DLP.Studio.exe', digest: 'sha256:ABC' }] };
+  assert.equal(JSON.stringify(core.pickUpdate(rel, '1.4.2')), '{"latest":"1.4.3","newer":true,"url":"https://x/YT-DLP.Studio.exe","sha256":"abc"}');
+  assert(!core.pickUpdate(rel, '1.4.3').newer && core.pickUpdate({}, '1.4.2').url === '');
   // gênero: só de um álbum do mesmo artista (sem acento/caixa); outro artista = sem gênero
   const itunes = { results: [{ artistName: 'Anita Baker', primaryGenreName: 'R&B/soul' }, { artistName: 'Djavan', primaryGenreName: 'MPB' }] };
   assert.equal(core.itunesGenre(itunes, 'DJAVAN'), 'MPB');

@@ -225,8 +225,9 @@ story.append(body(
 story.append(h3("Montar playlist (versão .exe Tauri)"))
 story.append(body(
     "Na aba Áudio, o botão de estrela ao lado da verificação de playlist abre "
-    "<b>Montar playlist</b>. Digite o nome de um artista, escolha <b>Top 10, 25, 50, "
-    "100</b> ou <b>Todas</b> e clique em <b>Carregar</b>: vêm as mais tocadas dele no "
+    "<b>Montar playlist</b>. Digite o nome de um artista, escolha ou digite quantas "
+    "músicas (<b>10, 25, 50, 100</b> ou qualquer número; vazio = todas) e clique em "
+    "<b>Carregar</b>: vêm as mais tocadas dele no "
     "YouTube Music, na ordem do site, só as faixas de áudio (título limpo, sem "
     "\"Official Video\"). Tire o que não quiser com o <b>X</b> da linha. Para adicionar uma "
     "música, busque no campo de baixo, digite a posição (vazio = no fim) e clique no "
@@ -244,6 +245,16 @@ story.append(body(
     "com erro funcionam igual. Mais downloads juntos aumentam a chance de bloqueio do "
     "YouTube. No menu de faixas com erro, <b>Ignorar esta música</b> tira da contagem "
     "uma faixa para a qual você não achou substituta; <b>Desfazer</b> volta atrás."
+))
+story.append(h3("Versão, atualização e configurações de fábrica (versão .exe Tauri)"))
+story.append(body(
+    "A versão aparece no fim do menu lateral e nas propriedades do .exe. Clicando nela (ou "
+    "no fim das Configurações, em <b>Sobre e atualização</b>), <b>Verificar atualização</b> "
+    "consulta a última versão publicada no GitHub. Se houver uma nova, <b>Atualizar agora</b> "
+    "baixa o .exe, confere o código SHA-256 que o GitHub informa (garante que o arquivo chegou "
+    "inteiro e é o publicado), troca o .exe e reabre o app; a pasta <i>data</i> fica. "
+    "<b>Restaurar configurações de fábrica</b> apaga as configurações e reabre o app com tudo "
+    "no padrão; músicas, vídeos, yt-dlp, FFmpeg e Deno ficam."
 ))
 story.append(h3("Deno, erros e fechar o app (versão .exe Tauri)"))
 story.append(body(

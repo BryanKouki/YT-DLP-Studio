@@ -149,6 +149,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "artist_ph": "Ex.: Sade, Michael Jackson",
     "artist_find": "Carregar",
     "artist_all": "Todas",
+    "artist_count": "Quantas músicas carregar: escolha ou digite qualquer número (vazio = todas)",
     "artist_searching": "Procurando...",
     "artist_not_found": "Nenhum artista encontrado com esse nome.",
     "artist_no_top": "{artist} não tem uma lista de mais tocadas no YouTube Music.",
@@ -175,6 +176,20 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "tag_description": "Descrição",
     "tag_comment": "Link do vídeo",
     "tag_cover": "Capa",
+    "version_tip": "Versão do app (clique para verificar atualização)",
+    "about_section": "Sobre e atualização",
+    "update_check": "Verificar atualização",
+    "update_checking": "Verificando...",
+    "update_latest": "Você já está na versão mais recente (v{v}).",
+    "update_available": "Nova versão disponível: v{v}.",
+    "update_no_exe": "A v{v} saiu, mas sem o .exe para baixar.",
+    "update_install": "Atualizar agora",
+    "update_confirm": "Baixar a v{v}, trocar o .exe e reabrir o app? Downloads em andamento serão cancelados. A pasta data (configurações, yt-dlp, FFmpeg) fica.",
+    "update_downloading": "Baixando a atualização... {p}",
+    "update_failed": "A atualização falhou e o app continua na versão atual. Veja o Log.",
+    "update_error": "Não foi possível verificar. Veja o Log.",
+    "reset_factory": "Restaurar configurações de fábrica",
+    "reset_confirm": "Voltar todas as configurações ao padrão de fábrica e reabrir o app? Pastas, opções, cookies, propriedades do arquivo, tema, idioma e as seleções das abas voltam ao padrão. Músicas, vídeos, yt-dlp, FFmpeg e Deno ficam. Downloads em andamento serão cancelados.",
     "confirm_delete_title": "Confirmar",
     "no_link_error": "Cole ao menos um link antes de continuar.",
     "select_folder": "Selecione a pasta",
@@ -380,6 +395,7 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "artist_ph": "e.g. Sade, Michael Jackson",
     "artist_find": "Load",
     "artist_all": "All",
+    "artist_count": "How many songs to load: pick or type any number (empty = all)",
     "artist_searching": "Searching...",
     "artist_not_found": "No artist found with that name.",
     "artist_no_top": "{artist} has no top songs list on YouTube Music.",
@@ -406,6 +422,20 @@ export const STRINGS: Record<string, Record<string, string>> = {
     "tag_description": "Description",
     "tag_comment": "Video link",
     "tag_cover": "Cover",
+    "version_tip": "App version (click to check for updates)",
+    "about_section": "About and updates",
+    "update_check": "Check for updates",
+    "update_checking": "Checking...",
+    "update_latest": "You already have the latest version (v{v}).",
+    "update_available": "New version available: v{v}.",
+    "update_no_exe": "v{v} is out, but without an .exe to download.",
+    "update_install": "Update now",
+    "update_confirm": "Download v{v}, replace the .exe and reopen the app? Downloads in progress will be canceled. The data folder (settings, yt-dlp, FFmpeg) is kept.",
+    "update_downloading": "Downloading the update... {p}",
+    "update_failed": "The update failed and the app stays on the current version. See the Log.",
+    "update_error": "Could not check. See the Log.",
+    "reset_factory": "Restore factory settings",
+    "reset_confirm": "Reset every setting to the factory default and reopen the app? Folders, options, cookies, file properties, theme, language and the tab selections go back to default. Music, videos, yt-dlp, FFmpeg and Deno are kept. Downloads in progress will be canceled.",
     "confirm_delete_title": "Confirm",
     "no_link_error": "Paste at least one link before continuing.",
     "select_folder": "Select folder",
@@ -516,11 +546,15 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Montar playlist (versão .exe Tauri)",
-      "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar playlist'. Digite um artista, escolha Top 10, 25, 50, 100 ou Todas e clique em Carregar: vêm as mais tocadas dele no YouTube Music, na ordem do site, só as faixas de áudio (título limpo, sem 'Official Video'). Tire o que não quiser com ✕. Para adicionar uma música, busque no campo de baixo, digite a posição (vazio = no fim) e clique no + do resultado. Download baixa a lista nessa ordem, como uma playlist, numa pasta com o nome escolhido e com as opções da aba Áudio: datas e .m3u8 na ordem da lista, capa da playlist (a da 1ª faixa) e faixas com erro funcionam igual."
+      "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar playlist'. Digite um artista, escolha ou digite quantas músicas (10, 25, 50, 100 ou qualquer número; vazio = todas) e clique em Carregar: vêm as mais tocadas dele no YouTube Music, na ordem do site, só as faixas de áudio (título limpo, sem 'Official Video'). Tire o que não quiser com ✕. Para adicionar uma música, busque no campo de baixo, digite a posição (vazio = no fim) e clique no + do resultado. Download baixa a lista nessa ordem, como uma playlist, numa pasta com o nome escolhido e com as opções da aba Áudio: datas e .m3u8 na ordem da lista, capa da playlist (a da 1ª faixa) e faixas com erro funcionam igual."
     ],
     [
       "Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)",
       "Em Configurações → Fila, 'Músicas baixadas ao mesmo tempo em cada playlist' (1 a 5, padrão 1) divide a playlist entre vários downloads simultâneos. Com 3, uma playlist de teste baixou em cerca de metade do tempo. No fim, as datas dos arquivos são ajustadas para a ordem da playlist, e o .m3u8, a capa e as faixas com erro funcionam igual. Mais downloads juntos aumentam a chance de bloqueio do YouTube. No menu de faixas com erro, 'Ignorar esta música' tira da contagem uma faixa para a qual você não achou substituta ('Desfazer' volta atrás)."
+    ],
+    [
+      "Versão, atualização e configurações de fábrica (versão .exe Tauri)",
+      "A versão aparece no fim do menu lateral e nas propriedades do .exe. Clicando nela (ou no fim das Configurações, em 'Sobre e atualização'), 'Verificar atualização' consulta a última versão publicada no GitHub. Se houver uma nova, 'Atualizar agora' baixa o .exe, confere o código SHA-256 que o GitHub informa (garante que o arquivo chegou inteiro e é o publicado), troca o .exe e reabre o app; a pasta data fica. 'Restaurar configurações de fábrica' apaga as configurações e reabre o app com tudo no padrão; músicas, vídeos, yt-dlp, FFmpeg e Deno ficam."
     ],
     [
       "Deno, erros e fechar o app (versão .exe Tauri)",
@@ -606,11 +640,15 @@ export const HELP: Record<string, [string, string][]> = {
     ],
     [
       "Build a playlist (Tauri .exe version)",
-      "In the Audio tab, the ✦ button next to the playlist check opens 'Build a playlist'. Type an artist, pick Top 10, 25, 50, 100 or All and click Load: you get their top songs on YouTube Music, in the site's order, audio tracks only (clean titles, no 'Official Video'). Remove what you don't want with ✕. To add a song, search in the field below, type the position (empty = at the end) and click the + on the result. Download saves the list in that order, as a playlist, in a folder with the name you chose and with the Audio tab options: file dates and .m3u8 follow the list, the playlist cover (the first track's) and failed tracks work the same."
+      "In the Audio tab, the ✦ button next to the playlist check opens 'Build a playlist'. Type an artist, pick or type how many songs (10, 25, 50, 100 or any number; empty = all) and click Load: you get their top songs on YouTube Music, in the site's order, audio tracks only (clean titles, no 'Official Video'). Remove what you don't want with ✕. To add a song, search in the field below, type the position (empty = at the end) and click the + on the result. Download saves the list in that order, as a playlist, in a folder with the name you chose and with the Audio tab options: file dates and .m3u8 follow the list, the playlist cover (the first track's) and failed tracks work the same."
     ],
     [
       "Faster: tracks at the same time (Tauri .exe version)",
       "In Settings → Queue, 'Tracks downloaded at the same time in each playlist' (1 to 5, default 1) splits the playlist across several simultaneous downloads. With 3, a test playlist downloaded in about half the time. At the end the file dates are set back to playlist order, and the .m3u8, the cover and failed tracks work the same. More downloads at once raise the chance of a YouTube block. In the failed tracks window, 'Ignore this track' removes from the count a track you could not find a replacement for ('Undo' reverts it)."
+    ],
+    [
+      "Version, updates and factory settings (Tauri .exe version)",
+      "The version is shown at the bottom of the side menu and in the .exe properties. Click it (or go to the end of Settings, 'About and updates'): 'Check for updates' looks up the latest version published on GitHub. If there is a newer one, 'Update now' downloads the .exe, checks the SHA-256 code GitHub reports (so the file arrived whole and is the published one), replaces the .exe and reopens the app; the data folder is kept. 'Restore factory settings' deletes the settings and reopens the app with everything at default; music, videos, yt-dlp, FFmpeg and Deno are kept."
     ],
     [
       "Deno, errors and closing the app (Tauri .exe version)",

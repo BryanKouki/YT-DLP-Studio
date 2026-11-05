@@ -89,7 +89,8 @@ HELP_CONTENT = {
          "de um errado."),
         ("Montar playlist (versão .exe Tauri)",
          "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar "
-         "playlist'. Digite um artista, escolha Top 10, 25, 50, 100 ou Todas e clique "
+         "playlist'. Digite um artista, escolha ou digite quantas músicas (10, 25, 50, "
+         "100 ou qualquer número; vazio = todas) e clique "
          "em Carregar: vêm as mais tocadas dele no YouTube Music, na ordem do site, só "
          "as faixas de áudio (título limpo, sem 'Official Video'). Tire o que não quiser "
          "com ✕. Para adicionar uma música, busque no campo de baixo, digite a posição "
@@ -106,6 +107,15 @@ HELP_CONTENT = {
          "downloads juntos aumentam a chance de bloqueio do YouTube. No menu de "
          "faixas com erro, 'Ignorar esta música' tira da contagem uma faixa para a "
          "qual você não achou substituta ('Desfazer' volta atrás)."),
+        ("Versão, atualização e configurações de fábrica (versão .exe Tauri)",
+         "A versão aparece no fim do menu lateral e nas propriedades do .exe. Clicando "
+         "nela (ou no fim das Configurações, em 'Sobre e atualização'), 'Verificar "
+         "atualização' consulta a última versão publicada no GitHub. Se houver uma "
+         "nova, 'Atualizar agora' baixa o .exe, confere o código SHA-256 que o GitHub "
+         "informa (garante que o arquivo chegou inteiro e é o publicado), troca o .exe e "
+         "reabre o app; a pasta data fica. 'Restaurar configurações de fábrica' apaga as "
+         "configurações e reabre o app com tudo no padrão; músicas, vídeos, yt-dlp, "
+         "FFmpeg e Deno ficam."),
         ("Deno, erros e fechar o app (versão .exe Tauri)",
          "Além do yt-dlp e do FFmpeg, o app baixa sozinho o Deno (~45 MB) para "
          "data\\bin: o YouTube exige resolver um desafio em JavaScript, e sem ele "
@@ -268,7 +278,8 @@ HELP_CONTENT = {
          "is not found, the track gets no genre instead of a wrong one."),
         ("Build a playlist (Tauri .exe version)",
          "In the Audio tab, the ✦ button next to the playlist check opens 'Build a "
-         "playlist'. Type an artist, pick Top 10, 25, 50, 100 or All and click Load: "
+         "playlist'. Type an artist, pick or type how many songs (10, 25, 50, 100 or "
+         "any number; empty = all) and click Load: "
          "you get their top songs on YouTube Music, in the site's order, audio tracks "
          "only (clean titles, no 'Official Video'). Remove what you don't want with ✕. "
          "To add a song, search in the field below, type the position (empty = at the "
@@ -285,6 +296,15 @@ HELP_CONTENT = {
          "downloads at once raise the chance of a YouTube block. In the failed "
          "tracks window, 'Ignore this track' removes from the count a track you "
          "could not find a replacement for ('Undo' reverts it)."),
+        ("Version, updates and factory settings (Tauri .exe version)",
+         "The version is shown at the bottom of the side menu and in the .exe "
+         "properties. Click it (or go to the end of Settings, 'About and updates'): "
+         "'Check for updates' looks up the latest version published on GitHub. If "
+         "there is a newer one, 'Update now' downloads the .exe, checks the SHA-256 "
+         "code GitHub reports (so the file arrived whole and is the published one), "
+         "replaces the .exe and reopens the app; the data folder is kept. 'Restore "
+         "factory settings' deletes the settings and reopens the app with everything "
+         "at default; music, videos, yt-dlp, FFmpeg and Deno are kept."),
         ("Deno, errors and closing the app (Tauri .exe version)",
          "Besides yt-dlp and FFmpeg, the app downloads Deno (~45 MB) into "
          "data\\bin on its own: YouTube requires solving a JavaScript challenge, "

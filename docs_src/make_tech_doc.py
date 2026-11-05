@@ -786,6 +786,17 @@ story.append(bullets([
     "-metadata genre=</tt> em <tt>data\\tmp</tt>, copiando por cima e recolocando as datas do "
     "arquivo. Só MP3, M4A e FLAC (<tt>GENRE_EXTS</tt>): no Opus o ffmpeg não copia a capa. O "
     "<tt>runJob</tt> espera essas gravações antes de <tt>stampInOrder</tt>.",
+    "Versão e atualização (1.4.2): a versão vem só do <tt>tauri.conf.json</tt>; vai para as "
+    "propriedades do .exe e para a página (<tt>__INIT__.version</tt>), e o "
+    "<tt>make_release.py</tt> recusa gerar a release se ela não bater. "
+    "<tt>checkUpdate()</tt> lê <tt>releases/latest</tt> da API do GitHub "
+    "(<tt>core.pickUpdate</tt>: o .exe anexado, cujo nome o GitHub troca de espaço para ponto, "
+    "e o SHA-256 em <tt>digest</tt>). <tt>installUpdate()</tt> baixa para <tt>data\\tmp</tt>, "
+    "confere o hash com o <tt>certutil</tt> do Windows, e o comando nativo "
+    "<tt>replace_exe</tt> renomeia o .exe em uso para <tt>.old.exe</tt> (o Windows deixa "
+    "renomear, não sobrescrever) e copia o novo; <tt>relaunch</tt> abre o novo e fecha este. "
+    "Ao abrir, o app apaga o <tt>.old.exe</tt>. Configurações de fábrica: apaga "
+    "<tt>data\\settings.json</tt> e chama <tt>relaunch</tt>.",
     "Montar playlist (1.4.1): o yt-dlp não abre a página do artista no YouTube Music "
     "(redireciona para o canal comum). <tt>findArtist()</tt> usa a API do site "
     "(<tt>youtubei/v1/search</tt> com o filtro Artistas e <tt>browse</tt> do canal) pelo "

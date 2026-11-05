@@ -5,7 +5,7 @@ import * as core from './core.js';
 
 const { path } = core;
 
-interface Init { dir: string; home: string; tar: string; settings: Record<string, any> | null }
+interface Init { dir: string; home: string; tar: string; version: string; settings: Record<string, any> | null }
 declare global {
   interface Window { __INIT__: Init; __TAURI__: any }
 }
@@ -781,6 +781,50 @@ function nameLater(job: core.Job): void {
   });
 }
 
+// ---- atualização e configurações de fábrica ------------------------------------
+
+async function checkUpdate() {
+  try {
+    return core.pickUpdate(JSON.parse(await invoke('fetch_text', { url: core.RELEASES_API, body: null })), INIT.version);
+  } catch (e) {
+    log(`[erro] Verificação de atualização: ${e}`);
+    return { error: true };
+  }
+}
+
+/** Baixa o .exe da release, confere o SHA-256 que o GitHub informa, troca o .exe e reabre o app.
+ *  Qualquer falha antes da troca deixa o app como está. */
+async function installUpdate(u: { latest: string; url: string; sha256: string }) {
+  const file = path.join(TEMP, 'update.exe');
+  try {
+    await invoke('mkdir', { path: TEMP });
+    log(`Baixando a atualização v${u.latest}: ${u.url}`);
+    await download(u.url, file, (pct) => send('update_pct', pct));
+    if (u.sha256) {
+      // certutil vem no Windows: sem dependência nova para calcular o hash
+      let hash = '';
+      await runLines(path.join(path.dirname(INIT.tar), 'certutil.exe'), ['-hashfile', file, 'SHA256'], (line) => {
+        if (/^[0-9a-f ]{64,}$/i.test(line.trim())) hash = line.replace(/\s/g, '').toLowerCase();
+      }).done;
+      if (hash !== u.sha256) throw new Error(`SHA-256 diferente do informado pelo GitHub (${hash || 'não calculado'})`);
+    }
+    const exe = await invoke('replace_exe', { update: file });
+    log(`Atualizado para v${u.latest}; reabrindo.`);
+    await invoke('relaunch', { path: exe });
+    return {};
+  } catch (e) {
+    await invoke('remove', { path: file });
+    log(`[erro] Atualização: ${e}`);
+    return { error: String(e) };
+  }
+}
+
+/** Apaga data\settings.json e reabre: tudo volta ao padrão (músicas, vídeos e data\bin ficam). */
+async function factoryReset() {
+  await invoke('remove', { path: path.join(INIT.dir, 'settings.json') });
+  await invoke('relaunch', { path: null });
+}
+
 // ---- conversor -----------------------------------------------------------------
 
 const DUR_RE = /Duration: (\d+):(\d+):(\d+(?:\.\d+)?)/;
@@ -856,6 +900,9 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
   probe,
   findArtist,
   searchSongs,
+  checkUpdate,
+  installUpdate,
+  factoryReset,
   checkPlaylist: (url: string) =>
     core.checkPlaylist(log, (...args) => ytdlpLines(['--no-warnings', ...args, url.trim()], true)),
   checkDeps: ensureDeps,
@@ -947,7 +994,7 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
 };
 
 export const api = {
-  init: { settings, jobs },
+  init: { settings, jobs, version: INIT.version },
   call: async (name: string, ...args: unknown[]): Promise<any> => handlers[name](...args),
   on: (cb: (kind: string, data: any) => void): void => {
     listener = cb;

@@ -256,6 +256,29 @@ export function outputTemplate(job: Job): string {
   return job.title ? `${job.title.replace(/[/\\]/g, '-')}.%(ext)s` : '%(title)s.%(ext)s';
 }
 
+// ---- atualização (releases do GitHub) -------------------------------------------
+export const RELEASES_API = 'https://api.github.com/repos/BryanKouki/YT-DLP-Studio/releases/latest';
+
+/** "1.4.10" é mais nova que "1.4.2" (compara número a número, não texto). */
+export function isNewer(latest: string, current: string): boolean {
+  const nums = (v: string) => v.replace(/^v/, '').split('.').map((x) => parseInt(x, 10) || 0);
+  const [a, b] = [nums(latest), nums(current)];
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0);
+  }
+  return false;
+}
+
+/** Última release: versão, o .exe anexado (o GitHub troca espaço por ponto: "YT-DLP.Studio.exe") e o SHA-256 dele. */
+export function pickUpdate(release: any, current: string) {
+  const exe = (release?.assets ?? []).find((a: any) => /\.exe$/i.test(a?.name ?? ''));
+  const latest = String(release?.tag_name ?? '').replace(/^v/, '');
+  return {
+    latest, newer: Boolean(latest) && isNewer(latest, current), url: String(exe?.browser_download_url ?? ''),
+    sha256: String(exe?.digest ?? '').replace(/^sha256:/, '').toLowerCase(),
+  };
+}
+
 /** "Propriedades do arquivo" (Configurações): o que vai dentro de cada arquivo. Tudo ligado por padrão,
  *  menos o gênero (consulta a Apple, ver itunesGenre). */
 export const TAGS: Record<Mode, string[]> = {
