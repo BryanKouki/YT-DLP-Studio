@@ -344,6 +344,9 @@ async function runJob(job: core.Job): Promise<void> {
   for (const cmd of cmds) log('$ ' + cmd.map(core.shlexQuote).join(' '));
   const parallel = cmds.length > 1;
   const total = parts?.flat().length ?? 0;
+  // lista montada no app: cada link é uma faixa avulsa, a posição é a da lista
+  const tracks: core.Track[] | undefined = job.options.tracks;
+  const posOf = new Map(tracks?.map((t, i) => [t.id, String(i + 1)]));
   let doneHere = 0;
 
   let code = -1;
@@ -358,8 +361,10 @@ async function runJob(job: core.Job): Promise<void> {
     const onLine = (line: string) => {
       const now = core.NOW_PLAYING_RE.exec(line);
       if (now) {
-        const [nowTitle = '', nowArtist = '', idx = '', count = '', id = '', file = ''] = now[2].split('@@@');
-        Object.assign(job, { nowTitle, nowArtist: nowArtist.trim(), idx: idx.trim(), count: count.trim() });
+        const [nowTitle = '', nowArtist = '', plIdx = '', plCount = '', id = '', file = ''] = now[2].split('@@@');
+        const idx = posOf.get(id) ?? plIdx.trim();
+        const count = tracks ? String(tracks.length) : plCount.trim();
+        Object.assign(job, { nowTitle, nowArtist: nowArtist.trim(), idx, count });
         // BDL = faixa começou; ADL = faixa pronta na pasta (✓ ao lado do nome)
         if (now[1] === 'ADL') doneHere++;
         // com várias ao mesmo tempo a barra mostra a playlist inteira (faixas prontas / total)
@@ -425,9 +430,10 @@ async function runJob(job: core.Job): Promise<void> {
     job.prevSaved = saved;
     job.prevFailed = failed.filter((f) => !BOT_RE.test(f.reason));
     const doneIdx = new Set(saved.map((s) => Number(s.idx)));
-    // em partes, faixas anteriores podem ter ficado pela metade: retoma exatamente as que faltam
-    const from = parallel ? parts!.flat().filter((i) => !doneIdx.has(Number(i))).join(',') : core.resumeFrom(saved.map((s) => s.idx));
-    if (job.options._is_playlist && from && (parallel || !String(settings.playlist_items ?? '').trim())) job.options.playlist_items = from;
+    // em partes (ou numa lista montada no app) faixas anteriores podem ter ficado pela metade: retoma exatamente as que faltam
+    const pending = parts?.flat() ?? tracks?.map((_, i) => String(i + 1));
+    const from = pending ? pending.filter((i) => !doneIdx.has(Number(i))).join(',') : core.resumeFrom(saved.map((s) => s.idx));
+    if (job.options._is_playlist && from && (pending || !String(settings.playlist_items ?? '').trim())) job.options.playlist_items = from;
     Object.assign(job, { status: 'queued', progress: 0 });
     log(`[cookies] O YouTube bloqueou ("not a bot"). Cookies ativados até fechar o app; ` +
       (from ? `continuando a partir da faixa ${parseInt(from)}.` : 'recomeçando este item.'));
@@ -472,6 +478,9 @@ async function runJob(job: core.Job): Promise<void> {
         const src = path.join(TEMP, early[0]);
         await invoke('copy', { from: src, to: path.join(o.folder, `playlist_thumb${path.extname(early[0])}`) });
         await invoke('remove', { path: src });
+      } else if (tracks) { // lista montada no app: capa da 1ª faixa
+        await ytdlpLines(['--skip-download', '--write-thumbnail', '--no-warnings',
+          '-o', 'thumbnail:' + path.join(o.folder, 'playlist_thumb.%(ext)s'), core.trackUrls(tracks, '')[0]], true, 60000);
       } else {
         await ytdlpLines(core.playlistCoverArgs(job.url, o.folder), true, 60000); // ex.: item retomado depois de fechar
       }
@@ -499,7 +508,8 @@ async function splitPlaylist(job: core.Job): Promise<string[][] | null> {
   if (n < 2 || !job.options._is_playlist) return null;
   const items = String(job.options.playlist_items ?? '').trim();
   // retomada: "19,22,25" já é a lista das que faltam; senão a da consulta inicial; só lista de novo se não houver
-  let idx = /^\d+(,\d+)*$/.test(items) ? items.split(',') : job.indices ?? [];
+  let idx = /^\d+(,\d+)*$/.test(items) ? items.split(',')
+    : job.options.tracks?.map((_: unknown, i: number) => String(i + 1)) ?? job.indices ?? [];
   job.indices = undefined; // vale só para esta rodada
   if (!idx.length) {
     idx = (await ytdlpLines(['--flat-playlist', '--no-warnings', '--print', '%(playlist_index)s',
@@ -529,7 +539,8 @@ async function writePlaylistFile(job: core.Job): Promise<void> {
 /** Descobre a posição e o título de cada faixa que falhou (pela lista da playlist) e
  *  guarda os arquivos baixados por posição, para encaixar substitutas entre eles. */
 async function locateFailed(job: core.Job, failed: core.Failed[], saved: Saved[]): Promise<void> {
-  const order = (await ytdlpLines(
+  const tracks: core.Track[] | undefined = job.options.tracks; // lista montada no app: já tem a ordem
+  const order = tracks ? tracks.map((t) => [t.id, t.title, t.artist]) : (await ytdlpLines(
     ['--flat-playlist', '--no-warnings', '--print', '%(id)s\t%(title)s\t%(uploader|)s', job.url.trim()], false))
     .map((line) => line.split('\t'));
   const posOf = new Map(order.map(([id], i) => [id, i + 1]));
@@ -603,9 +614,10 @@ async function resolvePlaylistFolder(job: core.Job): Promise<void> {
     '--print', '%(playlist_title|)s\t%(playlist_index|)s',
     ...(cover ? ['--write-thumbnail', '-o', `pl_thumbnail:${cover}`, '-o', 'thumbnail:'] : []), url], false, 120000, cookies))
     .map((line) => line.split('\t'));
-  let rows = await lookup(true);
-  if (!rows.some(([title]) => title?.trim()) && cookiesNow()) rows = await lookup(false);
-  let name = rows.find(([title]) => title?.trim())?.[0].trim() ?? '';
+  const custom = Boolean(job.options.tracks); // lista montada no app: nome escolhido, nada para consultar
+  let rows = custom ? [] : await lookup(true);
+  if (!custom && !rows.some(([title]) => title?.trim()) && cookiesNow()) rows = await lookup(false);
+  let name = String(job.options.playlist_name ?? '').trim() || (rows.find(([title]) => title?.trim())?.[0].trim() ?? '');
   job.indices = rows.map(([, idx]) => Number(idx)).filter((i) => i > 0).map(String);
   const listId = core.playlistIdFrom(url);
   if (!name || name.toUpperCase() === 'NA' || name === url) {
@@ -666,6 +678,40 @@ async function probe(url: string) {
     '--no-warnings', '--skip-download', '--playlist-items', '1', url.trim()], false, 20000, false);
   const [title = '', artist = '', dur = '0', playlist = ''] = (out.at(-1) ?? '').split('@@@');
   return { title: title.trim(), artist: artist.trim(), duration: Math.floor(parseFloat(dur)) || 0, playlist: playlist.trim() };
+}
+
+/** API do YouTube Music (a mesma do site), pela casca nativa: a página não pode acessar outros sites. */
+const ytm = async (endpoint: string, extra: Record<string, string>) => JSON.parse(await invoke('post_json',
+  { url: `${core.YTM_API}${endpoint}?prettyPrint=false`, body: core.ytmBody(settings.language === 'en' ? 'en' : 'pt', extra) }));
+
+/** "Montar playlist": as n mais tocadas do artista no YouTube Music (lista "Top songs", na ordem do site; n vazio = todas). */
+async function findArtist(query: string, n: string) {
+  try {
+    const id = core.ytmArtistId(await ytm('search', { query, params: core.YTM_ARTISTS }));
+    if (!id) return { error: 'artist_not_found' };
+    const { artist, list } = core.ytmTopSongs(await ytm('browse', { browseId: id }));
+    if (!list) return { error: 'artist_no_top', artist };
+    const url = `https://www.youtube.com/playlist?list=${list}`;
+    const tracks = (await ytdlpLines(['--flat-playlist', '--no-warnings', ...(n ? ['--playlist-items', `1:${n}`] : []),
+      '--print', '%(id)s\t%(title)s\t%(channel,uploader|)s', url], false, 60000, false))
+      .map((line) => line.split('\t')).filter(([id, title]) => id && title)
+      .map(([id, title, channel = '']) => ({ id, title, artist: core.artistFromUploader(channel) }));
+    if (!tracks.length) return { error: 'artist_error' };
+    return { artist, url, tracks };
+  } catch (e) {
+    log(`[erro] busca do artista "${query}": ${e}`);
+    return { error: 'artist_error' };
+  }
+}
+
+/** Busca de músicas no YouTube Music (só faixas de áudio), para adicionar à playlist montada. */
+async function searchSongs(query: string) {
+  try {
+    return core.ytmSongs(await ytm('search', { query, params: core.YTM_SONGS }));
+  } catch (e) {
+    log(`[erro] busca de música "${query}": ${e}`);
+    return null;
+  }
 }
 
 /** Itens adicionados sem nome (a busca da tela não tinha terminado): busca um por vez, em segundo plano. */
@@ -752,6 +798,8 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
   copy: (text: string) => navigator.clipboard.writeText(text),
 
   probe,
+  findArtist,
+  searchSongs,
   checkPlaylist: (url: string) =>
     core.checkPlaylist(log, (...args) => ytdlpLines(['--no-warnings', ...args, url.trim()], true)),
   checkDeps: ensureDeps,

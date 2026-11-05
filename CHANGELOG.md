@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.1
+
+### Added
+- "Build a playlist" in the Audio tab (the ✦ button). Type an artist and pick Top 10, 25, 50, 100 or All to load their top songs on YouTube Music, in the site's order. Only the audio tracks are used, so file names are the clean song titles, without "Official Video". Remove any track with ✕, search YouTube Music for other songs and add them at the position you choose (empty = at the end). Download saves the list as a playlist, in that order, in a folder with the name you choose and with the Audio tab options: metadata, cover, file dates and .m3u8 follow the list, and failed tracks, simultaneous downloads and the cookie resume work as in any playlist. The playlist cover is the first track's cover.
+
 ## v1.4.0
 
 ### Changed (performance)

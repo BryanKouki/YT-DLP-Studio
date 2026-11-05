@@ -27,6 +27,7 @@
   <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
 </svg>
 
@@ -149,6 +150,7 @@
     <label class="chk"><input type="checkbox" data-opt="save_track_covers"><span data-i18n="save_track_covers"></span></label>
     <label class="chk"><input type="checkbox" data-opt="save_playlist_file"><span data-i18n="save_playlist_file"></span></label>
     <span class="grow"></span>
+    <button class="icon artist-pl" data-i18n-title="artist_pl"><svg><use href="#i-spark"/></svg></button>
     <button class="icon check-pl" data-i18n-title="check_playlist"><svg><use href="#i-list"/></svg></button>
   </div>
   <div class="actions">
@@ -285,6 +287,35 @@
     <button data-i18n="close"></button>
     <button id="failed-skip" type="button" data-i18n="failed_continue"></button>
     <button id="failed-go" type="button" class="primary" data-i18n="failed_download"></button>
+  </form>
+</dialog>
+
+<dialog id="dlg-artist">
+  <div class="dlg-body">
+    <h2 data-i18n="artist_title"></h2>
+    <p class="muted small" data-i18n="artist_hint"></p>
+    <div class="row">
+      <input id="artist-q" class="grow" data-i18n-ph="artist_ph">
+      <select id="artist-n">
+        <option value="10">Top 10</option><option value="25">Top 25</option><option value="50" selected>Top 50</option>
+        <option value="100">Top 100</option><option value="" data-i18n="artist_all"></option>
+      </select>
+      <button id="artist-find" type="button" data-i18n="artist_find"></button>
+    </div>
+    <label class="field"><span data-i18n="pl_name"></span><input id="pl-name" placeholder="Playlist"></label>
+    <div class="row small"><b class="grow"><span id="pl-count"></span> <span data-i18n="pl_songs"></span></b><span id="pl-status" class="muted"></span></div>
+    <ul id="pl-list" class="pick"></ul>
+    <div class="row">
+      <input id="song-q" class="grow" data-i18n-ph="song_ph">
+      <input id="song-pos" inputmode="numeric" data-i18n-ph="song_pos_ph">
+      <button id="song-find" type="button" data-i18n="song_find"></button>
+    </div>
+    <ul id="song-results" class="pick"></ul>
+  </div>
+  <form method="dialog" class="dlg-foot">
+    <button data-i18n="close"></button>
+    <button id="artist-queue" type="button" data-i18n="add_to_queue" disabled></button>
+    <button id="artist-go" type="button" class="primary" data-i18n="download" disabled></button>
   </form>
 </dialog>
 

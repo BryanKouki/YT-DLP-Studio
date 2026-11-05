@@ -1,6 +1,6 @@
 /** Interface: abas, diálogos e i18n. Só conversa com o resto do app por `api` (backend.ts). */
 import { api } from './backend.js';
-import { isYouTube, linksFrom, searchUrls } from './core.js';
+import { isYouTube, linksFrom, searchUrls, trackUrls, type Track } from './core.js';
 import { HELP, STRINGS } from './i18n.js';
 
 const cfg: Record<string, any> = structuredClone(api.init.settings);
@@ -86,6 +86,7 @@ interface DownloadTab {
   setStatus(text: string): void;
   setProgress(pct: number): void;
   showFolder(): void;
+  addPlaylist(url: string, name: string, tracks: Track[], start: boolean): Promise<void>;
 }
 
 const cloneTemplate = (id: string) => $<HTMLTemplateElement>(id).content.cloneNode(true);
@@ -212,8 +213,9 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
       saveSettings({ ui: { ...cfg.ui, [key]: el instanceof HTMLInputElement ? el.checked : el.value } });
   }
 
-  const submit = async (start: boolean) => {
-    const list = urls();
+  /** given: playlist montada no app ("Montar playlist"), no lugar do que está colado no campo */
+  const submit = async (start: boolean, given?: { url: string; name: string; tracks: Track[] }) => {
+    const list = given ? [given.url] : urls();
     if (!list.length) {
       links.focus();
       return toast(t('no_link_error'), 'warn');
@@ -225,13 +227,18 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
     for (const el of $$<HTMLInputElement>('[data-opt]', root)) {
       opts[el.dataset.opt!] = el.type === 'checkbox' ? el.checked : el.value.trim();
     }
+    if (given) {
+      Object.assign(opts, { trim_start: '', trim_end: '', title: '', artist: '', playlist_items: '', no_playlist: false,
+        playlist_name: given.name, tracks: given.tracks.map(({ id, title, artist }) => ({ id, title, artist })) });
+    }
     if (found.playlist) opts.title = opts.artist = ''; // Título/Artista valem só para uma música
-    const name = found.playlist || String(opts.title || '') || found.title;
+    const name = given?.name || found.playlist || String(opts.title || '') || found.title;
     opts.name = name;
     await api.call('addJobs', { mode, urls: list, opts }, start);
     const what = list.length > 1 ? t('detect_multi', { n: list.length }) : name || list[0];
     toast(t(start ? 'toast_started' : 'toast_queued', { name: what }), 'ok',
       { label: t('tab_queue'), run: () => showTab('queue') });
+    if (given) return; // o que estava colado no campo fica lá
     // pronto para colar o próximo link, sem herdar nome/artista do anterior
     links.value = '';
     links.dispatchEvent(new Event('input'));
@@ -255,6 +262,8 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
     saveSettings({ [folderKey]: chosen });
     showFolder();
   };
+  if (mode === 'audio') $('.artist-pl', root).onclick = () => $<HTMLDialogElement>('#dlg-artist').showModal();
+  else $('.artist-pl', root).remove(); // as mais tocadas do YouTube Music são faixas de áudio
   $('.check-pl', root).onclick = () => {
     const list = urls();
     if (!list.length) return toast(t('no_link_error'), 'warn');
@@ -271,7 +280,114 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
       statusLabel.textContent = text;
     },
     setProgress: (pct) => setBar($('.bar', root), pct),
+    addPlaylist: (url, name, tracks, start) => submit(start, { url, name, tracks }),
   };
+}
+
+// ---- montar playlist (YouTube Music) -------------------------------------------
+
+function setupArtistDialog(): void {
+  const dialog = $<HTMLDialogElement>('#dlg-artist');
+  const query = $<HTMLInputElement>('#artist-q');
+  const count = $<HTMLSelectElement>('#artist-n');
+  const nameInput = $<HTMLInputElement>('#pl-name');
+  const status = $('#pl-status');
+  const list = $('#pl-list');
+  const songQuery = $<HTMLInputElement>('#song-q');
+  const songPos = $<HTMLInputElement>('#song-pos');
+  const results = $('#song-results');
+  const buttons = [$<HTMLButtonElement>('#artist-go'), $<HTMLButtonElement>('#artist-queue')];
+  let tracks: Track[] = [];
+  let source = ''; // link da lista "Top songs" (só aparece no Log)
+  let artistSeq = 0;
+  let songSeq = 0;
+
+  // título e artista vêm do YouTube: só textContent
+  const line = (pos: string, title: string, sub: string, icon: string, tip: string, run: () => void) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="pos"></span><span class="grow"></span><button type="button" class="icon"><svg><use href="#${icon}"/></svg></button>`;
+    const [num, text] = $$('span', li);
+    num.textContent = pos;
+    text.textContent = sub ? `${title} — ${sub}` : title;
+    text.title = text.textContent;
+    const btn = $<HTMLButtonElement>('button', li);
+    btn.title = tip;
+    btn.onclick = run;
+    return li;
+  };
+  const render = (added = -1) => {
+    list.replaceChildren(...tracks.map((tr, i) => line(`${i + 1}.`, tr.title, tr.artist, 'i-x', t('pl_remove'), () => {
+      tracks.splice(i, 1);
+      render();
+    })));
+    $('#pl-count').textContent = String(tracks.length);
+    for (const b of buttons) b.disabled = !tracks.length;
+    const row = list.children[added] as HTMLElement | undefined;
+    row?.classList.add('new');
+    row?.scrollIntoView({ block: 'nearest' });
+  };
+
+  const loadArtist = async () => {
+    const name = query.value.trim();
+    if (!name) return query.focus();
+    const mine = ++artistSeq;
+    status.textContent = t('artist_searching');
+    const r = await api.call('findArtist', name, count.value);
+    if (mine !== artistSeq) return; // outro nome foi buscado nesse meio-tempo
+    if (r.error) {
+      status.textContent = t(r.error, { artist: r.artist || name });
+      return;
+    }
+    status.textContent = '';
+    tracks = r.tracks;
+    source = r.url;
+    nameInput.value = `${r.artist} - Top ${tracks.length}`;
+    render();
+    list.scrollTop = 0;
+  };
+  const addSong = (song: Track) => {
+    const at = tracks.findIndex((x) => x.id === song.id);
+    if (at >= 0) {
+      status.textContent = t('song_dup', { pos: at + 1 });
+      return render(at);
+    }
+    // posição vazia ou maior que a lista = no fim
+    const pos = Math.min(Math.max(1, Math.floor(Number(songPos.value)) || tracks.length + 1), tracks.length + 1);
+    tracks.splice(pos - 1, 0, song);
+    status.textContent = t('song_added', { pos });
+    render(pos - 1);
+  };
+  const findSongs = async () => {
+    const q = songQuery.value.trim();
+    if (!q) return songQuery.focus();
+    const mine = ++songSeq;
+    results.textContent = t('artist_searching');
+    const found: Track[] | null = await api.call('searchSongs', q);
+    if (mine !== songSeq) return;
+    if (!found?.length) {
+      results.textContent = t(found ? 'song_none' : 'artist_error');
+      return;
+    }
+    results.replaceChildren(...found.slice(0, 10).map((s) =>
+      line('', s.title, s.info || s.artist, 'i-plus', t('song_add'), () => addSong(s))));
+  };
+
+  $('#artist-find').onclick = loadArtist;
+  count.onchange = () => source && void loadArtist(); // trocou o Top N depois de carregar: recarrega
+  $('#song-find').onclick = findSongs;
+  for (const [input, run] of [[query, loadArtist], [songQuery, findSongs], [songPos, findSongs]] as const) {
+    input.onkeydown = (event) => {
+      if (event.key === 'Enter') void run();
+    };
+  }
+  const go = async (start: boolean) => {
+    if (!tracks.length) return;
+    await downloadTabs.audio.addPlaylist(source || trackUrls(tracks, '')[0], nameInput.value.trim() || 'Playlist', tracks, start);
+    dialog.close();
+  };
+  buttons[0].onclick = () => go(true);
+  buttons[1].onclick = () => go(false);
+  render();
 }
 
 // ---- aba Converter -------------------------------------------------------------
@@ -719,6 +835,7 @@ const downloadTabs: Record<string, DownloadTab> = { audio: setupDownloadTab('aud
 setupConvertTab();
 setupQueueTab();
 setupFailedDialog();
+setupArtistDialog();
 setupErrorDialog();
 setupDialogs();
 applyTheme();

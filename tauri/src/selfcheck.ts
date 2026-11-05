@@ -99,6 +99,28 @@ async function run(): Promise<void> {
   // bloqueio na 19 de 32 depois de baixar até a 18: continua da 19
   assert.equal(core.resumeFrom(['16', '17', '18']), '19:');
   assert.equal(core.resumeFrom([]), '');
+  // montar playlist: canal do 1º artista da busca; na página dele, a lista "Top songs"; busca de músicas
+  const artistEp = (id: string) => ({ browseEndpoint: { browseId: id,
+    browseEndpointContextSupportedConfigs: { browseEndpointContextMusicConfig: { pageType: 'MUSIC_PAGE_TYPE_ARTIST' } } } });
+  assert.equal(core.ytmArtistId({ contents: [{ a: { navigationEndpoint: artistEp('UCx') } }, { navigationEndpoint: artistEp('UCy') }] }), 'UCx');
+  assert.equal(core.ytmArtistId({}), '');
+  const col = (text: string) => ({ musicResponsiveListItemFlexColumnRenderer: { text: { runs: [{ text }] } } });
+  const top = core.ytmTopSongs({
+    header: { musicImmersiveHeaderRenderer: { title: { runs: [{ text: 'Sade' }] } } },
+    contents: { tabs: [{ musicShelfRenderer: { bottomEndpoint: { browseEndpoint: { browseId: 'VLOLAK5uy_abc' } },
+      contents: [{ musicResponsiveListItemRenderer: { flexColumns: [col('Smooth Operator'), col('Sade'), col('489M plays')] } }] } }] },
+  });
+  assert.equal(JSON.stringify(top), '{"artist":"Sade","list":"OLAK5uy_abc"}');
+  assert.equal(core.ytmTopSongs({ header: {}, contents: {} }).list, '');
+  const songs = core.ytmSongs({ x: [{ musicResponsiveListItemRenderer: { playlistItemData: { videoId: 'XzNWRmqibNE' },
+    flexColumns: [col('Smooth Criminal'), col('Michael Jackson • Bad • 4:18')] } }, { musicResponsiveListItemRenderer: {} }] });
+  assert.equal(JSON.stringify(songs), '[{"id":"XzNWRmqibNE","title":"Smooth Criminal","artist":"Michael Jackson","info":"Michael Jackson • Bad • 4:18"}]');
+  // lista montada: um link por faixa (só as posições pedidas), sem --playlist-items
+  const list = [{ id: 'a', title: 'A', artist: '' }, { id: 'b', title: 'B', artist: '' }, { id: 'c', title: 'C', artist: '' }];
+  assert.equal(core.trackUrls(list, '1,3').join(' '), 'https://music.youtube.com/watch?v=a https://music.youtube.com/watch?v=c');
+  c = cmdFor(job('audio', { folder: 'C:/m', tracks: list, playlist_items: '2', _is_playlist: true }));
+  assert.equal(c[1], 'https://music.youtube.com/watch?v=b');
+  assert(!c.includes('--playlist-items') && !c.includes('u'));
   assert.equal(JSON.stringify(core.splitRoundRobin(['1', '2', '3', '4', '5', '6', '7'], 3)), '[["1","4","7"],["2","5"],["3","6"]]');
   assert.equal(core.splitRoundRobin(['9'], 3).length, 1); // menos faixas que processos: um processo por faixa
   assert.equal(core.playlistIdFrom('https://music.youtube.com/playlist?list=PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41'), 'PLsTaFPbVzr42Zagqe6HDBgac7erdK4M41');

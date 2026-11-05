@@ -411,6 +411,16 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 #dlg-confirm .dlg-body { align-items: center; text-align: center; font-weight: 600; font-size: 14px; }
 .confirm-ico { width: 34px; height: 34px; color: var(--warn); animation: shake 0.4s ease-out; }
 #dlg-failed { width: 720px; }
+#dlg-artist { width: 640px; }
+#song-pos { width: 130px; }
+.pick { list-style: none; margin: 0; padding: 0; max-height: 170px; overflow: auto; font-size: 12px; }
+.pick:empty { display: none; }
+#song-results { max-height: 130px; }
+.pick li { display: flex; align-items: center; gap: 6px; padding: 1px 4px; border-radius: 6px; }
+.pick li .pos { min-width: 26px; color: var(--muted); text-align: right; }
+.pick li .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick li.new { animation: flash 1.5s ease-out; }
+.pick button.icon { width: 26px; height: 26px; }
 #err-text {
   margin: 0;
   padding: 10px 12px;

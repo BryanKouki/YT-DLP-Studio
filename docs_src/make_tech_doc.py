@@ -766,6 +766,16 @@ story.append(bullets([
     "Com <tt>parallel_tracks</tt> &gt; 1, <tt>splitPlaylist()</tt> divide os índices "
     "(<tt>core.splitRoundRobin</tt>) entre vários processos e <tt>stampInOrder()</tt> "
     "reajusta as datas dos arquivos na ordem da playlist.",
+    "Montar playlist (1.4.1): o yt-dlp não abre a página do artista no YouTube Music "
+    "(redireciona para o canal comum). <tt>findArtist()</tt> usa a API do site "
+    "(<tt>youtubei/v1/search</tt> com o filtro Artistas e <tt>browse</tt> do canal) pelo "
+    "comando nativo <tt>post_json</tt>, porque a CSP da página bloqueia outros sites; "
+    "<tt>core.ytmTopSongs()</tt> acha a lista \"Top songs\" e o yt-dlp lista as faixas "
+    "dela. <tt>searchSongs()</tt> usa o filtro Músicas (só faixas de áudio). A lista "
+    "montada vai no job como <tt>options.tracks</tt>: <tt>buildCommand</tt> passa um link "
+    "por faixa (<tt>core.trackUrls</tt>, com <tt>playlist_items</tt> escolhendo as "
+    "posições, sem <tt>--playlist-items</tt>) e a posição de cada faixa vem da lista, "
+    "pelo ID, para datas, .m3u8, faixas com erro, divisão em processos e retomada.",
     "Nome na fila: a busca automática usa <tt>--flat-playlist</tt> e devolve "
     "<tt>%(playlist_title)s</tt>; itens adicionados sem nome são nomeados em "
     "segundo plano, um por vez (<tt>nameLater()</tt>). <tt>job.name</tt> só é "

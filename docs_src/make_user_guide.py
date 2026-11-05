@@ -206,6 +206,19 @@ story.append(body(
     "No menu de faixas com erro de playlists do YouTube, cada faixa com nome conhecido "
     "tem botões que copiam a busca dela no YouTube Music e no YouTube."
 ))
+story.append(h3("Montar playlist (versão .exe Tauri)"))
+story.append(body(
+    "Na aba Áudio, o botão de estrela ao lado da verificação de playlist abre "
+    "<b>Montar playlist</b>. Digite o nome de um artista, escolha <b>Top 10, 25, 50, "
+    "100</b> ou <b>Todas</b> e clique em <b>Carregar</b>: vêm as mais tocadas dele no "
+    "YouTube Music, na ordem do site, só as faixas de áudio (título limpo, sem "
+    "\"Official Video\"). Tire o que não quiser com o <b>X</b> da linha. Para adicionar uma "
+    "música, busque no campo de baixo, digite a posição (vazio = no fim) e clique no "
+    "<b>+</b> do resultado. <b>Download</b> baixa a lista nessa ordem, como uma "
+    "playlist, numa pasta com o nome escolhido e com as opções da aba Áudio: datas e "
+    ".m3u8 na ordem da lista, capa da playlist (a da 1ª faixa) e faixas com erro "
+    "funcionam igual."
+))
 story.append(h3("Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)"))
 story.append(body(
     "Em Configurações → Fila, <b>Músicas baixadas ao mesmo tempo em cada playlist</b> "

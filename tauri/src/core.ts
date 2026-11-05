@@ -147,6 +147,64 @@ export function resumeFrom(doneIdx: string[]): string {
   return last ? `${last + 1}:` : '';
 }
 
+// ---- playlist montada no app (YouTube Music) -----------------------------------
+// O yt-dlp não abre a página do artista no YouTube Music (redireciona para o canal comum), então o app
+// pergunta à mesma API que o site usa: o artista, a lista "Top songs" dele e a busca de músicas.
+// Só faixas de áudio do Music (título limpo), nunca os clipes.
+export interface Track { id: string; title: string; artist: string; info?: string }
+
+/** Lista montada: um link por faixa, só as posições pedidas ("3,5,6"; vazio = todas), na ordem da lista. */
+export function trackUrls(tracks: Track[], items: string): string[] {
+  const want = items.trim() ? new Set(items.split(',').map(Number)) : null;
+  return tracks.filter((_, i) => !want || want.has(i + 1)).map((t) => `https://music.youtube.com/watch?v=${t.id}`);
+}
+
+export const YTM_API = 'https://music.youtube.com/youtubei/v1/';
+export const YTM_ARTISTS = 'EgWKAQIgAWoKEAoQAxAEEAkQBQ=='; // filtro "Artistas" da busca
+export const YTM_SONGS = 'EgWKAQIIAWoKEAoQAxAEEAkQBQ=='; // filtro "Músicas": só faixas de áudio
+export const ytmBody = (hl: string, extra: Record<string, string>): string =>
+  JSON.stringify({ context: { client: { clientName: 'WEB_REMIX', clientVersion: '1.20241023.01.00', hl } }, ...extra });
+
+/** Primeiro objeto (em profundidade) que passa no teste: aguenta o YouTube mudar o aninhamento. */
+function deepFind(o: any, test: (x: any) => boolean): any {
+  if (!o || typeof o !== 'object') return undefined;
+  if (test(o)) return o;
+  for (const v of Object.values(o)) {
+    const hit = deepFind(v, test);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+const runsText = (x: any): string => (x?.runs ?? []).map((r: any) => r.text).join('');
+
+/** Canal do primeiro artista na resposta da busca ('' = nenhum). */
+export const ytmArtistId = (search: unknown): string => deepFind(search, (x) =>
+  x.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType === 'MUSIC_PAGE_TYPE_ARTIST')?.browseId ?? '';
+
+/** Página do artista: nome e ID da lista "Top songs" ('' = não tem). A página só mostra 5; a lista tem todas. */
+export function ytmTopSongs(page: any): { artist: string; list: string } {
+  const artist = runsText(deepFind(page?.header, (x) => Array.isArray(x.title?.runs))?.title);
+  const shelf = deepFind(page?.contents, (x) => x.musicShelfRenderer)?.musicShelfRenderer;
+  const id: string = shelf?.bottomEndpoint?.browseEndpoint?.browseId ??
+    shelf?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId ?? '';
+  return { artist, list: id.startsWith('VL') ? id.slice(2) : '' };
+}
+
+/** Resultados da busca de músicas: colunas título, "Artista • Álbum • 4:18", reproduções. */
+export function ytmSongs(search: unknown): Track[] {
+  const items: any[] = [];
+  const walk = (o: any): void => {
+    if (!o || typeof o !== 'object') return;
+    if (o.musicResponsiveListItemRenderer) items.push(o.musicResponsiveListItemRenderer);
+    else Object.values(o).forEach(walk);
+  };
+  walk(search);
+  return items.filter((r) => r.playlistItemData?.videoId).map((r) => {
+    const [title = '', info = ''] = (r.flexColumns ?? []).map((c: any) => runsText(c.musicResponsiveListItemFlexColumnRenderer?.text));
+    return { id: r.playlistItemData.videoId, title, artist: info.split(' • ')[0], info };
+  });
+}
+
 /** ID da playlist num link do YouTube (list=...). Serve para nunca baixar uma playlist solta
  *  na pasta principal quando o nome dela não puder ser lido. */
 export const playlistIdFrom = (url: string): string => /[?&]list=([\w-]+)/.exec(url)?.[1] ?? '';
@@ -207,7 +265,7 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
   const fields = '%(title)s@@@%(artist|)s@@@%(playlist_index|)s@@@%(playlist_count|)s@@@%(id)s@@@%(filepath|)s';
   const args = [
     // --progress: o --print implica --quiet, e sem isto nenhuma linha "[download] N%" sai (barra parada)
-    ytdlp, job.url.trim(), '--encoding', 'utf-8', '--newline', '--progress', '--no-color', '--no-warnings', '--ignore-errors',
+    ytdlp, ...(s.tracks ? trackUrls(s.tracks, str('playlist_items')) : [job.url.trim()]), '--encoding', 'utf-8', '--newline', '--progress', '--no-color', '--no-warnings', '--ignore-errors',
     '--ffmpeg-location', ffdir, ...jsRuntimeArgs(ffdir),
     '--print', `before_dl:BDL@@@${fields}`,
     '--print', `after_move:ADL@@@${fields}`,
@@ -218,7 +276,10 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
   ];
 
   for (const [key, flag] of Object.entries(BOOL_FLAGS)) if (s[key]) args.push(flag);
-  for (const [key, flag] of Object.entries(VALUE_FLAGS)) if (str(key)) args.push(flag, str(key));
+  for (const [key, flag] of Object.entries(VALUE_FLAGS)) {
+    // lista montada: playlist_items escolhe os links acima (cada link é uma faixa avulsa)
+    if (str(key) && !(s.tracks && key === 'playlist_items')) args.push(flag, str(key));
+  }
   if (s.skip_downloaded) args.push('--download-archive', path.join(s.folder || '.', 'download_archive.txt'));
 
   const duration = [

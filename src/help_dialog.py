@@ -73,6 +73,16 @@ HELP_CONTENT = {
          "Incorporando a capa e Finalizando. A barra avança junto: o download vai "
          "até 75% e as etapas seguintes completam o resto. Quando a música está "
          "pronta na pasta, aparece um ✓ ao lado do nome dela."),
+        ("Montar playlist (versão .exe Tauri)",
+         "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar "
+         "playlist'. Digite um artista, escolha Top 10, 25, 50, 100 ou Todas e clique "
+         "em Carregar: vêm as mais tocadas dele no YouTube Music, na ordem do site, só "
+         "as faixas de áudio (título limpo, sem 'Official Video'). Tire o que não quiser "
+         "com ✕. Para adicionar uma música, busque no campo de baixo, digite a posição "
+         "(vazio = no fim) e clique no + do resultado. Download baixa a lista nessa "
+         "ordem, como uma playlist, numa pasta com o nome escolhido e com as opções "
+         "da aba Áudio: datas e .m3u8 na ordem da lista, capa da playlist (a da 1ª "
+         "faixa) e faixas com erro funcionam igual."),
         ("Mais rápido: músicas ao mesmo tempo (versão .exe Tauri)",
          "Em Configurações → Fila, 'Músicas baixadas ao mesmo tempo em cada "
          "playlist' (1 a 5, padrão 1) divide a playlist entre vários downloads "
@@ -229,6 +239,16 @@ HELP_CONTENT = {
          "metadata, Embedding the cover and Finishing. The bar follows it: the "
          "download goes up to 75% and the next steps fill the rest. When the track "
          "is ready in the folder, a ✓ appears next to its name."),
+        ("Build a playlist (Tauri .exe version)",
+         "In the Audio tab, the ✦ button next to the playlist check opens 'Build a "
+         "playlist'. Type an artist, pick Top 10, 25, 50, 100 or All and click Load: "
+         "you get their top songs on YouTube Music, in the site's order, audio tracks "
+         "only (clean titles, no 'Official Video'). Remove what you don't want with ✕. "
+         "To add a song, search in the field below, type the position (empty = at the "
+         "end) and click the + on the result. Download saves the list in that order, "
+         "as a playlist, in a folder with the name you chose and with the Audio tab "
+         "options: file dates and .m3u8 follow the list, the playlist cover (the first "
+         "track's) and failed tracks work the same."),
         ("Faster: tracks at the same time (Tauri .exe version)",
          "In Settings → Queue, 'Tracks downloaded at the same time in each "
          "playlist' (1 to 5, default 1) splits the playlist across several "
