@@ -258,6 +258,7 @@ export function outputTemplate(job: Job): string {
 
 // ---- atualização (releases do GitHub) -------------------------------------------
 export const RELEASES_API = 'https://api.github.com/repos/BryanKouki/YT-DLP-Studio/releases/latest';
+export const RELEASES_PAGE = 'https://github.com/BryanKouki/YT-DLP-Studio/releases'; // changelog de cada versão
 
 /** "1.4.10" é mais nova que "1.4.2" (compara número a número, não texto). */
 export function isNewer(latest: string, current: string): boolean {
@@ -276,6 +277,7 @@ export function pickUpdate(release: any, current: string) {
   return {
     latest, newer: Boolean(latest) && isNewer(latest, current), url: String(exe?.browser_download_url ?? ''),
     sha256: String(exe?.digest ?? '').replace(/^sha256:/, '').toLowerCase(),
+    page: String(release?.html_url ?? ''), // o que mudou nessa versão
   };
 }
 

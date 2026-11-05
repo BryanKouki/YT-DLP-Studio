@@ -89,8 +89,8 @@ HELP_CONTENT = {
          "de um errado."),
         ("Montar playlist (versão .exe Tauri)",
          "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar "
-         "playlist'. Digite um artista, escolha ou digite quantas músicas (10, 25, 50, "
-         "100 ou qualquer número; vazio = todas) e clique "
+         "playlist'. Digite um artista, escolha Top 10, 25, 50, 100, Todas ou "
+         "Personalizado (digite quantas) e clique "
          "em Carregar: vêm as mais tocadas dele no YouTube Music, na ordem do site, só "
          "as faixas de áudio (título limpo, sem 'Official Video'). Tire o que não quiser "
          "com ✕. Para adicionar uma música, busque no campo de baixo, digite a posição "
@@ -108,9 +108,10 @@ HELP_CONTENT = {
          "faixas com erro, 'Ignorar esta música' tira da contagem uma faixa para a "
          "qual você não achou substituta ('Desfazer' volta atrás)."),
         ("Versão, atualização e configurações de fábrica (versão .exe Tauri)",
-         "A versão aparece no fim do menu lateral e nas propriedades do .exe. Clicando "
-         "nela (ou no fim das Configurações, em 'Sobre e atualização'), 'Verificar "
-         "atualização' consulta a última versão publicada no GitHub. Se houver uma "
+         "A versão aparece no fim do menu lateral e nas propriedades do .exe. No fim "
+         "das Configurações, em 'Sobre e atualização', 'Ver changelog' abre no "
+         "navegador a página de versões no GitHub, com o que mudou em cada uma, e "
+         "'Verificar atualização' consulta a última versão publicada no GitHub. Se houver uma "
          "nova, 'Atualizar agora' baixa o .exe, confere o código SHA-256 que o GitHub "
          "informa (garante que o arquivo chegou inteiro e é o publicado), troca o .exe e "
          "reabre o app; a pasta data fica. 'Restaurar configurações de fábrica' apaga as "
@@ -278,8 +279,8 @@ HELP_CONTENT = {
          "is not found, the track gets no genre instead of a wrong one."),
         ("Build a playlist (Tauri .exe version)",
          "In the Audio tab, the ✦ button next to the playlist check opens 'Build a "
-         "playlist'. Type an artist, pick or type how many songs (10, 25, 50, 100 or "
-         "any number; empty = all) and click Load: "
+         "playlist'. Type an artist, pick Top 10, 25, 50, 100, All or Custom (type "
+         "how many) and click Load: "
          "you get their top songs on YouTube Music, in the site's order, audio tracks "
          "only (clean titles, no 'Official Video'). Remove what you don't want with ✕. "
          "To add a song, search in the field below, type the position (empty = at the "
@@ -298,8 +299,9 @@ HELP_CONTENT = {
          "could not find a replacement for ('Undo' reverts it)."),
         ("Version, updates and factory settings (Tauri .exe version)",
          "The version is shown at the bottom of the side menu and in the .exe "
-         "properties. Click it (or go to the end of Settings, 'About and updates'): "
-         "'Check for updates' looks up the latest version published on GitHub. If "
+         "properties. At the end of Settings, 'About and updates', 'View changelog' "
+         "opens the GitHub releases page in the browser, with what changed in each "
+         "version, and 'Check for updates' looks up the latest version published on GitHub. If "
          "there is a newer one, 'Update now' downloads the .exe, checks the SHA-256 "
          "code GitHub reports (so the file arrived whole and is the published one), "
          "replaces the .exe and reopens the app; the data folder is kept. 'Restore "

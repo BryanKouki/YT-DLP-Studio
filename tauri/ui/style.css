@@ -412,15 +412,14 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 .confirm-ico { width: 34px; height: 34px; color: var(--warn); animation: shake 0.4s ease-out; }
 #dlg-failed { width: 720px; }
 #dlg-artist { width: 640px; }
-.version { align-self: center; padding: 2px 8px; background: transparent; color: var(--muted); font-size: 11px; }
-.version:hover { color: var(--text); background: transparent; }
+.version { align-self: center; color: var(--muted); font-size: 11px; }
 #set-about { display: flex; flex-direction: column; gap: 10px; }
 #set-about h3 { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--border); }
 #set-about p:empty { display: none; }
 #factory-reset { align-self: flex-start; }
 #set-form .grid.tags { grid-template-columns: repeat(3, 1fr); gap: 6px 12px; }
-#song-pos { width: 130px; }
-#artist-n { width: 110px; }
+#song-pos { width: 160px; }
+#artist-n-custom { width: 100px; }
 .pick { list-style: none; margin: 0; padding: 0; max-height: 170px; overflow: auto; font-size: 12px; }
 .pick:empty { display: none; }
 #song-results { max-height: 130px; }

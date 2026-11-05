@@ -289,10 +289,17 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
 function setupArtistDialog(): void {
   const dialog = $<HTMLDialogElement>('#dlg-artist');
   const query = $<HTMLInputElement>('#artist-q');
-  const count = $<HTMLInputElement>('#artist-n');
-  // quantidade digitada: número inteiro positivo; vazio ou inválido = todas
+  const count = $<HTMLSelectElement>('#artist-n');
+  const custom = $<HTMLInputElement>('#artist-n-custom');
+  // "Personalizado": abre o campo para digitar a quantidade
+  count.onchange = () => {
+    custom.hidden = count.value !== 'custom';
+    if (!custom.hidden) custom.focus();
+  };
+  // quantidade do menu, ou a digitada (inteiro positivo; vazio ou inválido = todas)
   const howMany = () => {
-    const n = parseInt(count.value, 10);
+    if (count.value !== 'custom') return count.value;
+    const n = parseInt(custom.value, 10);
     return n > 0 ? String(n) : '';
   };
   const nameInput = $<HTMLInputElement>('#pl-name');
@@ -337,8 +344,9 @@ function setupArtistDialog(): void {
     if (!name) return query.focus();
     const mine = ++artistSeq;
     status.textContent = t('artist_searching');
-    count.value = howMany(); // mostra o que vai valer ("abc" vira vazio = todas)
-    const r = await api.call('findArtist', name, count.value);
+    const n = howMany();
+    if (count.value === 'custom') custom.value = n; // mostra o que vai valer ("abc" vira vazio = todas)
+    const r = await api.call('findArtist', name, n);
     if (mine !== artistSeq) return; // outro nome foi buscado nesse meio-tempo
     if (r.error) {
       status.textContent = t(r.error, { artist: r.artist || name });
@@ -380,7 +388,7 @@ function setupArtistDialog(): void {
 
   $('#artist-find').onclick = loadArtist;
   $('#song-find').onclick = findSongs;
-  for (const [input, run] of [[query, loadArtist], [count, loadArtist], [songQuery, findSongs], [songPos, findSongs]] as const) {
+  for (const [input, run] of [[query, loadArtist], [custom, loadArtist], [songQuery, findSongs], [songPos, findSongs]] as const) {
     input.onkeydown = (event) => {
       if (event.key === 'Enter') void run();
     };
@@ -718,17 +726,14 @@ function ask(text: string): Promise<boolean> {
   return new Promise((resolve) => dialog.addEventListener('close', () => resolve(dialog.returnValue === 'yes'), { once: true }));
 }
 
-/** Versão no menu, verificar/instalar atualização e configurações de fábrica (fim das Configurações). */
+/** Versão no menu, changelog, verificar/instalar atualização e configurações de fábrica (fim das Configurações). */
 function setupAbout(): void {
-  const version = `v${api.init.version}`;
-  $('#app-version').textContent = $('#about-version').textContent = version;
-  $('#app-version').onclick = () => {
-    $('#btn-settings').click();
-    $('#set-about').scrollIntoView();
-  };
+  $('#app-version').textContent = $('#about-version').textContent = `v${api.init.version}`;
   const status = $('#update-status');
   const install = $<HTMLButtonElement>('#update-install');
   let found: any = null;
+  // página das versões no GitHub; depois de achar uma nova, a página dela (o que mudou antes de atualizar)
+  $('#update-notes').onclick = () => api.call('openReleases', found?.newer ? found.page : '');
   $('#update-check').onclick = async () => {
     status.textContent = t('update_checking');
     install.hidden = true;

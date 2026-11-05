@@ -902,6 +902,9 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
   searchSongs,
   checkUpdate,
   installUpdate,
+  // abre no navegador só páginas de release do próprio repositório (o link vem da API do GitHub)
+  openReleases: (page: string) =>
+    invoke('open_path', { path: page.startsWith(core.RELEASES_PAGE + '/') ? page : core.RELEASES_PAGE }),
   factoryReset,
   checkPlaylist: (url: string) =>
     core.checkPlaylist(log, (...args) => ytdlpLines(['--no-warnings', ...args, url.trim()], true)),

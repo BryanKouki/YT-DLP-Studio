@@ -795,7 +795,9 @@ story.append(bullets([
     "confere o hash com o <tt>certutil</tt> do Windows, e o comando nativo "
     "<tt>replace_exe</tt> renomeia o .exe em uso para <tt>.old.exe</tt> (o Windows deixa "
     "renomear, não sobrescrever) e copia o novo; <tt>relaunch</tt> abre o novo e fecha este. "
-    "Ao abrir, o app apaga o <tt>.old.exe</tt>. Configurações de fábrica: apaga "
+    "Ao abrir, o app apaga o <tt>.old.exe</tt>. \"Ver changelog\" abre "
+    "<tt>core.RELEASES_PAGE</tt> (ou a página da versão nova achada) com <tt>open_path</tt>, "
+    "só se o link for do próprio repositório. Configurações de fábrica: apaga "
     "<tt>data\\settings.json</tt> e chama <tt>relaunch</tt>.",
     "Montar playlist (1.4.1): o yt-dlp não abre a página do artista no YouTube Music "
     "(redireciona para o canal comum). <tt>findArtist()</tt> usa a API do site "
