@@ -412,6 +412,7 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 .confirm-ico { width: 34px; height: 34px; color: var(--warn); animation: shake 0.4s ease-out; }
 #dlg-failed { width: 720px; }
 #dlg-artist { width: 640px; }
+#set-form .grid.tags { grid-template-columns: repeat(3, 1fr); gap: 6px 12px; }
 #song-pos { width: 130px; }
 .pick { list-style: none; margin: 0; padding: 0; max-height: 170px; overflow: auto; font-size: 12px; }
 .pick:empty { display: none; }

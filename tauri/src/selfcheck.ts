@@ -46,7 +46,31 @@ async function run(): Promise<void> {
   assert.equal(after(c, '-o'), "It's-Mine.%(ext)s");
   assert.equal(after(c, '-P'), 'C:/m'); // pasta de destino; intermediários vão para a pasta temporária
   assert(core.buildCommand(job('audio', { folder: 'C:/m' }), 'x', 'y', 'b', 'C:/t').includes('temp:C:/t'));
-  assert.equal(after(c, '--postprocessor-args'), `ffmpeg:-metadata title='It'"'"'s/Mine' -metadata artist=AC/DC`);
+  assert.equal(after(c, '--postprocessor-args'), `ffmpeg:-metadata title='It'"'"'s/Mine' -metadata artist=AC/DC -metadata album_artist=AC/DC`);
+  // propriedades do arquivo (padrão: tudo menos gênero): ano do ℗, artista do álbum, nº da faixa só em álbum
+  const albumArtist = '%(artists.0|)s:(?P<album_artist>.+)';
+  const video = cmdFor(job('video', { folder: 'C:/v', embed_metadata_thumb: true }));
+  assert(c.includes(albumArtist) && !video.includes(albumArtist) && c.includes('--embed-thumbnail') && video.includes('--embed-thumbnail'));
+  assert(c.includes('%(release_year|)s:(?P<meta_date>\\d{4})')); // ano do ℗, não o de envio ao YouTube
+  assert(c.includes(':(?P<meta_genre>)') && !c.includes(':(?P<meta_title>)')); // "Music" do YouTube nunca vai
+  // desmarcadas: a tag não vai; sem capa embutida o áudio não recorta capa nenhuma
+  const off = cmdFor(job('audio', { folder: 'C:/m', embed_metadata_thumb: true, tag_audio_date: false, tag_audio_cover: false,
+    tag_audio_album_artist: false, tag_audio_comment: false }, '', 'X'));
+  assert(off.includes(':(?P<meta_date>)') && off.includes(':(?P<meta_purl>)') && off.includes(':(?P<meta_comment>)') && !off.includes(albumArtist));
+  assert(!off.includes('--embed-thumbnail') && !off.includes('--ppa') && !after(off, '--postprocessor-args').includes('album_artist'));
+  assert(!core.tagOn({}, 'audio', 'genre') && core.tagOn({}, 'video', 'title') && core.tagOn({ tag_audio_genre: true }, 'audio', 'genre'));
+  const trackTag = core.tagArgs({}, 'audio').find((a) => a.includes('track_number'))!;
+  const trackRe = new RegExp(trackTag.slice(trackTag.indexOf(':') + 1).replace('(?P<', '(?<'));
+  assert.equal(trackRe.exec('Album - Thriller|02')?.groups?.track_number, '2');
+  assert.equal(trackRe.exec('Album - Bad|12')?.groups?.track_number, '12');
+  assert.equal(trackRe.exec('Top 100 Funk|02'), null); // playlist comum: sem número de faixa
+  // gênero: só de um álbum do mesmo artista (sem acento/caixa); outro artista = sem gênero
+  const itunes = { results: [{ artistName: 'Anita Baker', primaryGenreName: 'R&B/soul' }, { artistName: 'Djavan', primaryGenreName: 'MPB' }] };
+  assert.equal(core.itunesGenre(itunes, 'DJAVAN'), 'MPB');
+  assert.equal(core.itunesGenre(itunes, 'Anitta'), '');
+  assert.equal(core.itunesGenre({ results: [{ artistName: 'Beyoncé', primaryGenreName: 'Pop' }] }, 'Beyonce'), 'Pop');
+  assert.equal(core.itunesGenre({}, 'x'), '');
+  assert(core.genreUrl('Sade', 'Love Deluxe', 'pt').endsWith('country=BR&term=Sade%20Love%20Deluxe'));
   assert.equal(after(cmdFor(job('video', { folder: 'C:/v' })), '-o'), '%(title)s - %(channel,uploader)s.%(ext)s');
   assert(!c.join(' ').includes('uploader') && c.join(' ').includes('%(artist|)s'));
   assert(c.includes('--progress'), 'sem --progress o --print esconde o progresso');
@@ -58,7 +82,7 @@ async function run(): Promise<void> {
   assert(core.isYouTube('https://music.youtube.com/playlist?list=X') && core.isYouTube('https://youtu.be/abc'));
   assert(!core.isYouTube('https://soundcloud.com/a/sets/b') && !core.isYouTube('https://notyoutube.com.evil/x'));
   assert.equal(after(c, '--js-runtimes'), core.path.join('bin', 'deno.exe').replace(/^/, 'deno:'));
-  assert(after(c, '--print').endsWith('@@@%(id)s@@@%(filepath|)s') && !c.includes('--cookies-from-browser'));
+  assert(after(c, '--print').endsWith('@@@%(id)s@@@%(filepath|)s@@@%(album|)s') && !c.includes('--cookies-from-browser'));
 
   // 2b. cookies: Firefox por padrão (não Chromium); substituta fica entre as vizinhas (na ordem que a pasta mostra)
   assert.equal(after(cmdFor(job('audio', { folder: 'C:/m', use_cookies: true })), '--cookies-from-browser'), 'firefox');

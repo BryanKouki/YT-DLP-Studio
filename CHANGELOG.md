@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.4.2
+
+### Fixed
+- The year tag now holds the song's original release year, read from the ℗ line of the YouTube Music description, instead of the date the track was uploaded to YouTube ("Beat It" was tagged 2017; it is now 1982).
+- The genre tag no longer says "Music" on every track (YouTube has no real genre).
+
+### Added
+- Album artist tag: the track's first artist, or the artist typed in the Artist field.
+- Track number when downloading an album (also EPs and singles): each track's position in the album. Other playlists keep the field empty.
+- Settings → File properties: choose which tags go into each file, separately for audio (title, artist, album, album artist, year, track number, genre, description, video link, cover) and video (title, artist, year, description, video link, cover). Everything is on by default except genre.
+- Genre (off by default): the app looks up the album's genre in Apple's catalog (iTunes Search, in Portuguese when the app is in Portuguese), one lookup per album and at most one every 3 seconds while the tracks download, and writes it to MP3, M4A and FLAC files without re-encoding, keeping the cover and the file dates. If the artist is not found, the track gets no genre rather than a wrong one. Opus and Vorbis files get no genre: ffmpeg cannot copy their cover.
+
 ## v1.4.1
 
 ### Added

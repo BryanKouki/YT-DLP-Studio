@@ -256,13 +256,62 @@ export function outputTemplate(job: Job): string {
   return job.title ? `${job.title.replace(/[/\\]/g, '-')}.%(ext)s` : '%(title)s.%(ext)s';
 }
 
+/** "Propriedades do arquivo" (Configurações): o que vai dentro de cada arquivo. Tudo ligado por padrão,
+ *  menos o gênero (consulta a Apple, ver itunesGenre). */
+export const TAGS: Record<Mode, string[]> = {
+  audio: ['title', 'artist', 'album', 'album_artist', 'date', 'track', 'genre', 'description', 'comment', 'cover'],
+  video: ['title', 'artist', 'date', 'description', 'comment', 'cover'],
+};
+export const tagOn = (s: Opts, mode: Mode, tag: string): boolean => s[`tag_${mode}_${tag}`] ?? tag !== 'genre';
+// tags que o --embed-metadata grava para cada propriedade; meta_<tag> vazio apaga (testado no yt-dlp real)
+const META_KEYS: Record<string, string[]> = {
+  title: ['title'], artist: ['artist'], album: ['album'], album_artist: ['album_artist'], date: ['date'],
+  track: ['track'], description: ['description', 'synopsis'], comment: ['purl', 'comment'], // comment = link do vídeo
+};
+
+/** Tags (testadas no yt-dlp real). Áudio: ano = o do ℗ na descrição (release_year; senão seria a data de
+ *  envio ao YouTube, ex. 2017 num Beat It de 1982); artista do álbum = 1º artista da faixa; número da faixa =
+ *  posição, só em álbum (o YouTube chama a playlist de álbum, EP e single de "Album - Nome"); o gênero
+ *  "Music" do YouTube nunca vai. Desmarcada = campo vazio = a tag não é gravada. */
+export function tagArgs(s: Opts, mode: Mode): string[] {
+  const on = (tag: string) => tagOn(s, mode, tag);
+  const pm = (rule: string) => ['--parse-metadata', rule];
+  const audio = mode === 'audio';
+  return [
+    ...(on('cover') ? ['--embed-thumbnail'] : []),
+    ...(audio && on('date') ? pm('%(release_year|)s:(?P<meta_date>\\d{4})') : []),
+    ...(audio && on('album_artist') ? pm('%(artists.0|)s:(?P<album_artist>.+)') : []),
+    ...(audio && on('track') ? pm('%(playlist_title|)s|%(playlist_index|)s:^Album - .+\\|0*(?P<track_number>\\d+)$') : []),
+    ...(audio ? pm(':(?P<meta_genre>)') : []),
+    ...TAGS[mode].filter((tag) => !on(tag)).flatMap((tag) => META_KEYS[tag] ?? []).flatMap((key) => pm(`:(?P<meta_${key}>)`)),
+  ];
+}
+
+// ---- gênero (o YouTube não tem: vem do catálogo da Apple, iTunes Search, grátis e sem chave) ----
+/** Formatos em que o gênero é gravado depois sem perder a capa (testado; no Opus/Vorbis o ffmpeg recusa). */
+export const GENRE_EXTS = ['.mp3', '.m4a', '.flac'];
+export const genreUrl = (artist: string, album: string, lang: string): string =>
+  `https://itunes.apple.com/search?entity=album&limit=10&country=${lang === 'en' ? 'US' : 'BR'}` +
+  `&term=${encodeURIComponent(`${artist} ${album}`)}`;
+/** Gênero do primeiro álbum do MESMO artista ('' = nenhum: melhor sem gênero do que um errado). */
+export function itunesGenre(res: any, artist: string): string {
+  const norm = (s: string) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[^\p{L}\p{N}]/gu, '');
+  const want = norm(artist);
+  const hit = (res?.results ?? []).find((r: any) => {
+    const name = norm(r.artistName);
+    return want && name && (name.includes(want) || want.includes(name));
+  });
+  return hit?.primaryGenreName ?? '';
+}
+
 /** tempDir: pasta dos arquivos intermediários (.part, .webm, capa a embutir); a pasta de
  *  destino só recebe o arquivo pronto. */
 export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir: string, tempDir = ''): string[] {
   const s = job.options;
   const str = (key: string) => String(s[key] ?? '').trim();
   // id e caminho final servem pra encaixar uma substituta entre as vizinhas (ver between)
-  const fields = '%(title)s@@@%(artist|)s@@@%(playlist_index|)s@@@%(playlist_count|)s@@@%(id)s@@@%(filepath|)s';
+  // álbum: para buscar o gênero (ver itunesGenre)
+  const fields = '%(title)s@@@%(artist|)s@@@%(playlist_index|)s@@@%(playlist_count|)s@@@%(id)s@@@%(filepath|)s@@@%(album|)s';
   const args = [
     // --progress: o --print implica --quiet, e sem isto nenhuma linha "[download] N%" sai (barra parada)
     ytdlp, ...(s.tracks ? trackUrls(s.tracks, str('playlist_items')) : [job.url.trim()]), '--encoding', 'utf-8', '--newline', '--progress', '--no-color', '--no-warnings', '--ignore-errors',
@@ -294,14 +343,15 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
   }
 
   if (s.embed_metadata_thumb) {
-    args.push('--embed-metadata', '--embed-thumbnail', '--parse-metadata', 'release_year:%(release_year)s');
+    args.push('--embed-metadata', '--parse-metadata', 'release_year:%(release_year)s', ...tagArgs(s, job.mode));
   }
+  const tag = (name: string) => Boolean(s.embed_metadata_thumb) && tagOn(s, job.mode, name);
 
   // Numa playlist, "Guardar thumbnail" é só a capa DA PLAYLIST, baixada à parte (playlistCoverArgs);
   // uma capa por faixa só com "Guardar capa de cada música".
   const saveThumbFile = (Boolean(s.save_thumbnail) && !s._is_playlist) || Boolean(s.save_track_covers);
   // áudio: capa sempre .jpg recortada 1:1; vídeo: nunca recorta
-  const squareCrop = job.mode === 'audio' && (saveThumbFile || Boolean(s.embed_metadata_thumb));
+  const squareCrop = job.mode === 'audio' && (saveThumbFile || tag('cover'));
   if (saveThumbFile) args.push('--write-thumbnail');
   // senão o --write-thumbnail também grava a capa da playlist com o nome dela (modelo vazio = não grava)
   if (saveThumbFile && s._is_playlist) args.push('-o', 'pl_thumbnail:');
@@ -312,8 +362,9 @@ export function buildCommand(job: Job, outTemplate: string, ytdlp: string, ffdir
     args.push('-x', '--audio-format', s.format || 'mp3', '--audio-quality', s.quality || '0');
     args.push(s.keep_video ? '--keep-video' : '--no-keep-video');
     const meta = [
-      job.title && `-metadata title=${shlexQuote(job.title)}`,
-      job.artist && `-metadata artist=${shlexQuote(job.artist)}`,
+      job.title && tagOn(s, 'audio', 'title') && `-metadata title=${shlexQuote(job.title)}`,
+      job.artist && tagOn(s, 'audio', 'artist') && `-metadata artist=${shlexQuote(job.artist)}`,
+      job.artist && tagOn(s, 'audio', 'album_artist') && `-metadata album_artist=${shlexQuote(job.artist)}`,
     ].filter(Boolean);
     if (meta.length) args.push('--postprocessor-args', 'ffmpeg:' + meta.join(' '));
   } else {

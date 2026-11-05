@@ -131,15 +131,18 @@ async fn download(app: AppHandle, id: u32, url: String, dest: String) -> Result<
         .map_err(|e| e.to_string())?
 }
 
-/// POST com corpo JSON; devolve a resposta (busca do artista no YouTube Music).
+/// GET, ou POST com corpo JSON; devolve a resposta (API do YouTube Music, gênero no catálogo da Apple).
 #[tauri::command]
-async fn post_json(url: String, body: String) -> Result<String, String> {
+async fn fetch_text(url: String, body: Option<String>) -> Result<String, String> {
     let job = move || -> Result<String, Box<dyn std::error::Error>> {
-        let resp = ureq::post(&url)
-            .timeout(Duration::from_secs(20))
-            .set("Content-Type", "application/json")
-            .set("Origin", "https://music.youtube.com")
-            .send_string(&body)?;
+        let resp = match body {
+            Some(body) => ureq::post(&url)
+                .timeout(Duration::from_secs(20))
+                .set("Content-Type", "application/json")
+                .set("Origin", "https://music.youtube.com")
+                .send_string(&body)?,
+            None => ureq::get(&url).timeout(Duration::from_secs(20)).call()?,
+        };
         Ok(resp.into_string()?)
     };
     tauri::async_runtime::spawn_blocking(move || job().map_err(|e| e.to_string()))
@@ -247,7 +250,7 @@ fn main() {
     tauri::Builder::default()
         .manage(Procs::default())
         .invoke_handler(tauri::generate_handler![
-            spawn, kill, download, post_json, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick, quit
+            spawn, kill, download, fetch_text, write_text, mkdir, is_file, remove, copy, list_dir, file_times, set_times, open_path, pick, quit
         ])
         .on_page_load(|webview, payload| {
             if payload.event() == PageLoadEvent::Finished {

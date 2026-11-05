@@ -1,6 +1,6 @@
 /** Interface: abas, diálogos e i18n. Só conversa com o resto do app por `api` (backend.ts). */
 import { api } from './backend.js';
-import { isYouTube, linksFrom, searchUrls, trackUrls, type Track } from './core.js';
+import { isYouTube, linksFrom, searchUrls, TAGS, trackUrls, type Track } from './core.js';
 import { HELP, STRINGS } from './i18n.js';
 
 const cfg: Record<string, any> = structuredClone(api.init.settings);
@@ -758,6 +758,12 @@ function setupDialogs(): void {
   $('#set-form').insertAdjacentHTML('beforeend', SETTINGS_FORM.map(([title, wide, checks, grid]) =>
     `<h3 data-i18n="${title}"></h3>${wide.map(entry).join('')}${checks.map(check).join('')}` +
     `<div class="grid">${grid.map(entry).join('')}</div>`).join(''));
+  // Propriedades do arquivo: o que vai dentro de cada arquivo, separado em áudio e vídeo
+  const tagGroup = (mode: 'audio' | 'video') => `<b class="small" data-i18n="tab_${mode}"></b><div class="grid tags">` +
+    TAGS[mode].map((tag) => `<label class="chk"><input type="checkbox" data-set="tag_${mode}_${tag}">` +
+      `<span data-i18n="tag_${tag}"></span></label>`).join('') + '</div>';
+  $('#set-form').insertAdjacentHTML('beforeend',
+    `<h3 data-i18n="tags_section"></h3><p class="muted small" data-i18n="tags_hint"></p>${tagGroup('audio')}${tagGroup('video')}`);
 
   const dialog = $<HTMLDialogElement>('#dlg-settings');
   const fields = $$<HTMLInputElement>('[data-set]', dialog);

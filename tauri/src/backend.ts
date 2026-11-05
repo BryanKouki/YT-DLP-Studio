@@ -69,6 +69,10 @@ const settings: Record<string, any> = {
   cookies_on_bot: false, // só liga os cookies no primeiro bloqueio "not a bot" (até fechar o app)
   cookies_browser: 'firefox', // não Chromium: o yt-dlp lê sem o erro de DPAPI do Windows
 
+  // "Propriedades do arquivo": tag_audio_title, tag_video_cover... tudo ligado, menos o gênero (consulta a Apple)
+  ...Object.fromEntries((['audio', 'video'] as const).flatMap((mode) =>
+    core.TAGS[mode].map((tag) => [`tag_${mode}_${tag}`, tag !== 'genre']))),
+
   ui: {}, // seleções de cada aba, lembradas entre sessões ("audio.format": "mp3", ...)
   window_size: null,
   ...INIT.settings,
@@ -347,6 +351,8 @@ async function runJob(job: core.Job): Promise<void> {
   // lista montada no app: cada link é uma faixa avulsa, a posição é a da lista
   const tracks: core.Track[] | undefined = job.options.tracks;
   const posOf = new Map(tracks?.map((t, i) => [t.id, String(i + 1)]));
+  const withGenre = job.mode === 'audio' && Boolean(job.options.embed_metadata_thumb) && core.tagOn(job.options, 'audio', 'genre');
+  const genres: Promise<void>[] = []; // gênero gravado em cada faixa pronta, enquanto as outras baixam
   let doneHere = 0;
 
   let code = -1;
@@ -361,7 +367,8 @@ async function runJob(job: core.Job): Promise<void> {
     const onLine = (line: string) => {
       const now = core.NOW_PLAYING_RE.exec(line);
       if (now) {
-        const [nowTitle = '', nowArtist = '', plIdx = '', plCount = '', id = '', file = ''] = now[2].split('@@@');
+        const [nowTitle = '', nowArtist = '', plIdx = '', plCount = '', id = '', file = '', album = ''] = now[2].split('@@@');
+        if (now[1] === 'ADL' && file && withGenre) genres.push(writeGenre(file, nowArtist, album));
         const idx = posOf.get(id) ?? plIdx.trim();
         const count = tracks ? String(tracks.length) : plCount.trim();
         Object.assign(job, { nowTitle, nowArtist: nowArtist.trim(), idx, count });
@@ -421,6 +428,8 @@ async function runJob(job: core.Job): Promise<void> {
     currentIds = [];
     code = codes.find((c) => c !== 0) ?? 0;
   }
+  // antes de mexer nas datas: a gravação do gênero recoloca as datas que o arquivo tinha
+  if (genres.length) await Promise.all(genres);
   // baixadas fora de ordem: datas de criação/modificação voltam à ordem da playlist (é por elas que você ordena)
   if (parallel) await stampInOrder(saved);
 
@@ -572,9 +581,10 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
     log(`Substituta da faixa ${f.pos} (${f.title || f.id}): ${link}`);
     log('$ ' + cmd.map(core.shlexQuote).join(' '));
     let file = '';
+    let fields: string[] = [];
     const code = await runLines(cmd[0], cmd.slice(1), (line) => {
       const now = core.NOW_PLAYING_RE.exec(line);
-      if (now?.[1] === 'ADL') file = now[2].split('@@@')[5] ?? '';
+      if (now?.[1] === 'ADL') file = (fields = now[2].split('@@@'))[5] ?? '';
       else if (!now && !core.PROGRESS_RE.test(line) && !core.PP_RE.test(line)) log(line);
     }).done;
     if (code !== 0 || !file) {
@@ -582,6 +592,9 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
       log(`[erro] substituta da faixa ${f.pos} não baixou`);
       send('job', job);
       continue;
+    }
+    if (job.mode === 'audio' && job.options.embed_metadata_thumb && core.tagOn(job.options, 'audio', 'genre')) {
+      await writeGenre(file, fields[1] ?? '', fields[6] ?? '');
     }
     const placed = (job.placed ??= []).sort((a, b) => a.pos - b.pos);
     const before = placed.filter((p) => p.pos < f.pos).at(-1);
@@ -596,6 +609,49 @@ async function replaceFailed(jobId: string, links: Record<string, string>): Prom
     send('replaced', f);
     send('job', job);
   }
+}
+
+// ---- gênero --------------------------------------------------------------------
+
+const genreCache = new Map<string, Promise<string>>();
+let genreTurn = Promise.resolve();
+let genreAt = 0;
+/** Gênero do álbum no catálogo da Apple: uma consulta por artista+álbum, uma a cada 3 s (limite de ~20 por minuto). */
+function albumGenre(artist: string, album: string): Promise<string> {
+  const key = `${artist}\n${album}`.toLowerCase();
+  if (!genreCache.has(key)) {
+    genreCache.set(key, new Promise((resolve) => {
+      genreTurn = genreTurn.then(async () => {
+        await new Promise((r) => setTimeout(r, Math.max(0, genreAt + 3000 - Date.now())));
+        genreAt = Date.now();
+        try {
+          const res = await invoke('fetch_text', { url: core.genreUrl(artist, album, settings.language), body: null });
+          resolve(core.itunesGenre(JSON.parse(res), artist));
+        } catch (e) {
+          log(`[aviso] Gênero não consultado (${artist} - ${album}): ${e}`);
+          resolve('');
+        }
+      });
+    }));
+  }
+  return genreCache.get(key)!;
+}
+
+/** Grava o gênero no arquivo pronto: cópia sem recodificar (capa e demais tags ficam) e as mesmas datas.
+ *  Se o ffmpeg falhar, o arquivo original fica como estava. */
+async function writeGenre(file: string, artist: string, album: string): Promise<void> {
+  const ext = path.extname(file);
+  if (!artist.trim() || !album.trim() || !core.GENRE_EXTS.includes(ext)) return;
+  const genre = await albumGenre(artist.split(', ')[0].trim(), album.trim());
+  if (!genre) return;
+  const tmp = path.join(TEMP, `genre_${crypto.randomUUID().slice(0, 8)}${ext}`);
+  const times: [number, number] | null = await invoke('file_times', { path: file });
+  const ok = (await runLines(FFMPEG, ['-y', '-v', 'error', '-i', file, '-map', '0', '-c', 'copy',
+    '-metadata', `genre=${genre}`, ...(ext === '.mp3' ? ['-id3v2_version', '3'] : []), tmp], () => {}, true, 60000).done) === 0;
+  if (ok && (await invoke('copy', { from: tmp, to: file })) && times) {
+    await invoke('set_times', { path: file, created: times[0], modified: times[1] });
+  }
+  await invoke('remove', { path: tmp });
 }
 
 /** Se o link for uma playlist, cria uma subpasta com o nome dela dentro da pasta de destino. */
@@ -681,7 +737,7 @@ async function probe(url: string) {
 }
 
 /** API do YouTube Music (a mesma do site), pela casca nativa: a página não pode acessar outros sites. */
-const ytm = async (endpoint: string, extra: Record<string, string>) => JSON.parse(await invoke('post_json',
+const ytm = async (endpoint: string, extra: Record<string, string>) => JSON.parse(await invoke('fetch_text',
   { url: `${core.YTM_API}${endpoint}?prettyPrint=false`, body: core.ytmBody(settings.language === 'en' ? 'en' : 'pt', extra) }));
 
 /** "Montar playlist": as n mais tocadas do artista no YouTube Music (lista "Top songs", na ordem do site; n vazio = todas). */

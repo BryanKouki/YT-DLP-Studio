@@ -73,6 +73,20 @@ HELP_CONTENT = {
          "Incorporando a capa e Finalizando. A barra avança junto: o download vai "
          "até 75% e as etapas seguintes completam o resto. Quando a música está "
          "pronta na pasta, aparece um ✓ ao lado do nome dela."),
+        ("Metadados do áudio (versão .exe Tauri)",
+         "Com 'Incorporar metadados e capa' ligado, cada música recebe título, "
+         "artista, álbum, artista do álbum (o primeiro artista da faixa, ou o que "
+         "você digitou em Artista) e o ano de lançamento original, o do ℗ da "
+         "descrição do YouTube Music (Beat It sai 1982, não 2017, o ano em que a "
+         "faixa foi enviada ao YouTube). Ao baixar um álbum, o número de cada "
+         "faixa é a posição dela no álbum. O 'Music' que o YouTube põe como "
+         "gênero nunca vai. Em Configurações → Propriedades do arquivo você "
+         "escolhe o que vai dentro de cada arquivo, separado para áudio e vídeo: "
+         "tudo vem marcado, menos Gênero. Marcando Gênero, o app busca o gênero do "
+         "álbum no catálogo da Apple (iTunes), em português, uma consulta por "
+         "álbum (no máximo uma a cada 3 s, enquanto as músicas baixam), e grava em "
+         "MP3, M4A e FLAC; se não achar o artista, a música fica sem gênero em vez "
+         "de um errado."),
         ("Montar playlist (versão .exe Tauri)",
          "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar "
          "playlist'. Digite um artista, escolha Top 10, 25, 50, 100 ou Todas e clique "
@@ -239,6 +253,19 @@ HELP_CONTENT = {
          "metadata, Embedding the cover and Finishing. The bar follows it: the "
          "download goes up to 75% and the next steps fill the rest. When the track "
          "is ready in the folder, a ✓ appears next to its name."),
+        ("Audio metadata (Tauri .exe version)",
+         "With 'Embed metadata and cover' on, each track gets title, artist, "
+         "album, album artist (the track's first artist, or what you typed in "
+         "Artist) and the original release year, the one after ℗ in the YouTube "
+         "Music description (Beat It gets 1982, not 2017, the year the track was "
+         "uploaded to YouTube). When you download an album, each track number is "
+         "its position in the album. The 'Music' genre YouTube sets is never "
+         "written. In Settings → File properties you choose what goes inside each "
+         "file, for audio and video separately: everything is checked except "
+         "Genre. With Genre checked, the app looks up the album's genre in Apple's "
+         "catalog (iTunes), one lookup per album (at most one every 3 s, while the "
+         "tracks download), and writes it to MP3, M4A and FLAC files; if the artist "
+         "is not found, the track gets no genre instead of a wrong one."),
         ("Build a playlist (Tauri .exe version)",
          "In the Audio tab, the ✦ button next to the playlist check opens 'Build a "
          "playlist'. Type an artist, pick Top 10, 25, 50, 100 or All and click Load: "

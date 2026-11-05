@@ -206,6 +206,22 @@ story.append(body(
     "No menu de faixas com erro de playlists do YouTube, cada faixa com nome conhecido "
     "tem botões que copiam a busca dela no YouTube Music e no YouTube."
 ))
+story.append(h3("Metadados do áudio (versão .exe Tauri)"))
+story.append(body(
+    "Com <b>Incorporar metadados e capa</b> ligado, cada música recebe título, artista, "
+    "álbum, <b>artista do álbum</b> (o primeiro artista da faixa, ou o que você digitou "
+    "em Artista) e o <b>ano de lançamento original</b>, o que aparece depois de (P) na "
+    "descrição do YouTube Music: Beat It sai 1982, não 2017, o ano em que a faixa foi "
+    "enviada ao YouTube. Ao baixar um álbum, o <b>número</b> de cada faixa é a posição "
+    "dela no álbum. O \"Music\" que o YouTube põe como gênero nunca vai. Em "
+    "<b>Configurações → Propriedades do arquivo</b> você escolhe o que vai dentro de cada "
+    "arquivo, separado para áudio e vídeo (título, artista, álbum, artista do álbum, ano, "
+    "número da faixa, gênero, descrição, link do vídeo e capa): tudo vem marcado, menos "
+    "<b>Gênero</b>. Marcando Gênero, o app busca o gênero do álbum no catálogo da Apple "
+    "(iTunes), em português, uma consulta por álbum (no máximo uma a cada 3 s, enquanto as "
+    "músicas baixam), e grava em MP3, M4A e FLAC. Se não achar o artista, a música fica sem "
+    "gênero em vez de um errado."
+))
 story.append(h3("Montar playlist (versão .exe Tauri)"))
 story.append(body(
     "Na aba Áudio, o botão de estrela ao lado da verificação de playlist abre "

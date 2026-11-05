@@ -17,7 +17,7 @@
 - Download a single track, many links at once (one per line), or a whole playlist/album
 - Formats: MP3, M4A, AAC, Opus, Vorbis, FLAC, ALAC, WAV; bitrate from 32 to 320 kbps (320 kbps by default)
 - Title, artist and duration are fetched in the background as soon as you paste a link. You can hit **Download** before the lookup finishes.
-- Embedded metadata and cover art, with the cover always center-cropped to **1:1**
+- Embedded metadata and cover art, with the cover always center-cropped to **1:1**. The Tauri version also writes the album artist, the original release year (from the ℗ line on YouTube Music, not the upload date), the track number when downloading an album, never writes YouTube's generic "Music" genre, and can look up the real genre in Apple's catalog (iTunes). Settings → File properties chooses which tags go into audio and video files (all on by default except genre)
 - Playlists go into their own folder named after the playlist, with the playlist cover saved as `playlistcover.jpg`
 - **Playlist availability check** lists every unavailable track with its position and neighbours, without downloading anything
 - **Failed tracks and replacements** (Tauri version): when playlist tracks fail, they are listed with a copyable "Song - Artist", link or ID. Paste a replacement link and it is downloaded into the same folder, with file dates set so it sits exactly between its neighbours. The queue can pause after each playlist, at the end (review one playlist at a time) or not at all
