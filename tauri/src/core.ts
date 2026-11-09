@@ -151,7 +151,7 @@ export function resumeFrom(doneIdx: string[]): string {
 // O yt-dlp não abre a página do artista no YouTube Music (redireciona para o canal comum), então o app
 // pergunta à mesma API que o site usa: o artista, a lista "Top songs" dele e a busca de músicas.
 // Só faixas de áudio do Music (título limpo), nunca os clipes.
-export interface Track { id: string; title: string; artist: string; info?: string }
+export interface Track { id: string; title: string; artist: string; info?: string; url?: string }
 
 /** Lista montada: um link por faixa, só as posições pedidas ("3,5,6"; vazio = todas), na ordem da lista. */
 export function trackUrls(tracks: Track[], items: string): string[] {
@@ -162,6 +162,7 @@ export function trackUrls(tracks: Track[], items: string): string[] {
 export const YTM_API = 'https://music.youtube.com/youtubei/v1/';
 export const YTM_ARTISTS = 'EgWKAQIgAWoKEAoQAxAEEAkQBQ=='; // filtro "Artistas" da busca
 export const YTM_SONGS = 'EgWKAQIIAWoKEAoQAxAEEAkQBQ=='; // filtro "Músicas": só faixas de áudio
+export const YTM_ALBUMS = 'EgWKAQIYAWoKEAoQAxAEEAkQBQ=='; // filtro "Álbuns" (inclui EPs e singles)
 export const ytmBody = (hl: string, extra: Record<string, string>): string =>
   JSON.stringify({ context: { client: { clientName: 'WEB_REMIX', clientVersion: '1.20241023.01.00', hl } }, ...extra });
 
@@ -192,6 +193,23 @@ export function ytmTopSongs(page: any): { artist: string; list: string } {
 
 /** Resultados da busca de músicas: colunas título, "Artista • Álbum • 4:18", reproduções. */
 export function ytmSongs(search: unknown): Track[] {
+  return ytmItems(search).filter((r) => r.playlistItemData?.videoId).map((r) => {
+    const [title, info] = ytmColumns(r);
+    const id = r.playlistItemData.videoId;
+    return { id, title, artist: info.split(' • ')[0], info, url: `https://music.youtube.com/watch?v=${id}` };
+  });
+}
+
+/** Resultados da busca de álbuns: colunas título, "Album • Artista • 1982"; o link é a playlist do álbum (OLAK5uy_...). */
+export function ytmAlbums(search: unknown): Track[] {
+  return ytmItems(search).map((r) => {
+    const id: string = deepFind(r, (x) => String(x.playlistId ?? '').startsWith('OLAK5uy_'))?.playlistId ?? '';
+    const [title, info] = ytmColumns(r);
+    return { id, title, artist: info.split(' • ')[1] ?? '', info, url: `https://www.youtube.com/playlist?list=${id}` };
+  }).filter((a) => a.id && a.title);
+}
+
+const ytmItems = (search: unknown): any[] => {
   const items: any[] = [];
   const walk = (o: any): void => {
     if (!o || typeof o !== 'object') return;
@@ -199,11 +217,12 @@ export function ytmSongs(search: unknown): Track[] {
     else Object.values(o).forEach(walk);
   };
   walk(search);
-  return items.filter((r) => r.playlistItemData?.videoId).map((r) => {
-    const [title = '', info = ''] = (r.flexColumns ?? []).map((c: any) => runsText(c.musicResponsiveListItemFlexColumnRenderer?.text));
-    return { id: r.playlistItemData.videoId, title, artist: info.split(' • ')[0], info };
-  });
-}
+  return items;
+};
+const ytmColumns = (r: any): [string, string] => {
+  const [title = '', info = ''] = (r.flexColumns ?? []).map((c: any) => runsText(c.musicResponsiveListItemFlexColumnRenderer?.text));
+  return [title, info];
+};
 
 /** ID da playlist num link do YouTube (list=...). Serve para nunca baixar uma playlist solta
  *  na pasta principal quando o nome dela não puder ser lido. */
@@ -258,7 +277,17 @@ export function outputTemplate(job: Job): string {
 
 // ---- atualização (releases do GitHub) -------------------------------------------
 export const RELEASES_API = 'https://api.github.com/repos/BryanKouki/YT-DLP-Studio/releases/latest';
-export const RELEASES_PAGE = 'https://github.com/BryanKouki/YT-DLP-Studio/releases'; // changelog de cada versão
+
+/** CHANGELOG.md (ou a descrição de uma release, mesmo formato) por versão: "## v1.4.3" e as linhas até a próxima. */
+export function parseChangelog(md: string): { version: string; lines: string[] }[] {
+  const out: { version: string; lines: string[] }[] = [];
+  for (const line of md.split(/\r?\n/)) {
+    const head = /^##\s+v?(\d[\w.-]*)/.exec(line);
+    if (head) out.push({ version: head[1], lines: [] });
+    else if (out.length && line.trim()) out.at(-1)!.lines.push(line.trim());
+  }
+  return out;
+}
 
 /** "1.4.10" é mais nova que "1.4.2" (compara número a número, não texto). */
 export function isNewer(latest: string, current: string): boolean {
@@ -277,7 +306,7 @@ export function pickUpdate(release: any, current: string) {
   return {
     latest, newer: Boolean(latest) && isNewer(latest, current), url: String(exe?.browser_download_url ?? ''),
     sha256: String(exe?.digest ?? '').replace(/^sha256:/, '').toLowerCase(),
-    page: String(release?.html_url ?? ''), // o que mudou nessa versão
+    notes: String(release?.body ?? ''), // o que mudou nessa versão (o changelog.txt colado na release)
   };
 }
 

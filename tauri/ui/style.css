@@ -411,7 +411,13 @@ h3 { margin: 12px 0 0; font-size: 14px; }
 #dlg-confirm .dlg-body { align-items: center; text-align: center; font-weight: 600; font-size: 14px; }
 .confirm-ico { width: 34px; height: 34px; color: var(--warn); animation: shake 0.4s ease-out; }
 #dlg-failed { width: 720px; }
-#dlg-artist { width: 640px; }
+#dlg-artist, #dlg-search, #dlg-changelog { width: 640px; }
+.cl-version h4 { margin: 12px 0 4px; font-size: 13px; }
+.cl-version ul { margin: 0; padding-left: 20px; }
+.cl-version li, .cl-version p { margin: 4px 0; color: var(--muted); user-select: text; }
+#cl-older .cl-version { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+#cl-more { align-self: flex-start; }
+#search-results { max-height: 300px; }
 .version { align-self: center; color: var(--muted); font-size: 11px; }
 #set-about { display: flex; flex-direction: column; gap: 10px; }
 #set-about h3 { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--border); }

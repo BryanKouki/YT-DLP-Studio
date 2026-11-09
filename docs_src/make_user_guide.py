@@ -222,6 +222,16 @@ story.append(body(
     "músicas baixam), e grava em MP3, M4A e FLAC. Se não achar o artista, a música fica sem "
     "gênero em vez de um errado."
 ))
+story.append(h3("Pesquisar música ou álbum (versão .exe Tauri)"))
+story.append(body(
+    "Na aba Áudio, a <b>lupa</b> ao lado da verificação de playlist abre <b>Pesquisar música "
+    "ou álbum</b>. Digite o nome, escolha <b>Músicas</b> ou <b>Álbuns</b> e clique em "
+    "<b>Buscar</b>: aparecem 10 resultados do YouTube Music (só faixas de áudio e álbuns, "
+    "nunca clipes), com artista, álbum ou ano e duração. O <b>+</b> de um resultado põe o "
+    "link no campo da aba Áudio, e daí é como um link colado: o nome aparece e você baixa "
+    "com as opções da aba. Um álbum baixa como playlist, com pasta própria e o número de "
+    "cada faixa."
+))
 story.append(h3("Montar playlist (versão .exe Tauri)"))
 story.append(body(
     "Na aba Áudio, o botão de estrela ao lado da verificação de playlist abre "
@@ -249,8 +259,9 @@ story.append(body(
 story.append(h3("Versão, atualização e configurações de fábrica (versão .exe Tauri)"))
 story.append(body(
     "A versão aparece no fim do menu lateral e nas propriedades do .exe. No fim das "
-    "Configurações, em <b>Sobre e atualização</b>, <b>Ver changelog</b> abre no navegador a "
-    "página de versões no GitHub, com o que mudou em cada uma, e <b>Verificar atualização</b> "
+    "Configurações, em <b>Sobre e atualização</b>, <b>Ver changelog</b> mostra o que mudou na "
+    "versão instalada (ou na nova, depois de verificar a atualização), com <b>Ver versões "
+    "anteriores</b> para as outras, e <b>Verificar atualização</b> "
     "consulta a última versão publicada no GitHub. Se houver uma nova, <b>Atualizar agora</b> "
     "baixa o .exe, confere o código SHA-256 que o GitHub informa (garante que o arquivo chegou "
     "inteiro e é o publicado), troca o .exe e reabre o app; a pasta <i>data</i> fica. "

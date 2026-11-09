@@ -21,6 +21,7 @@
 - Playlists go into their own folder named after the playlist, with the playlist cover saved as `playlistcover.jpg`
 - **Playlist availability check** lists every unavailable track with its position and neighbours, without downloading anything
 - **Failed tracks and replacements** (Tauri version): when playlist tracks fail, they are listed with a copyable "Song - Artist", link or ID. Paste a replacement link and it is downloaded into the same folder, with file dates set so it sits exactly between its neighbours. The queue can pause after each playlist, at the end (review one playlist at a time) or not at all
+- **Search songs and albums** (Tauri version): 10 YouTube Music results (audio tracks and albums only), one click puts the link in the Audio tab; an album downloads as a playlist with track numbers
 - **Build a playlist** (Tauri version): type an artist to load their top songs on YouTube Music (audio tracks only, in the site's order), remove what you don't want, search and add songs at any position, and download the list as a playlist in that order
 - Optional cover file for every track of a playlist, separate from the playlist cover, and an optional `.m3u8` playlist file in playlist order (Tauri version)
 - **Browser cookies** (Tauri version) against YouTube's "confirm you're not a bot" block: every browser yt-dlp supports, Firefox by default; Chromium-based browsers show a warning, since yt-dlp may not be able to read their cookies on Windows

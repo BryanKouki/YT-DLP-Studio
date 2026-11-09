@@ -1,4 +1,4 @@
-"""Gera tauri/src/i18n.ts a partir de src/i18n.py e src/help_dialog.py,
+"""Gera tauri/src/i18n.ts a partir de src/i18n.py, src/help_dialog.py e CHANGELOG.md (tela "Ver changelog"),
 para os textos da interface terem uma fonte só. Rodar: python tauri/tools/gen_i18n.py"""
 import ast
 import json
@@ -21,9 +21,10 @@ def dump(value):
 out = ROOT / "tauri" / "src" / "i18n.ts"
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(
-    "// GERADO por tools/gen_i18n.py. Não edite à mão: mude src/i18n.py ou src/help_dialog.py e rode de novo.\n"
+    "// GERADO por tools/gen_i18n.py. Não edite à mão: mude src/i18n.py, src/help_dialog.py ou CHANGELOG.md e rode de novo.\n"
     f"export const STRINGS: Record<string, Record<string, string>> = {dump(literal('i18n.py', 'STRINGS'))};\n\n"
-    f"export const HELP: Record<string, [string, string][]> = {dump(literal('help_dialog.py', 'HELP_CONTENT'))};\n",
+    f"export const HELP: Record<string, [string, string][]> = {dump(literal('help_dialog.py', 'HELP_CONTENT'))};\n\n"
+    f"export const CHANGELOG: string = {dump((ROOT / 'CHANGELOG.md').read_text(encoding='utf-8'))};\n",
     encoding="utf-8",
 )
 print("ok:", out)

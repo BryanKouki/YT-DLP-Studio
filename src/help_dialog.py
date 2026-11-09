@@ -87,6 +87,14 @@ HELP_CONTENT = {
          "álbum (no máximo uma a cada 3 s, enquanto as músicas baixam), e grava em "
          "MP3, M4A e FLAC; se não achar o artista, a música fica sem gênero em vez "
          "de um errado."),
+        ("Pesquisar música ou álbum (versão .exe Tauri)",
+         "Na aba Áudio, a lupa ao lado da verificação de playlist abre 'Pesquisar "
+         "música ou álbum'. Digite o nome, escolha Músicas ou Álbuns e clique em "
+         "Buscar: aparecem 10 resultados do YouTube Music (só faixas de áudio e "
+         "álbuns, nunca clipes), com artista, álbum ou ano e duração. O + de um "
+         "resultado põe o link no campo da aba Áudio, e daí é como um link colado: "
+         "o nome aparece e você baixa com as opções da aba. Um álbum baixa como "
+         "playlist, com pasta própria e o número de cada faixa."),
         ("Montar playlist (versão .exe Tauri)",
          "Na aba Áudio, o botão ✦ ao lado da verificação de playlist abre 'Montar "
          "playlist'. Digite um artista, escolha Top 10, 25, 50, 100, Todas ou "
@@ -109,9 +117,10 @@ HELP_CONTENT = {
          "qual você não achou substituta ('Desfazer' volta atrás)."),
         ("Versão, atualização e configurações de fábrica (versão .exe Tauri)",
          "A versão aparece no fim do menu lateral e nas propriedades do .exe. No fim "
-         "das Configurações, em 'Sobre e atualização', 'Ver changelog' abre no "
-         "navegador a página de versões no GitHub, com o que mudou em cada uma, e "
-         "'Verificar atualização' consulta a última versão publicada no GitHub. Se houver uma "
+         "das Configurações, em 'Sobre e atualização', 'Ver changelog' mostra o que "
+         "mudou na versão instalada (ou na nova, depois de verificar a atualização), "
+         "com 'Ver versões anteriores' para as outras, e 'Verificar atualização' "
+         "consulta a última versão publicada no GitHub. Se houver uma "
          "nova, 'Atualizar agora' baixa o .exe, confere o código SHA-256 que o GitHub "
          "informa (garante que o arquivo chegou inteiro e é o publicado), troca o .exe e "
          "reabre o app; a pasta data fica. 'Restaurar configurações de fábrica' apaga as "
@@ -277,6 +286,14 @@ HELP_CONTENT = {
          "catalog (iTunes), one lookup per album (at most one every 3 s, while the "
          "tracks download), and writes it to MP3, M4A and FLAC files; if the artist "
          "is not found, the track gets no genre instead of a wrong one."),
+        ("Search a song or album (Tauri .exe version)",
+         "In the Audio tab, the magnifier next to the playlist check opens 'Search "
+         "a song or album'. Type the name, pick Songs or Albums and click Search: "
+         "you get 10 results from YouTube Music (audio tracks and albums only, never "
+         "music videos), with artist, album or year and duration. The + on a result "
+         "puts its link in the Audio tab box, and from there it works like a pasted "
+         "link: the name shows up and you download with the tab options. An album "
+         "downloads as a playlist, with its own folder and each track's number."),
         ("Build a playlist (Tauri .exe version)",
          "In the Audio tab, the ✦ button next to the playlist check opens 'Build a "
          "playlist'. Type an artist, pick Top 10, 25, 50, 100, All or Custom (type "
@@ -300,8 +317,9 @@ HELP_CONTENT = {
         ("Version, updates and factory settings (Tauri .exe version)",
          "The version is shown at the bottom of the side menu and in the .exe "
          "properties. At the end of Settings, 'About and updates', 'View changelog' "
-         "opens the GitHub releases page in the browser, with what changed in each "
-         "version, and 'Check for updates' looks up the latest version published on GitHub. If "
+         "shows what changed in the installed version (or in the new one, after "
+         "checking for updates), with 'Show previous versions' for the others, and "
+         "'Check for updates' looks up the latest version published on GitHub. If "
          "there is a newer one, 'Update now' downloads the .exe, checks the SHA-256 "
          "code GitHub reports (so the file arrived whole and is the published one), "
          "replaces the .exe and reopens the app; the data folder is kept. 'Restore "

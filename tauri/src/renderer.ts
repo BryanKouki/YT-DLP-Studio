@@ -1,7 +1,7 @@
 /** Interface: abas, diálogos e i18n. Só conversa com o resto do app por `api` (backend.ts). */
 import { api } from './backend.js';
-import { isYouTube, linksFrom, searchUrls, TAGS, trackUrls, type Track } from './core.js';
-import { HELP, STRINGS } from './i18n.js';
+import { isYouTube, linksFrom, parseChangelog, searchUrls, TAGS, trackUrls, type Track } from './core.js';
+import { CHANGELOG, HELP, STRINGS } from './i18n.js';
 
 const cfg: Record<string, any> = structuredClone(api.init.settings);
 let jobList: any[] = structuredClone(api.init.jobs);
@@ -262,8 +262,13 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
     saveSettings({ [folderKey]: chosen });
     showFolder();
   };
-  if (mode === 'audio') $('.artist-pl', root).onclick = () => $<HTMLDialogElement>('#dlg-artist').showModal();
-  else $('.artist-pl', root).remove(); // as mais tocadas do YouTube Music são faixas de áudio
+  if (mode === 'audio') {
+    $('.artist-pl', root).onclick = () => $<HTMLDialogElement>('#dlg-artist').showModal();
+    $('.search-music', root).onclick = () => $<HTMLDialogElement>('#dlg-search').showModal();
+  } else { // músicas e álbuns do YouTube Music são faixas de áudio
+    $('.artist-pl', root).remove();
+    $('.search-music', root).remove();
+  }
   $('.check-pl', root).onclick = () => {
     const list = urls();
     if (!list.length) return toast(t('no_link_error'), 'warn');
@@ -284,7 +289,54 @@ function setupDownloadTab(mode: 'audio' | 'video'): DownloadTab {
   };
 }
 
-// ---- montar playlist (YouTube Music) -------------------------------------------
+// ---- montar playlist e pesquisa (YouTube Music) --------------------------------
+
+/** Linha das listas de músicas: posição, "título — detalhe" e um botão. Vem do YouTube: só textContent. */
+function line(pos: string, title: string, sub: string, icon: string, tip: string, run: () => void): HTMLLIElement {
+  const li = document.createElement('li');
+  li.innerHTML = `<span class="pos"></span><span class="grow"></span><button type="button" class="icon"><svg><use href="#${icon}"/></svg></button>`;
+  const [num, text] = $$('span', li);
+  num.textContent = pos;
+  text.textContent = sub ? `${title} — ${sub}` : title;
+  text.title = text.textContent;
+  const btn = $<HTMLButtonElement>('button', li);
+  btn.title = tip;
+  btn.onclick = run;
+  return li;
+}
+
+/** Pesquisar música ou álbum: 10 resultados; o + põe o link no campo da aba Áudio e fecha. */
+function setupSearchDialog(): void {
+  const dialog = $<HTMLDialogElement>('#dlg-search');
+  const query = $<HTMLInputElement>('#search-q');
+  const kind = $<HTMLSelectElement>('#search-kind');
+  const results = $('#search-results');
+  const links = $<HTMLTextAreaElement>('#tab-audio .links');
+  let seq = 0;
+  const search = async () => {
+    const q = query.value.trim();
+    if (!q) return query.focus();
+    const mine = ++seq;
+    results.textContent = t('artist_searching');
+    const found: Track[] | null = await api.call('searchMusic', q, kind.value);
+    if (mine !== seq) return; // outra busca começou nesse meio-tempo
+    if (!found?.length) {
+      results.textContent = t(found ? 'search_none' : 'artist_error');
+      return;
+    }
+    results.replaceChildren(...found.slice(0, 10).map((r, i) => line(`${i + 1}.`, r.title, r.info || r.artist, 'i-plus', t('search_add'), () => {
+      links.value = [links.value.trim(), r.url].filter(Boolean).join('\n');
+      links.dispatchEvent(new Event('input')); // a busca automática mostra o nome, como num link colado
+      dialog.close();
+      links.focus();
+    })));
+  };
+  $('#search-go').onclick = search;
+  kind.onchange = () => query.value.trim() && void search();
+  query.onkeydown = (event) => {
+    if (event.key === 'Enter') void search();
+  };
+}
 
 function setupArtistDialog(): void {
   const dialog = $<HTMLDialogElement>('#dlg-artist');
@@ -314,19 +366,6 @@ function setupArtistDialog(): void {
   let artistSeq = 0;
   let songSeq = 0;
 
-  // título e artista vêm do YouTube: só textContent
-  const line = (pos: string, title: string, sub: string, icon: string, tip: string, run: () => void) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="pos"></span><span class="grow"></span><button type="button" class="icon"><svg><use href="#${icon}"/></svg></button>`;
-    const [num, text] = $$('span', li);
-    num.textContent = pos;
-    text.textContent = sub ? `${title} — ${sub}` : title;
-    text.title = text.textContent;
-    const btn = $<HTMLButtonElement>('button', li);
-    btn.title = tip;
-    btn.onclick = run;
-    return li;
-  };
   const render = (added = -1) => {
     list.replaceChildren(...tracks.map((tr, i) => line(`${i + 1}.`, tr.title, tr.artist, 'i-x', t('pl_remove'), () => {
       tracks.splice(i, 1);
@@ -376,7 +415,7 @@ function setupArtistDialog(): void {
     if (!q) return songQuery.focus();
     const mine = ++songSeq;
     results.textContent = t('artist_searching');
-    const found: Track[] | null = await api.call('searchSongs', q);
+    const found: Track[] | null = await api.call('searchMusic', q, 'songs');
     if (mine !== songSeq) return;
     if (!found?.length) {
       results.textContent = t(found ? 'song_none' : 'artist_error');
@@ -726,14 +765,58 @@ function ask(text: string): Promise<boolean> {
   return new Promise((resolve) => dialog.addEventListener('close', () => resolve(dialog.returnValue === 'yes'), { once: true }));
 }
 
+const CL_SECTIONS: Record<string, string> = { Added: 'cl_added', Fixed: 'cl_fixed', Changed: 'cl_changed', Removed: 'cl_removed' };
+
+/** Uma versão do changelog: título, seções ("### Added" vira "Novidades") e itens. Só textContent. */
+function changelogBlock(entry: { lines: string[] }, title: string, tag: 'h2' | 'h3'): HTMLElement {
+  const box = document.createElement('section');
+  box.className = 'cl-version';
+  const add = (name: string, text: string) => box.appendChild(Object.assign(document.createElement(name), { textContent: text }));
+  add(tag, title);
+  let list: HTMLElement | null = null;
+  for (const raw of entry.lines) {
+    const text = raw.replace(/\*\*|`/g, '');
+    const section = /^###\s+(\w+)(.*)$/.exec(text);
+    if (section) {
+      add('h4', CL_SECTIONS[section[1]] ? t(CL_SECTIONS[section[1]]) + section[2] : text.slice(4));
+      list = null;
+    } else if (text.startsWith('- ')) {
+      list ??= add('ul', '');
+      list.appendChild(Object.assign(document.createElement('li'), { textContent: text.slice(2) }));
+    } else {
+      add('p', text);
+      list = null;
+    }
+  }
+  return box;
+}
+
 /** Versão no menu, changelog, verificar/instalar atualização e configurações de fábrica (fim das Configurações). */
 function setupAbout(): void {
   $('#app-version').textContent = $('#about-version').textContent = `v${api.init.version}`;
   const status = $('#update-status');
   const install = $<HTMLButtonElement>('#update-install');
   let found: any = null;
-  // página das versões no GitHub; depois de achar uma nova, a página dela (o que mudou antes de atualizar)
-  $('#update-notes').onclick = () => api.call('openReleases', found?.newer ? found.page : '');
+  // changelog da versão instalada (vem dentro do .exe); depois de achar uma nova, o dela (descrição da release no GitHub)
+  $('#update-notes').onclick = () => {
+    const all = parseChangelog(CHANGELOG);
+    const fresh = found?.newer ? parseChangelog(found.notes)[0] : undefined;
+    const current = fresh ?? all.find((e) => e.version === api.init.version) ?? all[0];
+    if (!current) return;
+    const title = t(fresh ? 'changelog_new' : 'changelog_title', { v: current.version });
+    $('#cl-current').replaceChildren(changelogBlock(current, title, 'h2'));
+    const older = all.filter((e) => e.version !== current.version);
+    $('#cl-older').replaceChildren(...older.map((e) => changelogBlock(e, `v${e.version}`, 'h3')));
+    $('#cl-older').hidden = true;
+    $('#cl-more').hidden = !older.length;
+    const dialog = $<HTMLDialogElement>('#dlg-changelog');
+    dialog.showModal();
+    $('.dlg-body', dialog).scrollTop = 0;
+  };
+  $('#cl-more').onclick = () => {
+    $('#cl-older').hidden = false;
+    $('#cl-more').hidden = true;
+  };
   $('#update-check').onclick = async () => {
     status.textContent = t('update_checking');
     install.hidden = true;
@@ -888,6 +971,7 @@ setupConvertTab();
 setupQueueTab();
 setupFailedDialog();
 setupArtistDialog();
+setupSearchDialog();
 setupErrorDialog();
 setupDialogs();
 setupAbout();

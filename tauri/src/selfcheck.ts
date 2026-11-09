@@ -66,9 +66,13 @@ async function run(): Promise<void> {
   assert.equal(trackRe.exec('Top 100 Funk|02'), null); // playlist comum: sem número de faixa
   // atualização: compara número a número; acha o .exe mesmo com o nome que o GitHub dá ("YT-DLP.Studio.exe")
   assert(core.isNewer('1.4.10', '1.4.2') && core.isNewer('v2.0.0', '1.9.9') && !core.isNewer('1.4.2', '1.4.2') && !core.isNewer('1.4.1', '1.4.2'));
-  const rel = { tag_name: 'v1.4.3', html_url: 'https://github.com/BryanKouki/YT-DLP-Studio/releases/tag/v1.4.3', assets: [{ name: 'YT-DLP-Studio-v1.4.3-source.zip', browser_download_url: 'z' },
+  const rel = { tag_name: 'v1.4.3', body: '## v1.4.3\n- x', assets: [{ name: 'YT-DLP-Studio-v1.4.3-source.zip', browser_download_url: 'z' },
     { name: 'YT-DLP.Studio.exe', browser_download_url: 'https://x/YT-DLP.Studio.exe', digest: 'sha256:ABC' }] };
-  assert.equal(JSON.stringify(core.pickUpdate(rel, '1.4.2')), '{"latest":"1.4.3","newer":true,"url":"https://x/YT-DLP.Studio.exe","sha256":"abc","page":"https://github.com/BryanKouki/YT-DLP-Studio/releases/tag/v1.4.3"}');
+  const upd = core.pickUpdate(rel, '1.4.2');
+  assert(upd.latest === '1.4.3' && upd.newer && upd.url === 'https://x/YT-DLP.Studio.exe' && upd.sha256 === 'abc' && upd.notes === '## v1.4.3\n- x');
+  // changelog: uma entrada por "## vX.Y.Z", sem o título do arquivo nem linhas vazias
+  const cl = core.parseChangelog('# Changelog\n\n## v1.4.3\n\n### Added\n- Busca\n\n## v1.4.2\n- Ano certo\n');
+  assert.equal(JSON.stringify(cl), '[{"version":"1.4.3","lines":["### Added","- Busca"]},{"version":"1.4.2","lines":["- Ano certo"]}]');
   assert(!core.pickUpdate(rel, '1.4.3').newer && core.pickUpdate({}, '1.4.2').url === '');
   // gênero: só de um álbum do mesmo artista (sem acento/caixa); outro artista = sem gênero
   const itunes = { results: [{ artistName: 'Anita Baker', primaryGenreName: 'R&B/soul' }, { artistName: 'Djavan', primaryGenreName: 'MPB' }] };
@@ -144,7 +148,15 @@ async function run(): Promise<void> {
   assert.equal(core.ytmTopSongs({ header: {}, contents: {} }).list, '');
   const songs = core.ytmSongs({ x: [{ musicResponsiveListItemRenderer: { playlistItemData: { videoId: 'XzNWRmqibNE' },
     flexColumns: [col('Smooth Criminal'), col('Michael Jackson • Bad • 4:18')] } }, { musicResponsiveListItemRenderer: {} }] });
-  assert.equal(JSON.stringify(songs), '[{"id":"XzNWRmqibNE","title":"Smooth Criminal","artist":"Michael Jackson","info":"Michael Jackson • Bad • 4:18"}]');
+  assert.equal(JSON.stringify(songs), '[{"id":"XzNWRmqibNE","title":"Smooth Criminal","artist":"Michael Jackson",' +
+    '"info":"Michael Jackson • Bad • 4:18","url":"https://music.youtube.com/watch?v=XzNWRmqibNE"}]');
+  // pesquisa de álbuns: o link é a playlist do álbum (OLAK5uy_), achada no botão de tocar do resultado
+  const albums = core.ytmAlbums({ x: [{ musicResponsiveListItemRenderer: {
+    overlay: { play: { watchPlaylistEndpoint: { playlistId: 'OLAK5uy_l1U925dsiDi2DqlG-KCbODG6BaibpxbQE' } } },
+    flexColumns: [col('Thriller'), col('Album • Michael Jackson • 1982')] } }, { musicResponsiveListItemRenderer: { flexColumns: [col('Sem link')] } }] });
+  assert.equal(albums.length, 1);
+  assert.equal(albums[0].artist, 'Michael Jackson');
+  assert.equal(albums[0].url, 'https://www.youtube.com/playlist?list=OLAK5uy_l1U925dsiDi2DqlG-KCbODG6BaibpxbQE');
   // lista montada: um link por faixa (só as posições pedidas), sem --playlist-items
   const list = [{ id: 'a', title: 'A', artist: '' }, { id: 'b', title: 'B', artist: '' }, { id: 'c', title: 'C', artist: '' }];
   assert.equal(core.trackUrls(list, '1,3').join(' '), 'https://music.youtube.com/watch?v=a https://music.youtube.com/watch?v=c');

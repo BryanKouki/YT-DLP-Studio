@@ -760,12 +760,13 @@ async function findArtist(query: string, n: string) {
   }
 }
 
-/** Busca de músicas no YouTube Music (só faixas de áudio), para adicionar à playlist montada. */
-async function searchSongs(query: string) {
+/** Busca no YouTube Music: músicas (só faixas de áudio) ou álbuns (a playlist do álbum). null = falhou. */
+async function searchMusic(query: string, kind: 'songs' | 'albums' = 'songs') {
   try {
-    return core.ytmSongs(await ytm('search', { query, params: core.YTM_SONGS }));
+    const res = await ytm('search', { query, params: kind === 'albums' ? core.YTM_ALBUMS : core.YTM_SONGS });
+    return kind === 'albums' ? core.ytmAlbums(res) : core.ytmSongs(res);
   } catch (e) {
-    log(`[erro] busca de música "${query}": ${e}`);
+    log(`[erro] busca "${query}": ${e}`);
     return null;
   }
 }
@@ -899,12 +900,9 @@ const handlers: Record<string, (...args: any[]) => unknown> = {
 
   probe,
   findArtist,
-  searchSongs,
+  searchMusic,
   checkUpdate,
   installUpdate,
-  // abre no navegador só páginas de release do próprio repositório (o link vem da API do GitHub)
-  openReleases: (page: string) =>
-    invoke('open_path', { path: page.startsWith(core.RELEASES_PAGE + '/') ? page : core.RELEASES_PAGE }),
   factoryReset,
   checkPlaylist: (url: string) =>
     core.checkPlaylist(log, (...args) => ytdlpLines(['--no-warnings', ...args, url.trim()], true)),

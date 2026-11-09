@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.4.3
+
+### Added
+- "Search a song or album" in the Audio tab (the magnifier button). Type a name, pick Songs or Albums and get 10 results from YouTube Music, audio tracks and albums only, never music videos, with artist, album or year and duration. The + on a result puts its link in the Audio tab box, where it works like a pasted link: the name is looked up and the download uses the tab options. An album downloads as a playlist, in its own folder, with each track's number.
+
+### Changed
+- "View changelog" (Settings → About and updates) now opens a screen inside the app instead of the website: what changed in the installed version, or in the new one after checking for updates, with "Show previous versions" for the rest.
+
 ## v1.4.2
 
 ### Fixed
